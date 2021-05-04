@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Lobby"
-    android:background="@color/aliceblue">
+    tools:context=".Lobby">
 
     <TextView
         android:id="@+id/admin_msg"
@@ -101,7 +100,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/instrument"
         app:layout_constraintBottom_toTopOf="@id/loop"
-        android:background="#ABD5AB"
+        android:background="@color/grey"
         >
 
         <TextView
