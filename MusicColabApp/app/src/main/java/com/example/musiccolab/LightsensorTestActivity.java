@@ -15,7 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.security.Provider;
 
-public class Lightsensor extends AppCompatActivity implements SensorEventListener, View.OnClickListener {
+public class LightsensorTestActivity extends AppCompatActivity implements SensorEventListener, View.OnClickListener {
   TextView light;
   TextView note;
   SensorManager sensorManager;

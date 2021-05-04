@@ -12,8 +12,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Arrays;
-
 public class PreLobby extends AppCompatActivity implements View.OnClickListener {
 
     String Instrument;
@@ -69,7 +67,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             System.out.println("Redirect to Lobby - Testing!");
             if (Instrument == "Theremin") {
                 // redirect to the theremin activity
-                startActivity(new Intent(this, Lightsensor.class));
+                startActivity(new Intent(this, LightsensorTestActivity.class));
             } else {
                 startActivity(new Intent(this, Lobby.class));
             }
