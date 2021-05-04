@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">MusicColab</string>
+    <string name="about">About</string>
+    <string name="are_you_a_new_user_click_here_to_register">Are you a new user? Click here to Register.</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="login">Login</string>
+    <string name="password">Password</string>
+    <string name="email_address">Email Address</string>
+    <string name="make_music_with_friends">Make Music with Friends</string>
+    <string name="musiccolab">MusicColab</string>
+    <string name="register">Register</string>
+    <string name="username">Username</string>
+    <string name="Welcome">Welcome</string>
+    <string name="User123">User123</string>
+    <string name="create_server">Create new Server</string>
+    <string name="or">or</string>
+    <string name="join_server">Join a Server</string>
+    <string name="choose_your_instrument">Choose your instrument:</string>
+    <string name="server_connection">Server Connection:</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="let_s_go">Connect</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="you_have_joined_server">You have joined Server: #</string>
+    <string name="admin_access">Admin access: </string>
+    <string name="loop">Loop</string>
+
+    <string-array name="instruments">
+        <item>Controller Pad</item>
+        <item>Theremin</item>
+        <item>Robot Talk</item>
+        <item>Marakas</item>
+    </string-array>
+</resources>
