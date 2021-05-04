@@ -1,6 +1,6 @@
 Protokoll Meeting 2 - Besprechung Pflichtenheft
 
-# Meeting 2
+# Meeting 2 - Besprechung Pflichtenheft
 
 - Usability Tests von unabhängenen Personen werden empfohlen
 	- GUI testen (Sobald Funktionalität besteht)
@@ -11,3 +11,8 @@ Protokoll Meeting 2 - Besprechung Pflichtenheft
 3. Meilenstein: "Beta"-Status: Alle Funktionen sollen stehen. Kleinere Bugs können auftreten. Umfangreiches Testen durch Anwender.
 
 - Videos: Funktionen vorstellen (Prototypen)
+
+# Meeting 3
+
+- Gitlab ist down -> Umzug auf altes GitLab von der TU-Berlin
+- Datenbank/Datenspeicher ? -> Überlegungen anstellen, nicht zu spät
