@@ -20,7 +20,6 @@ public class Communication {
     private ServerSocketChannel serverChannel = null;
     private InetSocketAddress serverAddress = null;
     private Selector selector = null;
-    private ByteBuffer buffer = null;
 
     private static void printUsage() {
 
@@ -84,35 +83,35 @@ public class Communication {
         channel.configureBlocking(false);
         channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE); //AddState as third parameter.
 
-        String message = "Hi, i'm your Server.";
-        buffer.put(message.getBytes(messageCharset));
-        buffer.flip();
-        channel.write(buffer);
-        buffer.clear();
+        ByteBuffer tempBuffer = ByteBuffer.allocate(29);
+        String message = "Welcome in MusicCoLab Server.";
+        tempBuffer.put(message.getBytes(messageCharset));
+        tempBuffer.flip();
+        channel.write(tempBuffer);
+        tempBuffer.clear();
     }
 
+    /**
+     * According to the return value of function "analyseMainBuffer" send an error message or
+     * handle the received action.
+     */
     private void handleConnectionWhenReadable(SelectionKey key) throws IOException {
         //int state = (Integer) key.attachment(); //To save the state of all clients. Integer --> Class
+
         SocketChannel clientChannel = (SocketChannel) key.channel();
-        clientChannel.read(buffer);
-        buffer.flip();
-        String msg = messageCharset.decode(buffer).toString();
-        System.out.println(msg);
-        buffer.clear();
+        //Read the first 6 indexes. (Protocol name, Action and data length. 2 Bytes each)
 
-        msg = "yes you can.";
-        buffer.put(msg.getBytes(messageCharset));
-        buffer.flip();
-        clientChannel.write(buffer);
-        buffer.clear();
-        clientChannel.close();
-
+        Protocol protocol = new Protocol();
+        int result = protocol.analyseMainBuffer(messageCharset, clientChannel);
+        if(result == -1)
+            protocol.SendErrorToClient(messageCharset, clientChannel, "You are not our customer.");
+        else if(result == -2)
+            protocol.SendErrorToClient(messageCharset, clientChannel, "Action is not known.");
+        else
+            protocol.handleAction(messageCharset, clientChannel, result);
     }
 
     public void handleConnection() throws IOException {
-        //Create a buffer. We should deal with buffer size
-        buffer = ByteBuffer.allocate(10000);
-
         System.out.println("Waiting for connection: ");
 
         while (true) {

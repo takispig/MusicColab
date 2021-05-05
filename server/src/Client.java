@@ -109,25 +109,25 @@ public class Client{
                     {
                         SocketChannel channel = (SocketChannel) key.channel();
                         channel.finishConnect();
-                        //SMTPClientState state = new SMTPClientState();
-                        //generateMail(state);
-                        //key.attach(state);
                     }
 
                     if(key.isReadable())
                     {
-                        //SMTPClientState state = (SMTPClientState) key.attachment();
+
                         SocketChannel channel = (SocketChannel) key.channel();
 
-                        //if(!readCommandLine(channel, state.getByteBuffer()))
-                            //continue;
-
                         if(count == 0) {
-                            channel.read(buffer);
-                            buffer.flip();
-                            msg = messageCharset.decode(buffer).toString();
-                            System.out.println(msg);
-                            buffer.clear();
+
+                            //register
+                            //login
+                            //logout
+                            //creat lobby
+                            //join lobby
+                            //leave lobby
+                            //tone
+                            //game start
+                            //game end
+                            //game restart
                             String query = "Can I create an account in your System?";
                             buffer.put(query.getBytes(messageCharset));
                             buffer.flip();
