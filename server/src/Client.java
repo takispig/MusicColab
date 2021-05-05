@@ -16,10 +16,7 @@ public class Client{
     private static CharsetDecoder decoder = null;
     private static byte [] clientName = null;
 
-    /**
-     * Explains how to use this program
-     *
-     */
+
     private static void printUsage() {
 
         System.err.println("Usage: java SMTPClient <address> <port>");
@@ -83,7 +80,6 @@ public class Client{
             System.exit(1);
         }
 
-        int count = 0;
         ByteBuffer buffer = ByteBuffer.allocate(1000);
         String msg = "";
         while(true)
@@ -109,42 +105,27 @@ public class Client{
                     {
                         SocketChannel channel = (SocketChannel) key.channel();
                         channel.finishConnect();
-                        //SMTPClientState state = new SMTPClientState();
-                        //generateMail(state);
-                        //key.attach(state);
                     }
 
                     if(key.isReadable())
                     {
-                        //SMTPClientState state = (SMTPClientState) key.attachment();
                         SocketChannel channel = (SocketChannel) key.channel();
 
-                        //if(!readCommandLine(channel, state.getByteBuffer()))
-                            //continue;
-
-                        if(count == 0) {
-                            channel.read(buffer);
-                            buffer.flip();
-                            msg = messageCharset.decode(buffer).toString();
-                            System.out.println(msg);
-                            buffer.clear();
-                            String query = "Can I create an account in your System?";
+                        //register
+                        //login
+                        //logout
+                        //creat lobby
+                        //join lobby
+                        //leave lobby
+                        //tone
+                        //game start
+                        //game end
+                        //game restart
+                        String query = "Can I create an account in your System?";
                             buffer.put(query.getBytes(messageCharset));
                             buffer.flip();
                             channel.write(buffer);
                             buffer.clear();
-                        }
-
-                        else {
-                            channel.read(buffer);
-                            buffer.flip();
-                            msg = messageCharset.decode(buffer).toString();
-                            System.out.println(msg);
-                            buffer.clear();
-                            channel.close();
-                        }
-
-                        count++;
                     }
 
                 } catch(IOException ioe) {
