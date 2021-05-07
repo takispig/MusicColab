@@ -10,6 +10,9 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 
 import static java.lang.System.exit;
 
@@ -21,11 +24,21 @@ public class Communication {
     private InetSocketAddress serverAddress = null;
     private Selector selector = null;
 
+    private int playerId;
+    private List<Integer> idList = new LinkedList<>();
+
     private static void printUsage() {
 
         System.err.println("Usage: MusicCoLabServer needs <address> <port>");
     }
 
+    private int getPlayerId(){
+        Random rand = new Random();
+        int id = rand.nextInt(Integer.MAX_VALUE);
+        while (idList.contains(id))
+            id = rand.nextInt(Integer.MAX_VALUE);
+        return id;
+    }
 
     public void CheckParameters(int length){
         //we need address and port, so we have two parameters.
@@ -83,8 +96,10 @@ public class Communication {
         channel.configureBlocking(false);
         channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE); //AddState as third parameter.
 
-        ByteBuffer tempBuffer = ByteBuffer.allocate(29);
+        playerId = getPlayerId();
+
         String message = "Welcome in MusicCoLab Server.";
+        ByteBuffer tempBuffer = ByteBuffer.allocate(message.length());
         tempBuffer.put(message.getBytes(messageCharset));
         tempBuffer.flip();
         channel.write(tempBuffer);
@@ -103,12 +118,16 @@ public class Communication {
 
         Protocol protocol = new Protocol();
         int result = protocol.analyseMainBuffer(messageCharset, clientChannel);
-        if(result == -1)
+        if(result == -1) {
             protocol.SendErrorToClient(messageCharset, clientChannel, "You are not our customer.");
-        else if(result == -2)
+            clientChannel.close();
+        }
+        else if(result == -2) {
             protocol.SendErrorToClient(messageCharset, clientChannel, "Action is not known.");
+            clientChannel.close();
+        }
         else
-            protocol.handleAction(messageCharset, clientChannel, result);
+            protocol.handleAction(messageCharset, clientChannel, result, playerId);
     }
 
     public void handleConnection() throws IOException {

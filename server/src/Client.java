@@ -26,6 +26,14 @@ public class Client{
     }
 
 
+    public byte[] convertShortToByte(short value){
+        byte[] temp = new byte[2];
+        temp[0] = (byte)(value & 0xff);
+        temp[1] = (byte)((value >> 8) & 0xff);
+
+        return temp;
+    }
+
     public static void main(String [] args){
         SocketChannel clientChannel = null;
         InetSocketAddress remoteAddress = null;
@@ -83,9 +91,6 @@ public class Client{
             System.exit(1);
         }
 
-        int count = 0;
-        ByteBuffer buffer = ByteBuffer.allocate(1000);
-        String msg = "";
         while(true)
         {
             try {
@@ -111,40 +116,63 @@ public class Client{
                         channel.finishConnect();
                     }
 
-                    if(key.isReadable())
-                    {
+                    if(key.isReadable()) {
 
                         SocketChannel channel = (SocketChannel) key.channel();
+                        ByteBuffer mainBuffer = ByteBuffer.allocate(100);
+                        clientChannel.read(mainBuffer);
+                        mainBuffer.flip();
+                        System.out.println(messageCharset.decode(mainBuffer).toString());
 
-                        if(count == 0) {
+                        short protocolName = 12845;
+                        short action = 8;
+                        short dataLength;
+                        //byte emailLength;
+                        //byte userNameLength;
+                        //byte passwordLength;
+                        //String email = "abc@gmail.com";
+                        //String userName = "abc";
+                        //String password = "@zfh165.)";
+                        //byte toneAction = 1;
+                        //byte toneType = 1;
 
-                            //register
-                            //login
-                            //logout
-                            //creat lobby
-                            //join lobby
-                            //leave lobby
-                            //tone
-                            //game start
-                            //game end
-                            //game restart
-                            String query = "Can I create an account in your System?";
-                            buffer.put(query.getBytes(messageCharset));
-                            buffer.flip();
-                            channel.write(buffer);
-                            buffer.clear();
-                        }
+                        String lobbyID = "4564dd";
 
-                        else {
-                            channel.read(buffer);
-                            buffer.flip();
-                            msg = messageCharset.decode(buffer).toString();
-                            System.out.println(msg);
-                            buffer.clear();
-                            channel.close();
-                        }
+                        Client client = new Client();
+                        //emailLength = (byte) email.length();
+                        //userNameLength = (byte) userName.length();
+                        //passwordLength = (byte) password.length();
+                        dataLength = (short) lobbyID.length();
+                        String message = lobbyID;
+                        ByteBuffer buffer = ByteBuffer.allocate(2 + 2 + 2 + message.length());
 
-                        count++;
+
+                        //register
+                        byte[] a =client.convertShortToByte(protocolName);
+                        buffer.put(a);
+                        byte[] b =client.convertShortToByte(action);
+                        buffer.put(b);
+                        byte[] c =client.convertShortToByte(dataLength);
+                        buffer.put(c);
+                        //buffer.put(emailLength);
+                        /*buffer.put(userNameLength);
+                        buffer.put(passwordLength);*/
+                        //buffer.put(toneAction);
+                        //buffer.put(toneType);
+
+                        buffer.put(message.getBytes(messageCharset));
+                        buffer.flip();
+                        channel.write(buffer);
+                        buffer.clear();
+                        //login
+                        //logout
+                        //creat lobby
+                        //join lobby
+                        //leave lobby
+                        //tone
+                        //game start
+                        //game end
+                        //game restart
                     }
 
                 } catch(IOException ioe) {

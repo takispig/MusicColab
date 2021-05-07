@@ -1,6 +1,6 @@
 public class MusicJoiner {
 
-    public MusicJoiner(int action, String type, String data){
+    public MusicJoiner(byte action, byte type, String data){
 
     }
 }
