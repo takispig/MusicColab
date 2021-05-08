@@ -12,10 +12,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.net.Socket;
+
 public class PreLobby extends AppCompatActivity implements View.OnClickListener {
 
-    String Instrument;
-    String [] instruments = {"Theremin", "Violin", "Drums"};
+    public String Instrument;
+    String [] instruments = {"Theremin", "Keyboards", "Drums"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,12 +55,14 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
         });
     }
 
+    private Socket socket;
     // In this function we will 'hear' for onClick events and according to
     // their IDs we will make the correct decision
     public void onClick(View view) {
         if (view.getId() == R.id.create_server) {
-            // do some stuff
-            Toast.makeText(getApplicationContext(), "Create Server is not yet implemented", Toast.LENGTH_SHORT).show();
+            // send a request to the server by calling the client
+            // create a new Thread to handle the asynchron communication
+            new Thread(new Client(getApplicationContext())).start();
         } else if (view.getId() == R.id.join_server) {
             // do some stuff
             Toast.makeText(getApplicationContext(), "Join Server is not yet implemented", Toast.LENGTH_SHORT).show();
@@ -68,8 +72,14 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             if (Instrument == "Theremin") {
                 // redirect to the theremin activity
                 startActivity(new Intent(this, LightsensorTestActivity.class));
-            } else {
+            } else if (Instrument == "Drums") {
                 startActivity(new Intent(this, Lobby.class));
+            } else if (Instrument == "Keyboards") {
+                startActivity(new Intent(this, Lobby.class));
+            } else {
+                // may be redundant because it can never be empty (at least at this moment)
+                startActivity(new Intent(this, Lobby.class));
+                Toast.makeText(getApplicationContext(), "Not such an Instrument. Try again.", Toast.LENGTH_SHORT).show();
             }
         }
     }
