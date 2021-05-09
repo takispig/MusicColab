@@ -133,7 +133,7 @@ public class Client{
                             String query = "Can I create an account in your System?";
                             buffer.put(query.getBytes(messageCharset));
                             buffer.flip();
-                            channel.write(buffer);
+                            channel.write(getLoginBuffer());
                             buffer.clear();
                         }
 
@@ -156,5 +156,19 @@ public class Client{
             }
             iter.remove();
         }
+    }
+    private static ByteBuffer getLoginBuffer(){
+        ByteBuffer wbuffer =  ByteBuffer.allocate(100);
+
+        wbuffer.put("12845".getBytes());
+        wbuffer.put("1".getBytes());
+        wbuffer.put(Integer.toString("nils".getBytes().length).getBytes());
+        wbuffer.put(Integer.toString("1234".getBytes().length).getBytes());
+        wbuffer.put("nils".getBytes());
+        wbuffer.put("1234".getBytes());
+
+        wbuffer.flip();
+
+        return wbuffer;
     }
 }

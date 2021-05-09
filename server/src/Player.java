@@ -1,23 +1,29 @@
 package src;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.nio.channels.SocketChannel;
 
 public class Player {
     private String name;
     private String passwort;
     private String email;
     private int id;
-    private InetSocketAddress address;
+    private SocketAddress address;
+    private SocketChannel channel;
 
-    public Player(String name, String passwort, String email, int id, InetSocketAddress address) {
+    public Player(String name, String passwort, String email, int id, SocketChannel channel) throws IOException {
         this.name = name;
         this.passwort = passwort;
         this.email = email;
         this.id = id;
-        this.address = address;
+        this.channel = channel;
+        this.address = channel.getRemoteAddress();
     }
 
 
+    public SocketChannel getPlayerChannel(){ return this.channel; }
 
     public void setAddress(InetSocketAddress address){
         this.address = address;
@@ -33,6 +39,6 @@ public class Player {
 
     public int getId() { return this.id; }
 
-    public InetSocketAddress getAddress() { return this.address; }
+    public SocketAddress getAddress() { return this.address; }
 
 }

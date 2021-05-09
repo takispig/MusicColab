@@ -6,6 +6,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -55,12 +56,14 @@ public class Protocol {
     private byte passwordSize;
 
     private List<String> LobbyIdList = new LinkedList<>();
-    private String lobbyID;
+    private int lobbyID;
     private String lobbyName;
 
     private String toneData;
     private byte toneType;
     private byte toneAction;
+
+    private HashMap<Integer,Lobby> lobbyMap = new HashMap<>();
 
     public Protocol(){
         for(short index = 1; index < 11; index++)
@@ -120,6 +123,15 @@ public class Protocol {
         errorBuffer.clear();
     }
 
+    public void sendResponseToClient(Charset messageCharset, SocketChannel clientChannel, String message) throws IOException {
+        ByteBuffer messageBuffer = ByteBuffer.allocate(100);
+        messageBuffer.put(message.getBytes(messageCharset));
+        messageBuffer.flip();
+        clientChannel.write(messageBuffer);
+        messageBuffer.clear();
+    }
+
+
     private void readSizes(Charset messageCharset, SocketChannel clientChannel) throws IOException {
 
         ByteBuffer loginSystemBuffer = ByteBuffer.allocate(1);
@@ -168,11 +180,20 @@ public class Protocol {
 
 
         if(action == register)
-            LoginSystem.register(username, email, password);
+            if(LoginSystem.register(username, email, password)){
+                //TODO: Official protocol answer: registered
+                sendResponseToClient(messageCharset,clientChannel,"Client registered");
+            }
         else if(action == login)
-            LoginSystem.login(username, password,playerAddress);
+            if(LoginSystem.login(username, password,clientChannel)){
+                //TODO: Official Protocol-Response: login
+                sendResponseToClient(messageCharset,clientChannel,"Client logged in");
+            }
         else
-            LoginSystem.logout(username, password);
+            if(LoginSystem.logout(username, password)){
+                //TODO: Official Protocol-Response: logout
+                sendResponseToClient(messageCharset,clientChannel,"Client logged out");
+            }
     }
 
     private void parseBufferForLobbyOrGame(Charset messageCharset, SocketChannel clientChannel, int lobbyNameIsSize) throws IOException {
@@ -186,24 +207,38 @@ public class Protocol {
         lobbyBuffer.flip();
         if(action == createLobby){
             lobbyName = messageCharset.decode(lobbyBuffer).toString();
-            Player player = new Player(username, password, email, playerId, playerAddress);
+            Player player = LoginSystem.getPlayerByChannel(clientChannel);
             lobby = new Lobby(player);
+            lobbyMap.put(lobby.getLobby_id(),lobby);
+            //TODO: Official Protocol-Response: lobby-create
+            sendResponseToClient(messageCharset,clientChannel,"Lobby "+ lobby.getLobby_id()+" created by Client");
         }
         else if(action == joinLobby || action == leaveLobby){
-            lobbyID = messageCharset.decode(lobbyBuffer).toString();//function to add player to a lobby is needed.
-            Player player = new Player(username, password, email, playerId, playerAddress);
-            if(action == joinLobby)
-                lobby.addPlayer(player);
-            else
-                lobby.removePlayer(player);
+            lobbyID = Integer.valueOf(messageCharset.decode(lobbyBuffer).toString());//function to add player to a lobby is needed.
+            Player player = LoginSystem.getPlayerByChannel(clientChannel);
+            Lobby lobby1 = lobbyMap.get(lobbyID);
+            if(action == joinLobby && lobby1 != null){
+                lobby1.addPlayer(player);
+                //TODO: Official Protocol-Response: Lobby-join
+                sendResponseToClient(messageCharset,clientChannel,"Client joined the Lobby: "+ lobbyID);
+            } else if(action == leaveLobby && lobby1 != null){
+                lobby1.removePlayer(player);
+                //TODO: Official Protocol-Response: Lobby-leave
+                sendResponseToClient(messageCharset,clientChannel,"Client left the lobby: "+ lobbyID);
+            } else throw new RuntimeException("Lobby not found"); //TODO: Error handling
+
         }
         else{
-            lobbyID = messageCharset.decode(lobbyBuffer).toString();
+            lobbyID = Integer.valueOf(messageCharset.decode(lobbyBuffer).toString());
             //TODO: Create new Game
-            //game = new Game(lobbyID, action);
+            game = new Game(lobbyMap.get(lobbyID));
+            //TODO: Official Protocol-Response: Game start
+            sendResponseToClient(messageCharset,clientChannel,"Game started");
         }
         lobbyBuffer.clear();
     }
+
+
 
     private void parseBufferForMusicJoiner(Charset messageCharset, SocketChannel clientChannel, int dataSize) throws IOException {
 

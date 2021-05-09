@@ -1,7 +1,9 @@
 package src;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.nio.channels.SocketChannel;
 import java.sql.*;
 import java.util.HashMap;
 
@@ -14,19 +16,19 @@ public class LoginSystem {
      * check if the player(name,email) already registered, if so add new player to the loggedInPlayers
      * @param name
      * @param passwort
-     * @param address
+     * @param channel
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public static void login(String name, String passwort, InetSocketAddress address) throws SQLException, ClassNotFoundException {
+    public static boolean login(String name, String passwort, SocketChannel channel) throws SQLException, ClassNotFoundException, IOException {
         //check for registration
         if(checkLogin(name,passwort)){
-            //TODO: player initialising
             //create new player
             ResultSet res = DataBase.getUserlogin(name,passwort);
-            Player player = new Player(name,passwort,res.getString(3),res.getInt(1),address);
+            Player player = new Player(name,passwort,res.getString(3),res.getInt(1),channel);
             //add data to List
             loggedInPlayers.put(res.getInt(1),player);
+            return true;
         } else throw new RuntimeException("User not registered!");
 
     }
@@ -38,12 +40,13 @@ public class LoginSystem {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public static void logout(String name,String email) throws SQLException, ClassNotFoundException {
+    public static boolean logout(String name,String email) throws SQLException, ClassNotFoundException {
         //check in list
         if(checkForRegistration(name, email) & loggedInPlayers.get(getId(name, email)) != null){
             //del player from list
             loggedInPlayers.remove(getId(name, email));
             //TODO: Delete player
+            return true;
         } else throw new RuntimeException("User not logged in!");
     }
 
@@ -55,12 +58,15 @@ public class LoginSystem {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public static void register(String name, String email, String passwort) throws SQLException, ClassNotFoundException {
+    public static boolean register(String name, String email, String passwort) throws SQLException, ClassNotFoundException {
         //check for registration
         if(!checkForRegistration(name, email)){
             //add data to DB
             DataBase.addUser(name, email, passwort);
-        } else throw new RuntimeException("User not registered!");
+            return true;
+        } else {
+            throw new RuntimeException("User not registered!");
+        }
     }
 
     /**
@@ -100,5 +106,14 @@ public class LoginSystem {
             throw new RuntimeException("User not found!");
         }
         return res.getInt(1);
+    }
+
+    public static Player getPlayerByChannel(SocketChannel channel){
+        for(int i = 0;i<loggedInPlayers.size();i++){
+            if(loggedInPlayers.get(i).getPlayerChannel()==channel){
+                return loggedInPlayers.get(i);
+            }
+        }
+        return null;
     }
 }
