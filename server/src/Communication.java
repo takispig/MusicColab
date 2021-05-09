@@ -1,5 +1,3 @@
-package src;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -12,6 +10,9 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 
 import static java.lang.System.exit;
 
@@ -22,13 +23,22 @@ public class Communication {
     private ServerSocketChannel serverChannel = null;
     private InetSocketAddress serverAddress = null;
     private Selector selector = null;
-    private ByteBuffer buffer = null;
+
+    private int playerId;
+    private List<Integer> idList = new LinkedList<>();
 
     private static void printUsage() {
 
         System.err.println("Usage: MusicCoLabServer needs <address> <port>");
     }
 
+    private int getPlayerId(){
+        Random rand = new Random();
+        int id = rand.nextInt(Integer.MAX_VALUE);
+        while (idList.contains(id))
+            id = rand.nextInt(Integer.MAX_VALUE);
+        return id;
+    }
 
     public void CheckParameters(int length){
         //we need address and port, so we have two parameters.
@@ -86,35 +96,41 @@ public class Communication {
         channel.configureBlocking(false);
         channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE); //AddState as third parameter.
 
-        String message = "Hi, i'm your Server.";
-        buffer.put(message.getBytes(messageCharset));
-        buffer.flip();
-        channel.write(buffer);
-        buffer.clear();
+        playerId = getPlayerId();
+
+        String message = "Welcome in MusicCoLab Server.";
+        ByteBuffer tempBuffer = ByteBuffer.allocate(message.length());
+        tempBuffer.put(message.getBytes(messageCharset));
+        tempBuffer.flip();
+        channel.write(tempBuffer);
+        tempBuffer.clear();
     }
 
+    /**
+     * According to the return value of function "analyseMainBuffer" send an error message or
+     * handle the received action.
+     */
     private void handleConnectionWhenReadable(SelectionKey key) throws IOException {
         //int state = (Integer) key.attachment(); //To save the state of all clients. Integer --> Class
+
         SocketChannel clientChannel = (SocketChannel) key.channel();
-        clientChannel.read(buffer);
-        buffer.flip();
-        String msg = messageCharset.decode(buffer).toString();
-        System.out.println(msg);
-        buffer.clear();
+        //Read the first 6 indexes. (Protocol name, Action and data length. 2 Bytes each)
 
-        msg = "yes you can.";
-        buffer.put(msg.getBytes(messageCharset));
-        buffer.flip();
-        clientChannel.write(buffer);
-        buffer.clear();
-        clientChannel.close();
-
+        Protocol protocol = new Protocol();
+        int result = protocol.analyseMainBuffer(messageCharset, clientChannel);
+        if(result == -1) {
+            protocol.SendErrorToClient(messageCharset, clientChannel, "You are not our customer.");
+            clientChannel.close();
+        }
+        else if(result == -2) {
+            protocol.SendErrorToClient(messageCharset, clientChannel, "Action is not known.");
+            clientChannel.close();
+        }
+        else
+            protocol.handleAction(messageCharset, clientChannel, result, playerId);
     }
 
     public void handleConnection() throws IOException {
-        //Create a buffer. We should deal with buffer size
-        buffer = ByteBuffer.allocate(10000);
-
         System.out.println("Waiting for connection: ");
 
         while (true) {
