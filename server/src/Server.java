@@ -23,6 +23,9 @@ public class Server {
     private ServerSocketChannel serverChannel = null;
     private InetSocketAddress serverAddress = null;
     private Selector selector = null;
+    //TODO NEW
+    private static boolean runnning = true;
+    private static boolean finished = false;
 
     private int playerId;
     private List<Integer> idList = new LinkedList<>();
@@ -48,7 +51,7 @@ public class Server {
         }
     }
 
-    public void defineCharType(String Address, String Port){
+    public void defineCharType(String address, int port){
         try {
             messageCharset = Charset.forName("US-ASCII");
         } catch(UnsupportedCharsetException uce) {
@@ -59,7 +62,7 @@ public class Server {
         encoder = messageCharset.newEncoder();
 
         try {
-            serverAddress = new InetSocketAddress(Address, Integer.parseInt(Port));
+            serverAddress = new InetSocketAddress(address, port);
         } catch (IllegalArgumentException e) {
             printUsage();
             exit(1);
@@ -130,25 +133,43 @@ public class Server {
             protocol.handleAction(messageCharset, clientChannel, result, playerId);
     }
 
+    //TODO CHANGED
     public void handleConnection() throws IOException {
         System.out.println("Waiting for connection: ");
 
-        while (true) {
+        while (runnning) {
             selector.select();
-
             Iterator selectedKeys = selector.selectedKeys().iterator();
-
             while (selectedKeys.hasNext()) {
                 SelectionKey key = (SelectionKey) selectedKeys.next();
-
                 if (key.isAcceptable()) {
                     handleConnectionWhenAcceptable(key);
-
                 } else if (key.isReadable()) {
                     handleConnectionWhenReadable(key);
                 }
                 selectedKeys.remove();
             }
         }
+        finished = true;
     }
+
+    //TODO NEW
+    public void finishServer() {
+        runnning = false;
+        selector.wakeup();
+        while (!finished) {
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            serverChannel.close();
+            selector.close();
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+    }
+
 }
