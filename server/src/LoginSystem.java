@@ -1,5 +1,7 @@
 package src;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.sql.*;
 import java.util.HashMap;
 
@@ -11,19 +13,20 @@ public class LoginSystem {
     /**
      * check if the player(name,email) already registered, if so add new player to the loggedInPlayers
      * @param name
-     * @param email
+     * @param passwort
+     * @param address
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public static void login(String name, String email) throws SQLException, ClassNotFoundException {
+    public static void login(String name, String passwort, InetSocketAddress address) throws SQLException, ClassNotFoundException {
         //check for registration
-        if(checkForRegistration(name,email)){
+        if(checkLogin(name,passwort)){
             //TODO: player initialising
             //create new player
-            int playerId = getId(name,email);
-            Player player = new Player();
+            ResultSet res = DataBase.getUserlogin(name,passwort);
+            Player player = new Player(name,passwort,res.getString(3),res.getInt(1),address);
             //add data to List
-            loggedInPlayers.put(playerId,player);
+            loggedInPlayers.put(res.getInt(1),player);
         } else throw new RuntimeException("User not registered!");
 
     }
@@ -74,6 +77,14 @@ public class LoginSystem {
             return true;
         } else return false;
     }
+
+    private static boolean checkLogin(String name, String passwort) throws SQLException, ClassNotFoundException {
+        ResultSet res = DataBase.getUserlogin(name, passwort);
+        if (res.next()){
+            return true;
+        } else return false;
+    }
+
 
     /**
      * get the id from the user-data from the database

@@ -123,6 +123,15 @@ public class DataBase {
         return res;
     }
 
+    public static ResultSet getUserlogin(String name, String passwort) throws SQLException, ClassNotFoundException {
+        if(con == null){
+            getConnection();
+        }
+        Statement state = con.createStatement();
+        ResultSet res = state.executeQuery("SELECT * FROM "+TABLE_NAME+" WHERE "+ NAME_COL_NAME +" = '"+ name +
+                "' AND "+PASSWORT_COL_NAME+" ='"+ passwort+"'");
+        return res;
+    }
     /**
      * Delete user from Database
      * @param name

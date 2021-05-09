@@ -1,3 +1,5 @@
+package src;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -9,6 +11,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.UnsupportedCharsetException;
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -110,7 +113,7 @@ public class Communication {
      * According to the return value of function "analyseMainBuffer" send an error message or
      * handle the received action.
      */
-    private void handleConnectionWhenReadable(SelectionKey key) throws IOException {
+    private void handleConnectionWhenReadable(SelectionKey key) throws IOException, SQLException, ClassNotFoundException {
         //int state = (Integer) key.attachment(); //To save the state of all clients. Integer --> Class
 
         SocketChannel clientChannel = (SocketChannel) key.channel();
@@ -130,7 +133,7 @@ public class Communication {
             protocol.handleAction(messageCharset, clientChannel, result, playerId);
     }
 
-    public void handleConnection() throws IOException {
+    public void handleConnection() throws IOException, SQLException, ClassNotFoundException {
         System.out.println("Waiting for connection: ");
 
         while (true) {

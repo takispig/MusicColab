@@ -1,3 +1,5 @@
+package src;
+
 import java.net.InetSocketAddress;
 
 public class Player {
@@ -12,6 +14,12 @@ public class Player {
         this.passwort = passwort;
         this.email = email;
         this.id = id;
+        this.address = address;
+    }
+
+
+
+    public void setAddress(InetSocketAddress address){
         this.address = address;
     }
 

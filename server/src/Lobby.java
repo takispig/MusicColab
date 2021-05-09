@@ -1,15 +1,22 @@
+package src;
+
 import java.util.LinkedList;
 
 public class Lobby {
     private int lobby_id;
-    private int max_players;
+    private int MAX_PLAYERS = 7;
     private LinkedList<Player> players;
     private Player admin;
     private boolean blocking;
 
-    public Lobby(int lobby_id, int max_players, Player admin) {
-        this.lobby_id = lobby_id;
-        this.max_players = max_players;
+    static int noOfLobbys = 0;
+
+    {
+        noOfLobbys +=1;
+    }
+
+    public Lobby(Player admin) {
+        this.lobby_id = noOfLobbys;
         this.players = new LinkedList<>();
         this.admin = admin;
         this.blocking = false;
@@ -19,7 +26,7 @@ public class Lobby {
 
     public int getLobby_id() { return this.lobby_id; }
 
-    public int getMax_players() { return this.max_players; }
+    public int getMax_players() { return MAX_PLAYERS; }
 
     public LinkedList<Player> getPlayers() { return this.players; }
 
@@ -38,7 +45,7 @@ public class Lobby {
     public boolean getBlocking() { return this.blocking; }
 
     public boolean addPlayer(Player player) {
-        if (players.size() < max_players && !blocking && !playerInLobby(player)) {
+        if (players.size() < MAX_PLAYERS && !blocking && !playerInLobby(player)) {
             players.add(player);
             return true;
         }
