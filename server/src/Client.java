@@ -16,6 +16,17 @@ public class Client{
     private static CharsetDecoder decoder = null;
     private static byte [] clientName = null;
 
+
+    public short action = 7;
+    public String email = "abc@gmail.com";
+    public String userName = "abc";
+    public String password = "@zfh165.)";
+    public byte toneAction = 1;
+    public byte toneType = 1;
+    public String toneData = "dataExample";
+    public String lobbyName = "example";
+    public String lobbyID = "4564";
+
     /**
      * Explains how to use this program
      *
@@ -125,54 +136,74 @@ public class Client{
                         System.out.println(messageCharset.decode(mainBuffer).toString());
 
                         short protocolName = 12845;
-                        short action = 8;
                         short dataLength;
-                        //byte emailLength;
-                        //byte userNameLength;
-                        //byte passwordLength;
-                        //String email = "abc@gmail.com";
-                        //String userName = "abc";
-                        //String password = "@zfh165.)";
-                        //byte toneAction = 1;
-                        //byte toneType = 1;
+                        byte userNameLength;
+                        byte passwordLength;
 
-                        String lobbyID = "4564dd";
 
                         Client client = new Client();
-                        //emailLength = (byte) email.length();
-                        //userNameLength = (byte) userName.length();
-                        //passwordLength = (byte) password.length();
-                        dataLength = (short) lobbyID.length();
-                        String message = lobbyID;
-                        ByteBuffer buffer = ByteBuffer.allocate(2 + 2 + 2 + message.length());
+                        String message;
+                        ByteBuffer buffer = null;
+                        if(client.action == 3){
+                            byte emailLength = (byte) client.email.length();
+                            userNameLength = (byte) client.userName.length();
+                            passwordLength = (byte) client.password.length();
+                            message = client.email+client.userName+client.password;
+                            dataLength = (short) message.length();
+                            buffer = ByteBuffer.allocate(6 + 3 + dataLength);
 
+                            buffer.put(client.convertShortToByte(protocolName));
+                            buffer.put(client.convertShortToByte(client.action));
+                            buffer.put(client.convertShortToByte(dataLength));
+                            buffer.put(emailLength);
+                            buffer.put(userNameLength);
+                            buffer.put(passwordLength);
+                            buffer.put(message.getBytes(messageCharset));
+                        }
+                        else if(client.action == 2 || client.action == 1){
+                            userNameLength = (byte) client.userName.length();
+                            passwordLength = (byte) client.password.length();
+                            message = client.userName+client.password;
+                            dataLength = (short) message.length();
+                            buffer = ByteBuffer.allocate(6 + 2 + dataLength);
 
-                        //register
-                        byte[] a =client.convertShortToByte(protocolName);
-                        buffer.put(a);
-                        byte[] b =client.convertShortToByte(action);
-                        buffer.put(b);
-                        byte[] c =client.convertShortToByte(dataLength);
-                        buffer.put(c);
-                        //buffer.put(emailLength);
-                        /*buffer.put(userNameLength);
-                        buffer.put(passwordLength);*/
-                        //buffer.put(toneAction);
-                        //buffer.put(toneType);
+                            buffer.put(client.convertShortToByte(protocolName));
+                            buffer.put(client.convertShortToByte(client.action));
+                            buffer.put(client.convertShortToByte(dataLength));
+                            buffer.put(userNameLength);
+                            buffer.put(passwordLength);
+                            buffer.put(message.getBytes(messageCharset));
+                        }
+                        else if(client.action == 4 || client.action == 5 || client.action == 6 ||
+                                client.action == 8 || client.action == 9 || client.action == 10){
+                            if(client.action == 4)
+                                message = client.lobbyName;
+                            else
+                                message = client.lobbyID;
+                            dataLength = (short) message.length();
+                            buffer = ByteBuffer.allocate(6 + dataLength);
 
-                        buffer.put(message.getBytes(messageCharset));
+                            buffer.put(client.convertShortToByte(protocolName));
+                            buffer.put(client.convertShortToByte(client.action));
+                            buffer.put(client.convertShortToByte(dataLength));
+                            buffer.put(message.getBytes(messageCharset));
+                        }
+                        if(client.action == 7){
+                            message = client.toneData;
+                            dataLength = (short) (message.length() + 2);
+                            buffer = ByteBuffer.allocate(6 + 2 + dataLength);
+
+                            buffer.put(client.convertShortToByte(protocolName));
+                            buffer.put(client.convertShortToByte(client.action));
+                            buffer.put(client.convertShortToByte(dataLength));
+                            buffer.put(client.toneAction);
+                            buffer.put(client.toneType);
+                            buffer.put(message.getBytes(messageCharset));
+                        }
                         buffer.flip();
                         channel.write(buffer);
                         buffer.clear();
-                        //login
-                        //logout
-                        //creat lobby
-                        //join lobby
-                        //leave lobby
-                        //tone
-                        //game start
-                        //game end
-                        //game restart
+
                     }
 
                 } catch(IOException ioe) {
