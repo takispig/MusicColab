@@ -1,8 +1,9 @@
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class Server {
 
-    public static void main(String args[]) throws IOException {
+    public static void main(String args[]) throws IOException, SQLException, ClassNotFoundException {
 
         Communication communication = new Communication();
 

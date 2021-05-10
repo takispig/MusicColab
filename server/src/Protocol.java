@@ -1,89 +1,73 @@
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
+import java.sql.SQLException;
 import java.util.*;
 
 public class Protocol {
     final private short protocolName = 12845;
-    int playerId;
     SocketAddress playerAddress;
-    final private List<Short> codeList = new ArrayList<Short>();
+    final private List<Short> codesList = new ArrayList<Short>();
 
     final private int login = 1;
     final private int loginError = 11;
 
     final private int logout = 2;
-    final private int logoutError = 21;
+    final private int logoutError = 12;
 
     final private int register = 3;
-    final private int registerError = 31;
+    final private int registerError = 13;
 
     final private int createLobby = 4;
-    final private int createLobbyError = 41;
+    final private int createLobbyError = 14;
 
     final private int joinLobby = 5;
-    final private int joinLobbyError = 51;
+    final private int joinLobbyError = 15;
 
     final private int leaveLobby = 6;
-    final private int leaveLobbyError = 61;
+    final private int leaveLobbyError = 15;
 
     final private int tone = 7;
-    final private int toneError = 71;
+    final private int toneError = 17;
 
     final private int gameStart = 8;
-    final private int GameStartError = 81;
+    final private int GameStartError = 18;
 
     final private int gameEnd = 9;
-    final private int gameEndError = 91;
+    final private int gameEndError = 19;
 
     final private int gameRestart = 10;
-    final private int gameRestartError = 101;
+    final private int gameRestartError = 20;
 
     private short action;
+    private short responseAction;
 
-    private String username ;
     private byte userNameSize;
-    private String email;
     private byte emailSize;
-    private String password;
     private byte passwordSize;
 
-    private List<String> LobbyIdList = new LinkedList<>();
-    private String lobbyID;
-    private String lobbyName;
 
-    private String toneData;
-    private byte toneType;
-    private byte toneAction;
+
+    final private String[][] responsesArray = { {"Client logged in", "error"},
+                                          {"Client logged out", "error"},
+                                          {"Client registered", "error"},};
 
     public Protocol(){
         for(short index = 1; index < 11; index++)
-            codeList.add(index);
+            codesList.add(index);
     }
 
 
     /**
-     * @param mainBuffer: first 6 Bytes from client message, but as ByteBuffer.
      * @return: -1 if protocol name is wrong.
      * -2 if Action is not known.
      * else size of Data.
      */
-    private static short getShort(byte[] b) {
-        return (short) (((b[1] << 8) | b[0] & 0xff));
-    }
+    public short[] analyseMainBuffer(Charset messageCharset, SocketChannel clientChannel) throws IOException {
+        short[] temp;
 
-    private String getLobbyId(){
-        Random rand = new Random();
-        int id = rand.nextInt(Integer.MAX_VALUE);
-        while (LobbyIdList.contains(id))
-            id = rand.nextInt(Integer.MAX_VALUE);
-        return Integer.toString(id);
-    }
-
-    public short analyseMainBuffer(Charset messageCharset, SocketChannel clientChannel) throws IOException {
         ByteBuffer mainBuffer = ByteBuffer.allocate(2);
         clientChannel.read(mainBuffer);
         mainBuffer.flip();
@@ -94,27 +78,20 @@ public class Protocol {
             clientChannel.read(mainBuffer);
             mainBuffer.flip();
             action = getShort(messageCharset.decode(mainBuffer).toString().getBytes(messageCharset));
-            if (codeList.contains(action)) {
+            if (codesList.contains(action)) {
                 mainBuffer.clear();
 
                 clientChannel.read(mainBuffer);
                 mainBuffer.flip();
-                return getShort(messageCharset.decode(mainBuffer).toString().getBytes(messageCharset));
+                temp = new short[]{action, getShort(messageCharset.decode(mainBuffer).toString().getBytes(messageCharset))};
+                return temp;
 
             } else {
-                return -2;
+                return new short[]{action, -2};
             }
         } else {
-            return -1;
+            return new short[]{action, -1};
         }
-    }
-
-    public void SendErrorToClient(Charset messageCharset, SocketChannel clientChannel, String errorMessage) throws IOException {
-        ByteBuffer errorBuffer = ByteBuffer.allocate(100);
-        errorBuffer.put(errorMessage.getBytes(messageCharset));
-        errorBuffer.flip();
-        clientChannel.write(errorBuffer);
-        errorBuffer.clear();
     }
 
     private void readSizes(Charset messageCharset, SocketChannel clientChannel) throws IOException {
@@ -138,17 +115,19 @@ public class Protocol {
         loginSystemBuffer.clear();
     }
 
-    private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel) throws IOException {
+    private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel) throws IOException, SQLException, ClassNotFoundException {
+
+        String username, password, email = "";
+        boolean checkResponse;
 
         readSizes(messageCharset, clientChannel);
         ByteBuffer loginSystemBuffer;
-        LoginSystem loginSystem;
 
         if(action == register){
             loginSystemBuffer = ByteBuffer.allocate(emailSize);
             clientChannel.read(loginSystemBuffer);
             loginSystemBuffer.flip();
-            username = messageCharset.decode(loginSystemBuffer).toString();
+            email = messageCharset.decode(loginSystemBuffer).toString();
             loginSystemBuffer.clear();
         }
 
@@ -164,40 +143,52 @@ public class Protocol {
         password = messageCharset.decode(loginSystemBuffer).toString();
         loginSystemBuffer.clear();
 
-
-        if(action == register)
-            LoginSystem.register(username, email, password);
-        else if(action == login)
-            LoginSystem.login(username, password);
-        else
-            LoginSystem.logout(username, password);
+        if(action == register) {
+            checkResponse = LoginSystem.register(username, email, password);
+            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
+        }
+        else if(action == login) {// TODO: LoginSystem.getId(username, password), Just registered users can login.
+            checkResponse = LoginSystem.login(username, password, clientChannel);
+            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
+        }
+        else{// TODO: LoginSystem.getId(username, password), Just logged in users can logout.
+            checkResponse = LoginSystem.logout(username, password);
+            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
+        }
     }
 
     private void parseBufferForLobbyOrGame(Charset messageCharset, SocketChannel clientChannel, int lobbyNameIsSize) throws IOException {
 
+        Player player = LoginSystem.getPlayerByChannel(clientChannel);
         ByteBuffer lobbyBuffer;
-        Lobby lobby = null;
-        Game game;
 
         lobbyBuffer = ByteBuffer.allocate(lobbyNameIsSize);
         clientChannel.read(lobbyBuffer);
         lobbyBuffer.flip();
-        if(action == createLobby){
-            lobbyName = messageCharset.decode(lobbyBuffer).toString();
-            Player player = new Player(username, password, email, playerId, playerAddress);
-            lobby = new Lobby(3, player);
+        if(action == createLobby && player != null){
+            String lobbyName = messageCharset.decode(lobbyBuffer).toString();
+            int id = Communication.createLobbyId();
+            Lobby lobby = new Lobby(player, lobbyName, id);
+            Communication.lobbyMap.put(id,lobby); //lobby.getLobby_id()
+            sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(true, lobby));
         }
-        else if(action == joinLobby || action == leaveLobby){
-            lobbyID = messageCharset.decode(lobbyBuffer).toString();//function to add player to a lobby is needed.
-            Player player = new Player(username, password, email, playerId, playerAddress);
-            if(action == joinLobby)
-                lobby.addPlayer(player);
-            else
-                lobby.removePlayer(player);
+        else if((action == joinLobby || action == leaveLobby) && player != null){
+            int lobbyID = Integer.parseInt(messageCharset.decode(lobbyBuffer).toString());
+            Lobby currentLobby = Communication.lobbyMap.get(lobbyID);
+            if(action == joinLobby && currentLobby != null){
+                boolean checkResponse = currentLobby.addPlayer(player);
+                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby));
+            } else if(action == leaveLobby && currentLobby != null){
+                currentLobby.removePlayer(player);
+                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(true, currentLobby));
+            }
+
         }
-        else{
-            lobbyID = messageCharset.decode(lobbyBuffer).toString();
-            game = new Game(lobbyID, action);
+        else if(player != null){
+            int lobbyID = Integer.parseInt(messageCharset.decode(lobbyBuffer).toString());
+            Game game = new Game(Communication.lobbyMap.get(lobbyID));
+            //TODO: Official Protocol-Response: Game start
+            sendResponseToClient(messageCharset,clientChannel,"Game started");
         }
         lobbyBuffer.clear();
     }
@@ -210,26 +201,25 @@ public class Protocol {
         toneBuffer = ByteBuffer.allocate(1);
         clientChannel.read(toneBuffer);
         toneBuffer.flip();
-        toneAction = messageCharset.decode(toneBuffer).toString().getBytes()[0];
+        byte toneAction = messageCharset.decode(toneBuffer).toString().getBytes()[0];
         toneBuffer.clear();
 
         clientChannel.read(toneBuffer);
         toneBuffer.flip();
-        toneType = messageCharset.decode(toneBuffer).toString().getBytes()[0];
+        byte toneType = messageCharset.decode(toneBuffer).toString().getBytes()[0];
         toneBuffer.clear();
 
         toneBuffer = ByteBuffer.allocate(dataSize - 2);
         clientChannel.read(toneBuffer);
         toneBuffer.flip();
-        toneData= messageCharset.decode(toneBuffer).toString();
+        String toneData= messageCharset.decode(toneBuffer).toString();
         toneBuffer.clear();
 
         musicJoiner = new MusicJoiner(toneAction, toneType, toneData);
     }
 
-    public void handleAction(Charset messageCharset, SocketChannel clientChannel, int bufferSize, int id) throws IOException {
+    public void handleAction(Charset messageCharset, SocketChannel clientChannel, int bufferSize) throws IOException, SQLException, ClassNotFoundException {
         if(bufferSize != 0){
-            playerId = id;
             playerAddress = clientChannel.getRemoteAddress();
 
             if(action == login || action == logout || action == register){
@@ -243,5 +233,50 @@ public class Protocol {
                 parseBufferForMusicJoiner(messageCharset, clientChannel, bufferSize);
             }
         }
+    }
+
+    public byte[] convertShortToByte(short value){
+        byte[] temp = new byte[2];
+        temp[0] = (byte)(value & 0xff);
+        temp[1] = (byte)((value >> 8) & 0xff);
+
+        return temp;
+    }
+
+    private static short getShort(byte[] b) {
+        return (short) (((b[1] << 8) | b[0] & 0xff));
+    }
+
+    private String getLoginSystemResponse(int action, boolean result){
+        int index = result? 1:0;
+        this.responseAction = (short) action;
+        return responsesArray[action <= 10? action-1:action-11][index];
+    }
+
+    private String getLobbyResponse(boolean result, Lobby lobby){
+        String message;
+        if(result){
+            message = "Lobby "+ lobby.getLobby_id()+" created by Client";
+            responseAction = action;
+        }
+        else{
+            message = "Error";
+            responseAction = (short) (action + 10);
+        }
+        return message;
+    }
+
+    public void sendResponseToClient(Charset messageCharset, SocketChannel clientChannel, String message) throws IOException {
+        short dataLength = (short) message.length();
+        ByteBuffer messageBuffer = ByteBuffer.allocate(6 + dataLength);
+        messageBuffer.put(convertShortToByte(protocolName));
+        messageBuffer.put(convertShortToByte(responseAction));
+        messageBuffer.put(convertShortToByte(dataLength));
+        messageBuffer.put(message.getBytes(messageCharset));
+        messageBuffer.flip();
+        clientChannel.write(messageBuffer);
+        messageBuffer.clear();
+        if(action == register || action == logout)
+            clientChannel.close();
     }
 }

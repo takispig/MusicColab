@@ -1,23 +1,67 @@
 import java.util.LinkedList;
+import java.util.Random;
 
 public class Lobby {
-
-    private int lobby_id;//lobbyId is as String needed.
-    private int max_players;
+    private int lobby_id;
+    private String lobbyName;
+    private int MAX_PLAYERS = 7;
     private LinkedList<Player> players;
     private Player admin;
     private boolean blocking;
+    private byte usersNumber = 0;
 
-    public Lobby(int max_players, Player admin) {
-        this.lobby_id = lobby_id;
-        this.max_players = max_players;
+
+    public Lobby(Player admin, String lobbyName, int id) {
+        this.lobbyName = lobbyName;
+        this.lobby_id = id;
         this.players = new LinkedList<>();
         this.admin = admin;
         this.blocking = false;
+        this.usersNumber++;
 
         this.players.add(admin);
+        admin.setAdmin();
     }
 
-    public void removePlayer(Player player) {}
-    public boolean addPlayer(Player player){return true;}
+    public int getLobby_id() { return this.lobby_id; }
+
+    public int getMax_players() { return MAX_PLAYERS; }
+
+    public LinkedList<Player> getPlayers() { return this.players; }
+
+    public boolean setAdmin(Player player) {
+        if (playerInLobby(player)) {
+            this.admin = player;
+            return true;
+        }
+        return false;
+    }
+
+    public Player getAdmin() { return this.admin; }
+
+    public void setBlocking(boolean bool) { this.blocking = bool; }
+
+    public boolean getBlocking() { return this.blocking; }
+
+    public boolean addPlayer(Player player) {
+        if (players.size() < MAX_PLAYERS && !blocking && !playerInLobby(player)) {
+            players.add(player);
+            return true;
+        }
+        return false;
+    }
+
+    public void removePlayer(Player player) {
+        if (playerInLobby(player)) {
+            players.remove(player);
+            if (player.getId() == admin.getId()) {
+                if (!players.isEmpty()) {
+                    admin = players.peek();
+                }
+                else admin = null;
+            }
+        }
+    }
+
+    public boolean playerInLobby(Player player) { return players.contains(player); }
 }
