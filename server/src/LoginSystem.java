@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 public class LoginSystem {
     //HashMap to save the players which are logged in
-    static HashMap<Integer,Player> loggedInPlayers = new HashMap<>();
+
 
 
     /**
@@ -27,7 +27,7 @@ public class LoginSystem {
             ResultSet res = DataBase.getUserlogin(name,passwort);
             Player player = new Player(name,passwort,res.getString(3),res.getInt(1),channel);
             //add data to List
-            loggedInPlayers.put(res.getInt(1),player);
+            Communication.loggedInPlayers.put(res.getInt(1),player);
             return true;
         } else throw new RuntimeException("User not registered!");
 
@@ -42,10 +42,11 @@ public class LoginSystem {
      */
     public static boolean logout(String name,String email) throws SQLException, ClassNotFoundException {
         //check in list
-        if(checkForRegistration(name, email) & loggedInPlayers.get(getId(name, email)) != null){
+        if(checkForRegistration(name, email) & Communication.loggedInPlayers.get(getId(name, email)) != null){
             //del player from list
-            loggedInPlayers.remove(getId(name, email));
-            //TODO: Delete player
+            Player player = Communication.loggedInPlayers.get(getId(name,email));
+            player = null;
+            Communication.loggedInPlayers.remove(getId(name, email));
             return true;
         } else throw new RuntimeException("User not logged in!");
     }
@@ -109,9 +110,9 @@ public class LoginSystem {
     }
 
     public static Player getPlayerByChannel(SocketChannel channel){
-        for(int i = 0;i<loggedInPlayers.size();i++){
-            if(loggedInPlayers.get(i).getPlayerChannel()==channel){
-                return loggedInPlayers.get(i);
+        for(int i = 0;i<Communication.loggedInPlayers.size();i++){
+            if(Communication.loggedInPlayers.get(i).getPlayerChannel()==channel){
+                return Communication.loggedInPlayers.get(i);
             }
         }
         return null;

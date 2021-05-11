@@ -10,6 +10,8 @@ public class Player {
     private String passwort;
     private String email;
     private int id;
+    private boolean loggedIn = false;
+    private boolean admin = false;
     private SocketAddress address;
     private SocketChannel channel;
 
@@ -40,5 +42,14 @@ public class Player {
     public int getId() { return this.id; }
 
     public SocketAddress getAddress() { return this.address; }
+
+    public boolean isAdmin(){return admin;}
+
+    public void setAdmin(){admin = true;}
+
+    public boolean isLoggedIn(){return loggedIn;}
+
+    public void setLoggedIn(){loggedIn = true;}
+    public void setLoggedOut(){loggedIn = false;}
 
 }

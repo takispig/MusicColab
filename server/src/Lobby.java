@@ -1,27 +1,28 @@
 package src;
 
 import java.util.LinkedList;
+import java.util.Random;
 
 public class Lobby {
     private int lobby_id;
+    private String lobbyName;
     private int MAX_PLAYERS = 7;
     private LinkedList<Player> players;
     private Player admin;
     private boolean blocking;
+    private byte usersNumber = 0;
 
-    static int noOfLobbys = 0;
 
-    {
-        noOfLobbys +=1;
-    }
-
-    public Lobby(Player admin) {
-        this.lobby_id = noOfLobbys;
+    public Lobby(Player admin, String lobbyName, int id) {
+        this.lobbyName = lobbyName;
+        this.lobby_id = id;
         this.players = new LinkedList<>();
         this.admin = admin;
         this.blocking = false;
+        this.usersNumber++;
 
         this.players.add(admin);
+        admin.setAdmin();
     }
 
     public int getLobby_id() { return this.lobby_id; }
@@ -65,8 +66,4 @@ public class Lobby {
     }
 
     public boolean playerInLobby(Player player) { return players.contains(player); }
-
-
-
-
 }

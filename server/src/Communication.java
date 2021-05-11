@@ -2,6 +2,7 @@ package src;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -12,10 +13,7 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.sql.SQLException;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static java.lang.System.exit;
 
@@ -27,20 +25,15 @@ public class Communication {
     private InetSocketAddress serverAddress = null;
     private Selector selector = null;
 
-    private int playerId;
-    private List<Integer> idList = new LinkedList<>();
+    private static int noOfLobbies = 0;
+    private static int playersId = 0;
+
+    public static HashMap<Integer,Lobby> lobbyMap = new HashMap<>();
+    public static HashMap<Integer,Player> loggedInPlayers = new HashMap<>();
 
     private static void printUsage() {
 
         System.err.println("Usage: MusicCoLabServer needs <address> <port>");
-    }
-
-    private int getPlayerId(){
-        Random rand = new Random();
-        int id = rand.nextInt(Integer.MAX_VALUE);
-        while (idList.contains(id))
-            id = rand.nextInt(Integer.MAX_VALUE);
-        return id;
     }
 
     public void CheckParameters(int length){
@@ -63,10 +56,7 @@ public class Communication {
 
         try {
             serverAddress = new InetSocketAddress(Address, Integer.parseInt(Port));
-        } catch (IllegalArgumentException e) {
-            printUsage();
-            exit(1);
-        } catch (SecurityException e) {
+        } catch (IllegalArgumentException | SecurityException e) {
             printUsage();
             exit(1);
         }
@@ -99,7 +89,6 @@ public class Communication {
         channel.configureBlocking(false);
         channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE); //AddState as third parameter.
 
-        playerId = getPlayerId();
 
         String message = "Welcome in MusicCoLab Server.";
         ByteBuffer tempBuffer = ByteBuffer.allocate(message.length());
@@ -120,17 +109,18 @@ public class Communication {
         //Read the first 6 indexes. (Protocol name, Action and data length. 2 Bytes each)
 
         Protocol protocol = new Protocol();
-        int result = protocol.analyseMainBuffer(messageCharset, clientChannel);
-        if(result == -1) {
-            protocol.SendErrorToClient(messageCharset, clientChannel, "You are not our customer.");
+
+        short[] result = protocol.analyseMainBuffer(messageCharset, clientChannel);
+        if(result[1] == -1) {
+            protocol.sendResponseToClient(messageCharset, clientChannel, "You are not our customer.");
             clientChannel.close();
         }
-        else if(result == -2) {
-            protocol.SendErrorToClient(messageCharset, clientChannel, "Action is not known.");
+        else if(result[1] == -2) {
+            protocol.sendResponseToClient(messageCharset, clientChannel, "Action is not known.");
             clientChannel.close();
         }
         else
-            protocol.handleAction(messageCharset, clientChannel, result, playerId);
+            protocol.handleAction(messageCharset, clientChannel, result[1]);
     }
 
     public void handleConnection() throws IOException, SQLException, ClassNotFoundException {
@@ -153,5 +143,13 @@ public class Communication {
                 selectedKeys.remove();
             }
         }
+    }
+
+    public static int createLobbyId(){
+        return noOfLobbies += 1;
+    }
+
+    public static int createPlayerId(){
+        return playersId += 1;
     }
 }

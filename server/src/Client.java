@@ -18,6 +18,17 @@ public class Client{
     private static CharsetDecoder decoder = null;
     private static byte [] clientName = null;
 
+
+    public short action = 7;
+    public String email = "abc@gmail.com";
+    public String userName = "abc";
+    public String password = "@zfh165.)";
+    public byte toneAction = 1;
+    public byte toneType = 1;
+    public String toneData = "dataExample";
+    public String lobbyName = "example";
+    public String lobbyID = "4564";
+
     /**
      * Explains how to use this program
      *
@@ -27,6 +38,14 @@ public class Client{
         System.err.println("Usage: java SMTPClient <address> <port>");
     }
 
+
+    public byte[] convertShortToByte(short value){
+        byte[] temp = new byte[2];
+        temp[0] = (byte)(value & 0xff);
+        temp[1] = (byte)((value >> 8) & 0xff);
+
+        return temp;
+    }
 
     public static void main(String [] args){
         SocketChannel clientChannel = null;
@@ -85,9 +104,6 @@ public class Client{
             System.exit(1);
         }
 
-        int count = 0;
-        ByteBuffer buffer = ByteBuffer.allocate(1000);
-        String msg = "";
         while(true)
         {
             try {
@@ -111,42 +127,85 @@ public class Client{
                     {
                         SocketChannel channel = (SocketChannel) key.channel();
                         channel.finishConnect();
-                        //SMTPClientState state = new SMTPClientState();
-                        //generateMail(state);
-                        //key.attach(state);
                     }
 
-                    if(key.isReadable())
-                    {
-                        //SMTPClientState state = (SMTPClientState) key.attachment();
+                    if(key.isReadable()) {
+
                         SocketChannel channel = (SocketChannel) key.channel();
+                        ByteBuffer mainBuffer = ByteBuffer.allocate(100);
+                        clientChannel.read(mainBuffer);
+                        mainBuffer.flip();
+                        System.out.println(messageCharset.decode(mainBuffer).toString());
 
-                        //if(!readCommandLine(channel, state.getByteBuffer()))
-                            //continue;
+                        short protocolName = 12845;
+                        short dataLength;
+                        byte userNameLength;
+                        byte passwordLength;
 
-                        if(count == 0) {
-                            channel.read(buffer);
-                            buffer.flip();
-                            msg = messageCharset.decode(buffer).toString();
-                            System.out.println(msg);
-                            buffer.clear();
-                            String query = "Can I create an account in your System?";
-                            buffer.put(query.getBytes(messageCharset));
-                            buffer.flip();
-                            channel.write(getLoginBuffer());
-                            buffer.clear();
+
+                        Client client = new Client();
+                        String message;
+                        ByteBuffer buffer = null;
+                        if(client.action == 3){
+                            byte emailLength = (byte) client.email.length();
+                            userNameLength = (byte) client.userName.length();
+                            passwordLength = (byte) client.password.length();
+                            message = client.email+client.userName+client.password;
+                            dataLength = (short) message.length();
+                            buffer = ByteBuffer.allocate(6 + 3 + dataLength);
+
+                            buffer.put(client.convertShortToByte(protocolName));
+                            buffer.put(client.convertShortToByte(client.action));
+                            buffer.put(client.convertShortToByte(dataLength));
+                            buffer.put(emailLength);
+                            buffer.put(userNameLength);
+                            buffer.put(passwordLength);
+                            buffer.put(message.getBytes(messageCharset));
                         }
+                        else if(client.action == 2 || client.action == 1){
+                            userNameLength = (byte) client.userName.length();
+                            passwordLength = (byte) client.password.length();
+                            message = client.userName+client.password;
+                            dataLength = (short) message.length();
+                            buffer = ByteBuffer.allocate(6 + 2 + dataLength);
 
-                        else {
-                            channel.read(buffer);
-                            buffer.flip();
-                            msg = messageCharset.decode(buffer).toString();
-                            System.out.println(msg);
-                            buffer.clear();
-                            channel.close();
+                            buffer.put(client.convertShortToByte(protocolName));
+                            buffer.put(client.convertShortToByte(client.action));
+                            buffer.put(client.convertShortToByte(dataLength));
+                            buffer.put(userNameLength);
+                            buffer.put(passwordLength);
+                            buffer.put(message.getBytes(messageCharset));
                         }
+                        else if(client.action == 4 || client.action == 5 || client.action == 6 ||
+                                client.action == 8 || client.action == 9 || client.action == 10){
+                            if(client.action == 4)
+                                message = client.lobbyName;
+                            else
+                                message = client.lobbyID;
+                            dataLength = (short) message.length();
+                            buffer = ByteBuffer.allocate(6 + dataLength);
 
-                        count++;
+                            buffer.put(client.convertShortToByte(protocolName));
+                            buffer.put(client.convertShortToByte(client.action));
+                            buffer.put(client.convertShortToByte(dataLength));
+                            buffer.put(message.getBytes(messageCharset));
+                        }
+                        if(client.action == 7){
+                            message = client.toneData;
+                            dataLength = (short) (message.length() + 2);
+                            buffer = ByteBuffer.allocate(6 + 2 + dataLength);
+
+                            buffer.put(client.convertShortToByte(protocolName));
+                            buffer.put(client.convertShortToByte(client.action));
+                            buffer.put(client.convertShortToByte(dataLength));
+                            buffer.put(client.toneAction);
+                            buffer.put(client.toneType);
+                            buffer.put(message.getBytes(messageCharset));
+                        }
+                        buffer.flip();
+                        channel.write(buffer);
+                        buffer.clear();
+
                     }
 
                 } catch(IOException ioe) {
@@ -156,19 +215,5 @@ public class Client{
             }
             iter.remove();
         }
-    }
-    private static ByteBuffer getLoginBuffer(){
-        ByteBuffer wbuffer =  ByteBuffer.allocate(100);
-
-        wbuffer.put("12845".getBytes());
-        wbuffer.put("1".getBytes());
-        wbuffer.put(Integer.toString("nils".getBytes().length).getBytes());
-        wbuffer.put(Integer.toString("1234".getBytes().length).getBytes());
-        wbuffer.put("nils".getBytes());
-        wbuffer.put("1234".getBytes());
-
-        wbuffer.flip();
-
-        return wbuffer;
     }
 }
