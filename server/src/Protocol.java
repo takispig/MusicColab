@@ -169,14 +169,14 @@ public class Protocol {
         lobbyBuffer.flip();
         if(action == createLobby && player != null){
             String lobbyName = messageCharset.decode(lobbyBuffer).toString();
-            int id = Communication.createLobbyId();
+            int id = Server.createLobbyId();
             Lobby lobby = new Lobby(player, lobbyName, id);
-            Communication.lobbyMap.put(id,lobby); //lobby.getLobby_id()
+            Server.lobbyMap.put(id,lobby); //lobby.getLobby_id()
             sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(true, lobby));
         }
         else if((action == joinLobby || action == leaveLobby) && player != null){
             int lobbyID = Integer.parseInt(messageCharset.decode(lobbyBuffer).toString());
-            Lobby currentLobby = Communication.lobbyMap.get(lobbyID);
+            Lobby currentLobby = Server.lobbyMap.get(lobbyID);
             if(action == joinLobby && currentLobby != null){
                 boolean checkResponse = currentLobby.addPlayer(player);
                 sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby));
@@ -188,7 +188,7 @@ public class Protocol {
         }
         else if(player != null){
             int lobbyID = Integer.parseInt(messageCharset.decode(lobbyBuffer).toString());
-            Game game = new Game(Communication.lobbyMap.get(lobbyID));
+            Game game = new Game(Server.lobbyMap.get(lobbyID));
             //TODO: Official Protocol-Response: Game start
             sendResponseToClient(messageCharset,clientChannel,"Game started");
         }

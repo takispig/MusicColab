@@ -1,11 +1,8 @@
 package src;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
 import java.sql.*;
-import java.util.HashMap;
 
 public class LoginSystem {
     //HashMap to save the players which are logged in
@@ -27,7 +24,7 @@ public class LoginSystem {
             ResultSet res = DataBase.getUserlogin(name,passwort);
             Player player = new Player(name,passwort,res.getString(3),res.getInt(1),channel);
             //add data to List
-            Communication.loggedInPlayers.put(res.getInt(1),player);
+            Server.loggedInPlayers.put(res.getInt(1),player);
             return true;
         } else throw new RuntimeException("User not registered!");
 
@@ -42,11 +39,11 @@ public class LoginSystem {
      */
     public static boolean logout(String name,String email) throws SQLException, ClassNotFoundException {
         //check in list
-        if(checkForRegistration(name, email) & Communication.loggedInPlayers.get(getId(name, email)) != null){
+        if(checkForRegistration(name, email) & Server.loggedInPlayers.get(getId(name, email)) != null){
             //del player from list
-            Player player = Communication.loggedInPlayers.get(getId(name,email));
+            Player player = Server.loggedInPlayers.get(getId(name,email));
             player = null;
-            Communication.loggedInPlayers.remove(getId(name, email));
+            Server.loggedInPlayers.remove(getId(name, email));
             return true;
         } else throw new RuntimeException("User not logged in!");
     }
@@ -110,9 +107,9 @@ public class LoginSystem {
     }
 
     public static Player getPlayerByChannel(SocketChannel channel){
-        for(int i = 0;i<Communication.loggedInPlayers.size();i++){
-            if(Communication.loggedInPlayers.get(i).getPlayerChannel()==channel){
-                return Communication.loggedInPlayers.get(i);
+        for(int i = 0; i< Server.loggedInPlayers.size(); i++){
+            if(Server.loggedInPlayers.get(i).getPlayerChannel()==channel){
+                return Server.loggedInPlayers.get(i);
             }
         }
         return null;
