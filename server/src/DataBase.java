@@ -14,13 +14,13 @@ import java.sql.*;
 
 public class DataBase {
     //Constants to specify various values
-    private final static String PATH_TO_DB = "jdbc:sqlite:G:/Uni/SoSe2021/PCPS/Server_Test_local/DB/TestDB.sqlite";
+    private final static String PATH_TO_DB = "jdbc:sqlite:database/identifier.sqlite";
     private final static String TABLE_NAME = "User";
     private final static String NAME_COL_NAME = "name";
     private final static String EMAIL_COL_NAME = "email";
     private final static String PASSWORT_COL_NAME = "passwort";
     private static Connection con;
-    private static boolean hasData = false;
+    private static boolean hasData = true;
 
 
 
@@ -93,6 +93,7 @@ public class DataBase {
         }
 
         PreparedStatement prep = con.prepareStatement("INSERT INTO "+ TABLE_NAME + " values(?,?,?,?);");
+        prep.setInt(1, Communication.createPlayerId());
         prep.setString(2,name);
         prep.setString(3,email);
         prep.setString(4,passwort);
@@ -149,5 +150,17 @@ public class DataBase {
         prep.setString(2,email);
         prep.setString(3,passwort);
         prep.execute();
+    }
+
+
+    public static int getID(String name, String passwort) throws SQLException, ClassNotFoundException {
+        if(con == null){
+            getConnection();
+        }
+
+        Statement state = con.createStatement();
+        ResultSet res = state.executeQuery("SELECT id FROM "+ TABLE_NAME +" WHERE "+ NAME_COL_NAME + " = '" + name +
+                "' AND "+ PASSWORT_COL_NAME + " = '"+ passwort + "'");
+        return res.getInt(1);
     }
 }

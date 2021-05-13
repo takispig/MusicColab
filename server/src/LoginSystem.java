@@ -1,9 +1,6 @@
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
 import java.sql.*;
-import java.util.HashMap;
 
 public class LoginSystem {
     //HashMap to save the players which are logged in
@@ -24,6 +21,7 @@ public class LoginSystem {
             //create new player
             ResultSet res = DataBase.getUserlogin(name,passwort);
             Player player = new Player(name,passwort,res.getString(3),res.getInt(1),channel);
+            player.setLoggedIn();
             //add data to List
             Communication.loggedInPlayers.put(res.getInt(1),player);
             return true;
@@ -42,8 +40,9 @@ public class LoginSystem {
         //check in list
         if(checkForRegistration(name, email) & Communication.loggedInPlayers.get(getId(name, email)) != null){
             //del player from list
+            Player player = Communication.loggedInPlayers.get(getId(name,email));
+            player = null;
             Communication.loggedInPlayers.remove(getId(name, email));
-            //TODO: Delete player
             return true;
         } else throw new RuntimeException("User not logged in!");
     }
@@ -63,7 +62,7 @@ public class LoginSystem {
             DataBase.addUser(name, email, passwort);
             return true;
         } else {
-            throw new RuntimeException("User not registered!");
+            throw new RuntimeException("User not registered!");//TODO i think, it should be user is registered.
         }
     }
 
