@@ -92,11 +92,12 @@ public class DataBase {
             getConnection();
         }
 
-        PreparedStatement prep = con.prepareStatement("INSERT INTO "+ TABLE_NAME + " values(?,?,?,?);");
-        prep.setInt(1, Communication.createPlayerId());
-        prep.setString(2,name);
-        prep.setString(3,email);
-        prep.setString(4,passwort);
+        PreparedStatement prep = con.prepareStatement("INSERT INTO "+ TABLE_NAME + "("+NAME_COL_NAME+","+EMAIL_COL_NAME+
+                ","+PASSWORT_COL_NAME+") values(?,?,?);");
+        //prep.setInt(1, Communication.createPlayerId());
+        prep.setString(1,name);
+        prep.setString(2,email);
+        prep.setString(3,passwort);
         prep.execute();
 
 
@@ -118,7 +119,6 @@ public class DataBase {
         Statement state = con.createStatement();
         ResultSet res = state.executeQuery("SELECT * FROM "+ TABLE_NAME +" WHERE "+ NAME_COL_NAME +" = '"+ name +
                 "' AND "+EMAIL_COL_NAME+" ='" + email +"'");
-
         return res;
     }
 

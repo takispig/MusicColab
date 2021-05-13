@@ -290,7 +290,7 @@ public class Client{
                                             client.sendQueryToServer(input, channel);
                                         }
                                     }
-                                    else if(actionDataLength[0] == 2)
+                                    if(actionDataLength[0] == 2)
                                         System.exit(1);
                                 }
                                 else if(actionDataLength[0] == 4 || actionDataLength[0] == 5 || actionDataLength[0] == 6 ||

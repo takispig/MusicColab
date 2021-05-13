@@ -46,6 +46,8 @@ public class Lobby {
     public boolean addPlayer(Player player) {
         if (players.size() < MAX_PLAYERS && !blocking && !playerInLobby(player)) {
             players.add(player);
+            usersNumber++;
+            player.setLobbyId(lobby_id);
             return true;
         }
         return false;
@@ -54,6 +56,8 @@ public class Lobby {
     public void removePlayer(Player player) {
         if (playerInLobby(player)) {
             players.remove(player);
+            usersNumber--;
+            player.setLobbyId(-1);
             if (player.getId() == admin.getId()) {
                 if (!players.isEmpty()) {
                     admin = players.peek();
@@ -64,4 +68,6 @@ public class Lobby {
     }
 
     public boolean playerInLobby(Player player) { return players.contains(player); }
+
+    public byte getUsersNumber(){return usersNumber;}
 }
