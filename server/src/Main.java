@@ -1,5 +1,8 @@
 package src;
 
+import src.exceptions.IPAddressException;
+import src.exceptions.SocketBindException;
+
 import java.io.IOException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.sql.SQLException;
@@ -8,16 +11,15 @@ import java.util.Scanner;
 public class Main {
 
     private static final String DEFAULT_ADDRESS = "localhost";
-    private static final int DEFAULT_PORT = 8080;
+    private static final int DEFAULT_PORT = 808080;
 
     private static boolean exit = false;
     private static boolean finish = false;
+    private static boolean close = false;
     private static boolean error = false;
     private static boolean invalidInput = false;
-    private static boolean bindError = false;
     private static int serverNumber = 1;
     private static String address = "";
-    private static String portString = "";
     private static int port = 0;
     private static Server currentServer;
     private static Thread serverThread;
@@ -50,7 +52,11 @@ public class Main {
             port = DEFAULT_PORT;
         } else if (args.length == 2) {
             address = args[0];
-            portString = args[1];
+            try {
+                port = Integer.parseInt(args[1]);
+            } catch (NumberFormatException e) {
+                invalidInput = true;
+            }
         } else {
             invalidInput = true;
         }
@@ -58,23 +64,17 @@ public class Main {
     }
 
     private static void input() {
-        if (port != 0)
+        if(!invalidInput)
             return;
-        if (!invalidInput) {
-            try {
-                port = Integer.parseInt(portString);
-                return;
-            } catch (NumberFormatException e) {
-            }
+        while(invalidInput) {
+            System.out.println("An error occurred with the specified IP address and port!\nTry a new input.");
+            System.out.println("This server will exit after 30 seconds without further interaction. -- NOT IMPLEMENTED YET");
+            System.out.print("address: ");
+            address = input.nextLine();
+            System.out.print("port: ");
+            port = Integer.parseInt(input.nextLine());
+            invalidInput = false;
         }
-        System.err.println("Invalid input!");
-        System.out.println("This server will exit after 30 seconds without further interaction. -- NOT IMPLEMENTED YET");
-        System.out.print("address: ");
-        address = input.nextLine();
-        System.out.print("port: ");
-
-
-
     }
 
     private static void runServer() {
@@ -82,34 +82,33 @@ public class Main {
         currentServer = new Server();
 
         try {
+            currentServer.setupServerAddress(address, port);
 
-            currentServer.defineCharType(address, port);
+            currentServer.defineCharType();
 
-            currentServer.OpenSelectorAndSetupSocket();
             System.out.println("Setting up new server...");
+            currentServer.OpenSelectorAndSetupSocket();
 
             currentServer.handleConnection();
 
-        } catch (UnsupportedCharsetException | SQLException | ClassNotFoundException e) {
-            //TODO DO NOTHING -- test with wrong charset...
-            e.printStackTrace();
-        } catch (IllegalArgumentException | SecurityException e) {
-            port = 0;
+            return;
+        } catch (IPAddressException | SocketBindException e) {
             invalidInput = true;
+        } catch (IOException | UnsupportedCharsetException | SQLException | ClassNotFoundException e) {
+            System.err.println("ERROR: ----------------------------------------------------");
             e.printStackTrace();
-            //TODO INVALID INPUT --
-        } catch (IOException e) {
-            //TODO DO NOTHING...
+            System.err.println("-----------------------------------------------------------");
+        } catch (Exception e) {
+            System.err.println("UNEXPECTED ERROR: -----------------------------------------");
             e.printStackTrace();
+            System.err.println("-----------------------------------------------------------");
         }
-        finish = true;
+        currentServer.setFinishedTrue();
+        close = true;
     }
 
-
-
     private static void loop() {
-        // TODO BAD...
-        while (!finish && (serverThread != null && serverThread.isAlive())) {
+        while (!finish) {
             try {
                 if (System.in.available() > 0) {
                     String nextLine = input.nextLine();
@@ -118,8 +117,8 @@ public class Main {
                             closeServer();
                             break;
                         case "exit":
-                            exit = true;
                             closeServer();
+                            exit = true;
                             break;
                         default:
                             System.out.println("Undefined input");
@@ -127,11 +126,13 @@ public class Main {
                     }
                 } else {
                     Thread.sleep(500);
-                    //System.out.println(serverThread.isAlive());
                 }
-
-            } catch (IOException | InterruptedException exception) {
-                exception.printStackTrace();
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (close) {
+                close = false;
+                closeServer();
             }
         }
         finish = false;
@@ -145,12 +146,11 @@ public class Main {
             restart = 0;
         time = System.currentTimeMillis();
         if (restart > 2)
-            System.err.println("An error has occurred!");
+            System.out.println("An error has occurred!");
         return restart < 3 ? false : true;
     }
 
     private static void closeServer() {
-        finish = true;
         System.out.println("Closing Server...");
         currentServer.finishServer();
         boolean closed = false;
@@ -164,15 +164,16 @@ public class Main {
                 e.printStackTrace();
             }
         }
+        finish = true;
     }
 
     private static void exit() {
         input.close();
-        System.out.println("\n\nExiting...");
-
+        System.out.println("Exiting...");
         if (!error)
             System.exit(0);
         else
             System.exit(1);
     }
+
 }

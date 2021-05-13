@@ -1,8 +1,11 @@
 package src;
 
+import src.exceptions.IPAddressException;
+import src.exceptions.SocketBindException;
+
 import java.io.IOException;
+import java.net.BindException;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -11,7 +14,6 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
-import java.nio.charset.UnsupportedCharsetException;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -34,66 +36,40 @@ public class Server {
     public static HashMap<Integer,Lobby> lobbyMap = new HashMap<>();
     public static HashMap<Integer,Player> loggedInPlayers = new HashMap<>();
 
-    private static void printUsage() {
 
-        System.err.println("Usage: MusicCoLabServer needs <address> <port>");
-    }
-
-    // TODO remove
-    public void CheckParameters(int length){
-        //we need address and port, so we have two parameters.
-        if(length != 2){
-            printUsage();
-            exit(1);
+    public void setupServerAddress(String address, int port) throws IPAddressException {
+        try {
+            serverAddress = new InetSocketAddress(address, port);
+        } catch (IllegalArgumentException | SecurityException e) {
+            throw new IPAddressException();
         }
     }
 
-    public void defineCharType(String address, int port) throws IllegalArgumentException, SecurityException {
-
+    //TODO IllegalArgumentException
+    public void defineCharType() {
         messageCharset = Charset.forName("US-ASCII");
 
         decoder = messageCharset.newDecoder();
         encoder = messageCharset.newEncoder();
-
-        serverAddress = new InetSocketAddress(address, port);
-
     }
 
-    public void OpenSelectorAndSetupSocket() throws IOException, IllegalArgumentException {
-        try {
-            selector = Selector.open();
-        } catch (IOException e) {
-            throw new IOException();
-        }
+    public void OpenSelectorAndSetupSocket() throws IOException, SocketBindException {
 
-        try {
-            serverChannel = ServerSocketChannel.open();
-        } catch (IOException e) {
-            selector.close();
-            throw new IOException();
-        }
+        selector = Selector.open();
 
-        try {
-            serverChannel.configureBlocking(false);
-            serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-        } catch (IOException e) {
-            serverChannel.close();
-            selector.close();
-            throw new IOException();
-        }
+        serverChannel = ServerSocketChannel.open();
+
+        serverChannel.configureBlocking(false);
+        serverChannel.register(selector, SelectionKey.OP_ACCEPT);
 
         try {
             serverChannel.socket().bind(serverAddress);
         } catch (IOException e) {
-            serverChannel.close();
-            selector.close();
-            e.printStackTrace();
-            throw new IllegalArgumentException();
+            throw new SocketBindException();
         }
     }
 
     //bufferHandleIsNeeded?
-
     private void handleConnectionWhenAcceptable(SelectionKey key) throws IOException {
         ServerSocketChannel sChannel = (ServerSocketChannel) key.channel();
         SocketChannel channel = sChannel.accept();
@@ -137,34 +113,24 @@ public class Server {
     public void handleConnection() throws IOException, SQLException, ClassNotFoundException {
         System.out.println("Waiting for connection: ");
 
-        try {
-            while (running) {
-                selector.select();
+        while (running) {
+            selector.select();
 
-                Iterator selectedKeys = selector.selectedKeys().iterator();
+            Iterator selectedKeys = selector.selectedKeys().iterator();
 
-                while (selectedKeys.hasNext()) {
-                    SelectionKey key = (SelectionKey) selectedKeys.next();
+            while (selectedKeys.hasNext()) {
+                SelectionKey key = (SelectionKey) selectedKeys.next();
 
-                    if (key.isAcceptable()) {
-                        handleConnectionWhenAcceptable(key);
+                if (key.isAcceptable()) {
+                    handleConnectionWhenAcceptable(key);
 
-                    } else if (key.isReadable()) {
-                        handleConnectionWhenReadable(key);
-                    }
-                    selectedKeys.remove();
+                } else if (key.isReadable()) {
+                    handleConnectionWhenReadable(key);
                 }
+                selectedKeys.remove();
             }
-        } catch (IOException e) {
-            finished = true;
-            throw new IOException();
-        } catch (SQLException e) {
-            finished = true;
-            throw new SQLException();
-        } catch (ClassNotFoundException e) {
-            finished = true;
-            throw new ClassNotFoundException();
         }
+
         finished = true;
     }
 
@@ -178,7 +144,8 @@ public class Server {
 
     public void finishServer() {
         running = false;
-        selector.wakeup();
+        if (selector != null)
+            selector.wakeup();
         while (!finished) {
             try {
                 Thread.sleep(50);
@@ -186,12 +153,21 @@ public class Server {
                 e.printStackTrace();
             }
         }
-        try {
-            serverChannel.close();
-            selector.close();
-        } catch (IOException exception) {
-            exception.printStackTrace();
+        for (int i = 3; i > 0; i--) {
+            try {
+                if (serverChannel != null)
+                    serverChannel.close();
+                if (selector != null)
+                    selector.close();
+                i = 0;
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
         }
+    }
+
+    public void setFinishedTrue() {
+        finished = true;
     }
 
 }

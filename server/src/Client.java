@@ -19,7 +19,7 @@ public class Client{
     private static byte [] clientName = null;
 
 
-    public short action = 1;
+    public short action = 8;
     public String email = "abc@gmail.com";
     public String userName = "abc";
     public String password = "@zfh165.)";
