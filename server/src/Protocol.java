@@ -14,34 +14,15 @@ public class Protocol {
     final private List<Short> codesList = new ArrayList<Short>();
 
     final private int login = 1;
-    final private int loginError = 11;
-
     final private int logout = 2;
-    final private int logoutError = 12;
-
     final private int register = 3;
-    final private int registerError = 13;
-
     final private int createLobby = 4;
-    final private int createLobbyError = 14;
-
     final private int joinLobby = 5;
-    final private int joinLobbyError = 15;
-
     final private int leaveLobby = 6;
-    final private int leaveLobbyError = 15;
-
     final private int tone = 7;
-    final private int toneError = 17;
-
     final private int gameStart = 8;
-    final private int GameStartError = 18;
-
     final private int gameEnd = 9;
-    final private int gameEndError = 19;
-
     final private int gameRestart = 10;
-    final private int gameRestartError = 20;
 
     private short action;
     private short responseAction;
@@ -149,11 +130,11 @@ public class Protocol {
             checkResponse = LoginSystem.register(username, email, password);
             sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
         }
-        else if(action == login) {// TODO: LoginSystem.getId(username, password), Just registered users can login.
+        else if(action == login) {
             checkResponse = LoginSystem.login(username, password, clientChannel);
             sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
         }
-        else{// TODO: LoginSystem.getId(username, password), Just logged in users can logout.
+        else if(LoginSystem.getPlayerByChannel(clientChannel) != null){
             checkResponse = LoginSystem.logout(username, password);
             sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
         }
@@ -171,26 +152,30 @@ public class Protocol {
             String lobbyName = messageCharset.decode(lobbyBuffer).toString();
             int id = Communication.createLobbyId();
             Lobby lobby = new Lobby(player, lobbyName, id);
-            Communication.lobbyMap.put(id,lobby); //lobby.getLobby_id()
-            sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(true, lobby));
+            Communication.lobbyMap.put(id,lobby);
+            sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(true, lobby, " created by client."));
         }
         else if((action == joinLobby || action == leaveLobby) && player != null){
             int lobbyID = Integer.parseInt(messageCharset.decode(lobbyBuffer).toString());
             Lobby currentLobby = Communication.lobbyMap.get(lobbyID);
-            if(action == joinLobby && currentLobby != null){
-                boolean checkResponse = currentLobby.addPlayer(player);
-                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby));
-            } else if(action == leaveLobby && currentLobby != null){
-                currentLobby.removePlayer(player);
-                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(true, currentLobby));
+            if(action == joinLobby){
+                boolean checkResponse = (currentLobby != null);
+                if(checkResponse)
+                    checkResponse = currentLobby.addPlayer(player);
+                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " --> you are in."));
+            } else if(action == leaveLobby){
+                boolean checkResponse = (currentLobby != null);
+                if(checkResponse)
+                    currentLobby.removePlayer(player);
+                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " you are out."));
             }
 
         }
-        else if(player != null){
+        else if(player != null){//
             int lobbyID = Integer.parseInt(messageCharset.decode(lobbyBuffer).toString());
             Game game = new Game(Communication.lobbyMap.get(lobbyID));
-            //TODO: Official Protocol-Response: Game start
-            sendResponseToClient(messageCharset,clientChannel,"Game started");
+            responseAction = action;
+            sendResponseToClient(messageCharset,clientChannel,Integer.toString(lobbyID));
         }
         lobbyBuffer.clear();
     }
@@ -250,19 +235,19 @@ public class Protocol {
     }
 
     private String getLoginSystemResponse(int action, boolean result){
-        int index = result? 1:0;
+        int index = result? 0:1;
         this.responseAction = (short) action;
         return responsesArray[action <= 10? action-1:action-11][index];
     }
 
-    private String getLobbyResponse(boolean result, Lobby lobby){
+    private String getLobbyResponse(boolean result, Lobby lobby, String additionPart){
         String message;
         if(result){
-            message = "Lobby "+ lobby.getLobby_id()+" created by Client";
+            message = "Lobby "+ lobby.getLobby_id() + additionPart;
             responseAction = action;
         }
         else{
-            message = "Error";
+            message = "either lobby is full, lobbyId is wrong or you are ready in.";
             responseAction = (short) (action + 10);
         }
         return message;

@@ -1,11 +1,8 @@
 package src;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
 import java.sql.*;
-import java.util.HashMap;
 
 public class LoginSystem {
     //HashMap to save the players which are logged in
@@ -26,9 +23,12 @@ public class LoginSystem {
             //create new player
             ResultSet res = DataBase.getUserlogin(name,passwort);
             Player player = new Player(name,passwort,res.getString(3),res.getInt(1),channel);
+            player.setLoggedIn();
             //add data to List
             Communication.loggedInPlayers.put(res.getInt(1),player);
             return true;
+            //TODO: OWN Exeption so the Server dont crash
+
         } else throw new RuntimeException("User not registered!");
 
     }
@@ -36,18 +36,20 @@ public class LoginSystem {
     /**
      * check if the player is registered and logged in, if so delete player from loggedInPlayers and the game
      * @param name
-     * @param email
+     * @param passwort
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public static boolean logout(String name,String email) throws SQLException, ClassNotFoundException {
+    public static boolean logout(String name,String passwort) throws SQLException, ClassNotFoundException {
         //check in list
-        if(checkForRegistration(name, email) & Communication.loggedInPlayers.get(getId(name, email)) != null){
+        if(checkLogin(name, passwort) & Communication.loggedInPlayers.get(getId(name, passwort)) != null){
             //del player from list
-            Player player = Communication.loggedInPlayers.get(getId(name,email));
+            Player player = Communication.loggedInPlayers.get(getId(name,passwort));
             player = null;
-            Communication.loggedInPlayers.remove(getId(name, email));
+            Communication.loggedInPlayers.remove(getId(name, passwort));
             return true;
+            //TODO: OWN Exeption so the Server dont crash
+
         } else throw new RuntimeException("User not logged in!");
     }
 
@@ -66,7 +68,8 @@ public class LoginSystem {
             DataBase.addUser(name, email, passwort);
             return true;
         } else {
-            throw new RuntimeException("User not registered!");
+            //TODO: OWN Exeption so the Server dont crash
+            throw new RuntimeException("User already registered!");
         }
     }
 
@@ -80,9 +83,7 @@ public class LoginSystem {
      */
     private static boolean checkForRegistration(String name, String email) throws SQLException, ClassNotFoundException {
         ResultSet res = DataBase.getUser(name, email);
-        if (res.next()){
-            return true;
-        } else return false;
+        return res.next();
     }
 
     private static boolean checkLogin(String name, String passwort) throws SQLException, ClassNotFoundException {
@@ -96,14 +97,15 @@ public class LoginSystem {
     /**
      * get the id from the user-data from the database
      * @param name
-     * @param email
+     * @param passwort
      * @return id from the user-data
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    private static int getId(String name, String email) throws SQLException, ClassNotFoundException {
-        ResultSet res = DataBase.getUser(name, email);
+    private static int getId(String name, String passwort) throws SQLException, ClassNotFoundException {
+        ResultSet res = DataBase.getUserlogin(name, passwort);
         if(!res.next()){
+            //TODO: OWN Exeption so the Server dont crash
             throw new RuntimeException("User not found!");
         }
         return res.getInt(1);

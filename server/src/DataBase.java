@@ -16,13 +16,13 @@ import java.sql.*;
 
 public class DataBase {
     //Constants to specify various values
-    private final static String PATH_TO_DB = "jdbc:sqlite:database/TestDB.sqlite";
+    private final static String PATH_TO_DB = "jdbc:sqlite:database/identifier.sqlite";
     private final static String TABLE_NAME = "User";
     private final static String NAME_COL_NAME = "name";
     private final static String EMAIL_COL_NAME = "email";
     private final static String PASSWORT_COL_NAME = "passwort";
     private static Connection con;
-    private static boolean hasData = false;
+    private static boolean hasData = true;
 
 
 
@@ -94,10 +94,12 @@ public class DataBase {
             getConnection();
         }
 
-        PreparedStatement prep = con.prepareStatement("INSERT INTO "+ TABLE_NAME + " values(?,?,?,?);");
-        prep.setString(2,name);
-        prep.setString(3,email);
-        prep.setString(4,passwort);
+        PreparedStatement prep = con.prepareStatement("INSERT INTO "+ TABLE_NAME + "("+NAME_COL_NAME+","+EMAIL_COL_NAME+
+                ","+PASSWORT_COL_NAME+") values(?,?,?);");
+        //prep.setInt(1, Communication.createPlayerId());
+        prep.setString(1,name);
+        prep.setString(2,email);
+        prep.setString(3,passwort);
         prep.execute();
 
 
@@ -119,7 +121,6 @@ public class DataBase {
         Statement state = con.createStatement();
         ResultSet res = state.executeQuery("SELECT * FROM "+ TABLE_NAME +" WHERE "+ NAME_COL_NAME +" = '"+ name +
                 "' AND "+EMAIL_COL_NAME+" ='" + email +"'");
-
         return res;
     }
 

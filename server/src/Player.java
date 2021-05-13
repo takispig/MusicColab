@@ -11,7 +11,7 @@ public class Player {
     private String email;
     private int id;
     private boolean loggedIn = false;
-    private boolean admin = false;
+    private boolean admin = true;
     private SocketAddress address;
     private SocketChannel channel;
 

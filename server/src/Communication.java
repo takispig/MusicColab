@@ -25,8 +25,8 @@ public class Communication {
     private InetSocketAddress serverAddress = null;
     private Selector selector = null;
 
-    private static int noOfLobbies = 0;
-    private static int playersId = 0;
+    private static int noOfLobbies = -1;
+    private static int playersId = -1;
 
     public static HashMap<Integer,Lobby> lobbyMap = new HashMap<>();
     public static HashMap<Integer,Player> loggedInPlayers = new HashMap<>();
@@ -148,7 +148,7 @@ public class Communication {
     public static int createLobbyId(){
         return noOfLobbies += 1;
     }
-
+    //TODO: Not needed for Database
     public static int createPlayerId(){
         return playersId += 1;
     }
