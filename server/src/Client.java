@@ -23,8 +23,8 @@ public class Client{
     private boolean neededAction = false;
     final private short protocolName = 12845;
     private short action = 4;
-    private String email = "abcd@gmail.com";
-    private String userName = "abcd";
+    private String email = "abc@gmail.com";
+    private String userName = "abc";
     private String password = "@zfh165.)";
     private byte toneAction = 1;
     private byte toneType = 1;
@@ -292,7 +292,7 @@ public class Client{
                                             client.sendQueryToServer(input, channel);
                                         }
                                     }
-                                    else if(actionDataLength[0] == 2)
+                                    if(actionDataLength[0] == 2)
                                         System.exit(1);
                                 }
                                 else if(actionDataLength[0] == 4 || actionDataLength[0] == 5 || actionDataLength[0] == 6 ||

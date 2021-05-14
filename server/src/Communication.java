@@ -2,7 +2,6 @@ package src;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -26,7 +25,6 @@ public class Communication {
     private Selector selector = null;
 
     private static int noOfLobbies = -1;
-    private static int playersId = -1;
 
     public static HashMap<Integer,Lobby> lobbyMap = new HashMap<>();
     public static HashMap<Integer,Player> loggedInPlayers = new HashMap<>();
@@ -147,9 +145,5 @@ public class Communication {
 
     public static int createLobbyId(){
         return noOfLobbies += 1;
-    }
-    //TODO: Not needed for Database
-    public static int createPlayerId(){
-        return playersId += 1;
     }
 }

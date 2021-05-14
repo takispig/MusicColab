@@ -202,7 +202,12 @@ public class Protocol {
         String toneData= messageCharset.decode(toneBuffer).toString();
         toneBuffer.clear();
 
-        musicJoiner = new MusicJoiner(toneAction, toneType, toneData);
+        Lobby clientLobby = Communication.lobbyMap.get(LoginSystem.getPlayerByChannel(clientChannel).getLobbyId());
+        musicJoiner = new MusicJoiner(clientLobby, toneAction, toneType, toneData, clientChannel);
+        musicJoiner.handleToneData();
+        responseAction = action;
+        for(byte index = 0; index < clientLobby.getUsersNumber(); index++)
+            sendResponseToClient(messageCharset, musicJoiner.getClientChannels().get(index), musicJoiner.getClientResponses().get(index));
     }
 
     public void handleAction(Charset messageCharset, SocketChannel clientChannel, int bufferSize) throws IOException, SQLException, ClassNotFoundException {
@@ -247,7 +252,7 @@ public class Protocol {
             responseAction = action;
         }
         else{
-            message = "either lobby is full, lobbyId is wrong or you are ready in.";
+            message = "either lobby is full, lobbyId is wrong or you are already in.";
             responseAction = (short) (action + 10);
         }
         return message;

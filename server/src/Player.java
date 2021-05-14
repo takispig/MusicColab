@@ -10,6 +10,7 @@ public class Player {
     private String passwort;
     private String email;
     private int id;
+    private int lobbyId;
     private boolean loggedIn = false;
     private boolean admin = true;
     private SocketAddress address;
@@ -51,5 +52,8 @@ public class Player {
 
     public void setLoggedIn(){loggedIn = true;}
     public void setLoggedOut(){loggedIn = false;}
+
+    public void setLobbyId(int id){lobbyId = id;}
+    public int getLobbyId(){return lobbyId;}
 
 }
