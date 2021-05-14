@@ -21,14 +21,14 @@ public class Client{
     private boolean neededAction = false;
     final private short protocolName = 12845;
     private short action = 4;
-    private String email = "abc@gmail.com";
-    private String userName = "abc";
-    private String password = "@zfh165.)";
+    private String email = "zead@gmail.com";
+    private String userName = "zead";
+    private String password = "@";
     private byte toneAction = 1;
     private byte toneType = 1;
-    private String toneData = "dataExampleghahgfavf4564";
+    private String toneData = "dataExample2";
     private String lobbyName = "example";
-    private String lobbyID = "0";
+    private String lobbyID = "1";
 
     public Client(){
         for(short index = 1; index < 11; index++) {
@@ -283,6 +283,10 @@ public class Client{
                                         flag = true;
                                     }
                                     if(!flag) {
+                                        if(actionDataLength[0] == 2) {
+                                            System.out.println("See you later.");
+                                            System.exit(1);
+                                        }
                                         System.out.println("\nPlease enter \"0\" to be able to receive response from  server or \n" +
                                                 "enter an action to send it to Server: ");
                                         input = getInput.nextShort();
@@ -290,8 +294,6 @@ public class Client{
                                             client.sendQueryToServer(input, channel);
                                         }
                                     }
-                                    if(actionDataLength[0] == 2)
-                                        System.exit(1);
                                 }
                                 else if(actionDataLength[0] == 4 || actionDataLength[0] == 5 || actionDataLength[0] == 6 ||
                                         actionDataLength[0] == 8 || actionDataLength[0] == 9 || actionDataLength[0] == 10){
