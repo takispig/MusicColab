@@ -21,6 +21,7 @@ public class Lobby {
 
         this.players.add(admin);
         admin.setAdmin();
+        admin.setLobbyId(id);
     }
 
     public int getLobby_id() { return this.lobby_id; }
