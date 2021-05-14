@@ -4,7 +4,6 @@ import src.exceptions.IPAddressException;
 import src.exceptions.SocketBindException;
 
 import java.io.IOException;
-import java.net.BindException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -14,10 +13,9 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.*;
-
-import static java.lang.System.exit;
 
 public class Server {
     private static Charset messageCharset = null;
@@ -45,9 +43,8 @@ public class Server {
         }
     }
 
-    //TODO IllegalArgumentException
     public void defineCharType() {
-        messageCharset = Charset.forName("US-ASCII");
+        messageCharset = StandardCharsets.US_ASCII;
 
         decoder = messageCharset.newDecoder();
         encoder = messageCharset.newEncoder();
@@ -116,7 +113,7 @@ public class Server {
         while (running) {
             selector.select();
 
-            Iterator selectedKeys = selector.selectedKeys().iterator();
+            Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
 
             while (selectedKeys.hasNext()) {
                 SelectionKey key = (SelectionKey) selectedKeys.next();

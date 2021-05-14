@@ -11,7 +11,7 @@ import java.util.Scanner;
 public class Main {
 
     private static final String DEFAULT_ADDRESS = "localhost";
-    private static final int DEFAULT_PORT = 808080;
+    private static final int DEFAULT_PORT = 8080;
 
     private static boolean exit = false;
     private static boolean finish = false;
@@ -28,7 +28,7 @@ public class Main {
     private static long time = 0;
     private static int restart = 0;
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
 
         init(args);
 
@@ -36,7 +36,7 @@ public class Main {
 
             input();
 
-            serverThread = new Thread(() -> runServer(), "server-"+serverNumber++);
+            serverThread = new Thread(Main::runServer, "server-" + serverNumber++);
             serverThread.start();
 
             loop();
@@ -46,7 +46,7 @@ public class Main {
 
     }
 
-    private static void init(String args[]) {
+    private static void init(String[] args) {
         if (args.length == 0) {
             address = DEFAULT_ADDRESS;
             port = DEFAULT_PORT;
@@ -64,15 +64,52 @@ public class Main {
     }
 
     private static void input() {
-        if(!invalidInput)
+        if (!invalidInput)
             return;
-        while(invalidInput) {
+        while (invalidInput) {
             System.out.println("An error occurred with the specified IP address and port!\nTry a new input.");
-            System.out.println("This server will exit after 30 seconds without further interaction. -- NOT IMPLEMENTED YET");
+            System.out.println("This server will exit after 30 seconds without further interaction.");
             System.out.print("address: ");
-            address = input.nextLine();
+            long Itime = System.currentTimeMillis();
+            boolean BAddress = false;
+            boolean b = true;
+            while (!BAddress && (b = System.currentTimeMillis() - Itime < 30000)) {
+                try {
+                    if (System.in.available() > 0) {
+                        address = input.nextLine();
+                        BAddress = true;
+                    } else {
+                        Thread.sleep(20);
+                    }
+                } catch (InterruptedException | IOException ignored) {
+                }
+            }
+            if (!b) {
+                System.out.println();
+                exit();
+            }
+            Itime = System.currentTimeMillis();
             System.out.print("port: ");
-            port = Integer.parseInt(input.nextLine());
+            boolean BPort = false;
+            while (!BPort && (b = System.currentTimeMillis() - Itime < 30000)) {
+                try {
+                    if (System.in.available() > 0) {
+                        try {
+                            port = Integer.parseInt(input.nextLine());
+                            invalidInput = false;
+                        } catch (NumberFormatException ignored) {
+                        }
+                        BPort = true;
+                    } else {
+                        Thread.sleep(20);
+                    }
+                } catch (InterruptedException | IOException ignored) {
+                }
+            }
+            if (!b) {
+                System.out.println();
+                exit();
+            }
             invalidInput = false;
         }
     }
@@ -136,18 +173,18 @@ public class Main {
             }
         }
         finish = false;
-        return;
     }
 
-    private static boolean error(){
+    private static boolean error() {
         if (System.currentTimeMillis() - time < 10000)
             restart++;
-        else
-            restart = 0;
+        else restart = 0;
         time = System.currentTimeMillis();
-        if (restart > 2)
+        if (restart > 3) {
+            error = true;
             System.out.println("An error has occurred!");
-        return restart < 3 ? false : true;
+        }
+        return restart >= 4;
     }
 
     private static void closeServer() {
