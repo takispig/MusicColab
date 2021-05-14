@@ -27,10 +27,8 @@ public class MusicJoiner {
     public void handleToneData(){
         byte index = 0;
         for(Player player: lobby.getPlayers()){
-            if(senderChannel.equals(player.getPlayerChannel())) {
-                clientChannels.add(player.getPlayerChannel());
-                clientResponses.add(toneData);
-            }
+            clientChannels.add(player.getPlayerChannel());
+            clientResponses.add(toneData);
             index++;
         }
     }
