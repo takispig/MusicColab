@@ -71,6 +71,7 @@ public class DataBase {
                 state.execute("CREATE TABLE "+TABLE_NAME+"(id integer,"
                         + NAME_COL_NAME +" varchar(60),"+ EMAIL_COL_NAME +" varchar (60),"+ PASSWORT_COL_NAME +" varchar (60),"+"primary key(id));");
                 PreparedStatement prep = con.prepareStatement("INSERT INTO User values(?,?,?,?);");
+                //prep.setInt(1, Communication.createPlayerId());
                 prep.setString(2,"Max Mustermann");
                 prep.setString(3,"maxmustermann@mail.de");
                 prep.setString(4,"1234");
@@ -92,12 +93,12 @@ public class DataBase {
             getConnection();
         }
 
-        PreparedStatement prep = con.prepareStatement("INSERT INTO "+ TABLE_NAME + "("+NAME_COL_NAME+","+EMAIL_COL_NAME+
-                ","+PASSWORT_COL_NAME+") values(?,?,?);");
-        //prep.setInt(1, Communication.createPlayerId());
-        prep.setString(1,name);
-        prep.setString(2,email);
-        prep.setString(3,passwort);
+        PreparedStatement prep = con.prepareStatement("INSERT INTO "+ TABLE_NAME + " values(?,?,?,?);");
+        prep.setInt(1, Communication.createPlayerId());
+        prep.setString(2,name);
+        prep.setString(3,email);
+        prep.setString(4,passwort);
+
         prep.execute();
 
 

@@ -1,6 +1,8 @@
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.sql.*;
+import java.util.Iterator;
+import java.util.Map;
 
 public class LoginSystem {
     //HashMap to save the players which are logged in
@@ -108,11 +110,14 @@ public class LoginSystem {
     }
 
     public static Player getPlayerByChannel(SocketChannel channel){
-        for(int i = 0;i<Communication.loggedInPlayers.size();i++){
-            if(Communication.loggedInPlayers.get(i).getPlayerChannel()==channel){
-                return Communication.loggedInPlayers.get(i);
+        Iterator<Map.Entry<Integer,Player>> i = Communication.loggedInPlayers.entrySet().iterator();
+        while(i.hasNext()){
+            Map.Entry<Integer,Player> entry = i.next();
+            if(entry.getValue().getPlayerChannel() == channel){
+                return entry.getValue();
             }
         }
+        //TODO: New Exeption (Own Exeption)
         return null;
     }
 }
