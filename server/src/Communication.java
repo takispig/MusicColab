@@ -23,6 +23,7 @@ public class Communication {
     private Selector selector = null;
 
     private static int noOfLobbies = -1;
+    private static int noOfPlayers = -1;
 
     public static HashMap<Integer,Lobby> lobbyMap = new HashMap<>();
     public static HashMap<Integer,Player> loggedInPlayers = new HashMap<>();
@@ -98,7 +99,7 @@ public class Communication {
      * According to the return value of function "analyseMainBuffer" send an error message or
      * handle the received action.
      */
-    private void handleConnectionWhenReadable(SelectionKey key) throws IOException, SQLException, ClassNotFoundException {
+    private void handleConnectionWhenReadable(SelectionKey key) throws SQLException, IOException, ClassNotFoundException {
         //int state = (Integer) key.attachment(); //To save the state of all clients. Integer --> Class
 
         SocketChannel clientChannel = (SocketChannel) key.channel();
@@ -113,6 +114,10 @@ public class Communication {
         }
         else if(result[1] == -2) {
             protocol.sendResponseToClient(messageCharset, clientChannel, "Action is not known.");
+            clientChannel.close();
+        }
+        else if(result[1] == -3) {
+            System.out.println("Client is disconnected.");
             clientChannel.close();
         }
         else
@@ -142,6 +147,11 @@ public class Communication {
     }
 
     public static int createLobbyId(){
-        return noOfLobbies += 1;
+        noOfLobbies++;
+        return noOfLobbies;
+    }
+    public static int createPlayerId(){
+        noOfPlayers++;
+        return noOfPlayers;
     }
 }

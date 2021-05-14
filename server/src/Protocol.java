@@ -46,32 +46,39 @@ public class Protocol {
      * -2 if Action is not known.
      * else size of Data.
      */
-    public short[] analyseMainBuffer(Charset messageCharset, SocketChannel clientChannel) throws IOException {
+    public short[] analyseMainBuffer(Charset messageCharset, SocketChannel clientChannel) {
         short[] temp;
+        ByteBuffer mainBuffer;
 
-        ByteBuffer mainBuffer = ByteBuffer.allocate(2);
-        clientChannel.read(mainBuffer);
-        mainBuffer.flip();
-
-        if (protocolName == getShort(messageCharset.decode(mainBuffer).toString().getBytes(messageCharset))) {
-            mainBuffer.clear();
-
+        try {
+            mainBuffer = ByteBuffer.allocate(2);
             clientChannel.read(mainBuffer);
             mainBuffer.flip();
-            action = getShort(messageCharset.decode(mainBuffer).toString().getBytes(messageCharset));
-            if (codesList.contains(action)) {
+
+            short nameOfProtocol = getShort(messageCharset.decode(mainBuffer).toString().getBytes(messageCharset));
+            if (protocolName == nameOfProtocol) {
                 mainBuffer.clear();
 
                 clientChannel.read(mainBuffer);
                 mainBuffer.flip();
-                temp = new short[]{action, getShort(messageCharset.decode(mainBuffer).toString().getBytes(messageCharset))};
-                return temp;
+                action = getShort(messageCharset.decode(mainBuffer).toString().getBytes(messageCharset));
+                if (codesList.contains(action)) {
+                    mainBuffer.clear();
 
+                    clientChannel.read(mainBuffer);
+                    mainBuffer.flip();
+                    temp = new short[]{action, getShort(messageCharset.decode(mainBuffer).toString().getBytes(messageCharset))};
+                    return temp;
+
+                } else {
+                    return new short[]{action, -2};
+                }
             } else {
-                return new short[]{action, -2};
+                return new short[]{action, -1};
             }
-        } else {
-            return new short[]{action, -1};
+        }
+        catch (IOException e){
+            return new short[]{action, -3};
         }
     }
 
@@ -127,14 +134,17 @@ public class Protocol {
         if(action == register) {
             checkResponse = LoginSystem.register(username, email, password);
             sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
+            System.out.println("Client is registered.");
         }
         else if(action == login) {
             checkResponse = LoginSystem.login(username, password, clientChannel);
             sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
+            System.out.println("Client is logged in.");
         }
         else if(LoginSystem.getPlayerByChannel(clientChannel) != null){
             checkResponse = LoginSystem.logout(username, password);
             sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
+            System.out.println("Client is logged out.");
         }
     }
 
@@ -152,6 +162,7 @@ public class Protocol {
             Lobby lobby = new Lobby(player, lobbyName, id);
             Communication.lobbyMap.put(id,lobby);
             sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(true, lobby, " created by client."));
+            System.out.println("Lobby with ID " + lobby.getLobby_id() + " is for Client " + player.getId() + " created");
         }
         else if((action == joinLobby || action == leaveLobby) && player != null){
             int lobbyID = Integer.parseInt(messageCharset.decode(lobbyBuffer).toString());
@@ -161,11 +172,13 @@ public class Protocol {
                 if(checkResponse)
                     checkResponse = currentLobby.addPlayer(player);
                 sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " --> you are in."));
+                System.out.println("Client with ID " + player.getId() + " is now in lobby: " + currentLobby.getLobby_id());
             } else if(action == leaveLobby){
                 boolean checkResponse = (currentLobby != null);
                 if(checkResponse)
                     currentLobby.removePlayer(player);
                 sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " you are out."));
+                System.out.println("Client with ID " + player.getId() + " is now out from lobby: " + currentLobby.getLobby_id());
             }
 
         }
@@ -208,7 +221,7 @@ public class Protocol {
             sendResponseToClient(messageCharset, musicJoiner.getClientChannels().get(index), musicJoiner.getClientResponses().get(index));
     }
 
-    public void handleAction(Charset messageCharset, SocketChannel clientChannel, int bufferSize) throws IOException, SQLException, ClassNotFoundException {
+    public void handleAction(Charset messageCharset, SocketChannel clientChannel, int bufferSize) throws SQLException, IOException, ClassNotFoundException {
         if(bufferSize != 0){
             playerAddress = clientChannel.getRemoteAddress();
 
@@ -234,7 +247,9 @@ public class Protocol {
     }
 
     private static short getShort(byte[] b) {
-        return (short) (((b[1] << 8) | b[0] & 0xff));
+        if(b.length > 0)
+            return (short) (((b[1] << 8) | b[0] & 0xff));
+        else return -3;
     }
 
     private String getLoginSystemResponse(int action, boolean result){
@@ -256,7 +271,7 @@ public class Protocol {
         return message;
     }
 
-    public void sendResponseToClient(Charset messageCharset, SocketChannel clientChannel, String message) throws IOException {
+    public void sendResponseToClient(Charset messageCharset, SocketChannel clientChannel, String message){
         short dataLength = (short) message.length();
         ByteBuffer messageBuffer = ByteBuffer.allocate(6 + dataLength);
         messageBuffer.put(convertShortToByte(protocolName));
@@ -264,9 +279,14 @@ public class Protocol {
         messageBuffer.put(convertShortToByte(dataLength));
         messageBuffer.put(message.getBytes(messageCharset));
         messageBuffer.flip();
-        clientChannel.write(messageBuffer);
-        messageBuffer.clear();
-        if(action == register || action == logout)
-            clientChannel.close();
+        try {
+            clientChannel.write(messageBuffer);
+            messageBuffer.clear();
+            if (action == register || action == logout)
+                clientChannel.close();
+        }
+        catch (IOException e){
+            System.out.println("Error by sending message to client.");
+        }
     }
 }
