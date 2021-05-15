@@ -62,14 +62,14 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
 
         instrumentGUI = new InstrumentGUIBox();
 
-        drums = new Drums(instrumentGUI);
+        drums = new Drums(instrumentGUI, this);
         instrumentList.add(drums);
 
         theremin = new Theremin(instrumentGUI, this);
         instrumentList.add(theremin);
 
-        // Theremin is set as default instrument:
-        selectedInstrument = theremin;
+        // Drums is set as default instrument:
+        selectedInstrument = drums;
         selectedInstrument.reCalibrate();
         selectedInstrumentType = selectedInstrument.getInstrumentType();
         sensor = sensorManager.getDefaultSensor(selectedInstrument.getSensorType());
