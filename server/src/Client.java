@@ -28,7 +28,7 @@ public class Client{
     private byte toneType = 1;
     private String toneData = "dataExample2";
     private String lobbyName = "example";
-    private String lobbyID = "1";
+    private String lobbyID = "0";
 
     public Client(){
         for(short index = 1; index < 11; index++) {
