@@ -162,15 +162,15 @@ public class Protocol {
         lobbyBuffer.flip();
         if(action == createLobby && player != null){
             String lobbyName = messageCharset.decode(lobbyBuffer).toString();
-            int id = Communication.createLobbyId();
+            int id = Server.createLobbyId();
             Lobby lobby = new Lobby(player, lobbyName, id);
-            Communication.lobbyMap.put(id,lobby);
+            Server.lobbyMap.put(id,lobby);
             sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(true, lobby, " created by client."));
             System.out.println("main.java.com.example.musiccolab.Lobby with ID " + lobby.getLobby_id() + " is for main.java.com.example.musiccolab.Client " + player.getId() + " created");
         }
         else if((action == joinLobby || action == leaveLobby) && player != null){
             int lobbyID = Integer.parseInt(messageCharset.decode(lobbyBuffer).toString());
-            Lobby currentLobby = Communication.lobbyMap.get(lobbyID);
+            Lobby currentLobby = Server.lobbyMap.get(lobbyID);
             if(action == joinLobby){
                 boolean checkResponse = (currentLobby != null);
                 if(checkResponse)
@@ -188,7 +188,7 @@ public class Protocol {
         }
         else if(player != null){//
             int lobbyID = Integer.parseInt(messageCharset.decode(lobbyBuffer).toString());
-            Game game = new Game(Communication.lobbyMap.get(lobbyID));
+            Game game = new Game(Server.lobbyMap.get(lobbyID));
             responseAction = action;
             sendResponseToClient(messageCharset,clientChannel,Integer.toString(lobbyID));
         }
@@ -217,7 +217,7 @@ public class Protocol {
         String toneData= messageCharset.decode(toneBuffer).toString();
         toneBuffer.clear();
 
-        Lobby clientLobby = Communication.lobbyMap.get(LoginSystem.getPlayerByChannel(clientChannel).getLobbyId());
+        Lobby clientLobby = Server.lobbyMap.get(LoginSystem.getPlayerByChannel(clientChannel).getLobbyId());
         musicJoiner = new MusicJoiner(clientLobby, toneAction, toneType, toneData, clientChannel);
         musicJoiner.handleToneData();
         responseAction = action;

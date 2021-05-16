@@ -96,7 +96,7 @@ public class DataBase {
         }
 
         PreparedStatement prep = con.prepareStatement("INSERT INTO "+ TABLE_NAME + " values(?,?,?,?);");
-        prep.setInt(1, Communication.createPlayerId());
+        prep.setInt(1, Server.createPlayerId());
         prep.setString(2,name);
         prep.setString(3,email);
         prep.setString(4,passwort);
