@@ -9,8 +9,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.UnsupportedCharsetException;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.Iterator;
 
 import static java.lang.System.exit;
 
@@ -21,17 +20,13 @@ public class Communication {
     private ServerSocketChannel serverChannel = null;
     private InetSocketAddress serverAddress = null;
     private Selector selector = null;
-
-    private static int noOfLobbies = -1;
-    private static int noOfPlayers = -1;
-
-    public static HashMap<Integer,Lobby> lobbyMap = new HashMap<>();
-    public static HashMap<Integer,Player> loggedInPlayers = new HashMap<>();
+    private ByteBuffer buffer = null;
 
     private static void printUsage() {
 
         System.err.println("Usage: MusicCoLabServer needs <address> <port>");
     }
+
 
     public void CheckParameters(int length){
         //we need address and port, so we have two parameters.
@@ -53,7 +48,10 @@ public class Communication {
 
         try {
             serverAddress = new InetSocketAddress(Address, Integer.parseInt(Port));
-        } catch (IllegalArgumentException | SecurityException e) {
+        } catch (IllegalArgumentException e) {
+            printUsage();
+            exit(1);
+        } catch (SecurityException e) {
             printUsage();
             exit(1);
         }
@@ -86,45 +84,35 @@ public class Communication {
         channel.configureBlocking(false);
         channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE); //AddState as third parameter.
 
-
-        String message = "Welcome in MusicCoLab Server.";
-        ByteBuffer tempBuffer = ByteBuffer.allocate(message.length());
-        tempBuffer.put(message.getBytes(messageCharset));
-        tempBuffer.flip();
-        channel.write(tempBuffer);
-        tempBuffer.clear();
+        String message = "Hi, i'm your Server.";
+        buffer.put(message.getBytes(messageCharset));
+        buffer.flip();
+        channel.write(buffer);
+        buffer.clear();
     }
 
-    /**
-     * According to the return value of function "analyseMainBuffer" send an error message or
-     * handle the received action.
-     */
-    private void handleConnectionWhenReadable(SelectionKey key) throws SQLException, IOException, ClassNotFoundException {
+    private void handleConnectionWhenReadable(SelectionKey key) throws IOException {
         //int state = (Integer) key.attachment(); //To save the state of all clients. Integer --> Class
-
         SocketChannel clientChannel = (SocketChannel) key.channel();
-        //Read the first 6 indexes. (Protocol name, Action and data length. 2 Bytes each)
+        clientChannel.read(buffer);
+        buffer.flip();
+        String msg = messageCharset.decode(buffer).toString();
+        System.out.println(msg);
+        buffer.clear();
 
-        Protocol protocol = new Protocol();
+        msg = "yes you can.";
+        buffer.put(msg.getBytes(messageCharset));
+        buffer.flip();
+        clientChannel.write(buffer);
+        buffer.clear();
+        clientChannel.close();
 
-        short[] result = protocol.analyseMainBuffer(messageCharset, clientChannel);
-        if(result[1] == -1) {
-            protocol.sendResponseToClient(messageCharset, clientChannel, "You are not our customer.");
-            clientChannel.close();
-        }
-        else if(result[1] == -2) {
-            protocol.sendResponseToClient(messageCharset, clientChannel, "Action is not known.");
-            clientChannel.close();
-        }
-        else if(result[1] == -3) {
-            System.out.println("Client is disconnected.");
-            clientChannel.close();
-        }
-        else
-            protocol.handleAction(messageCharset, clientChannel, result[1]);
     }
 
-    public void handleConnection() throws IOException, SQLException, ClassNotFoundException {
+    public void handleConnection() throws IOException {
+        //Create a buffer. We should deal with buffer size
+        buffer = ByteBuffer.allocate(10000);
+
         System.out.println("Waiting for connection: ");
 
         while (true) {
@@ -144,14 +132,5 @@ public class Communication {
                 selectedKeys.remove();
             }
         }
-    }
-
-    public static int createLobbyId(){
-        noOfLobbies++;
-        return noOfLobbies;
-    }
-    public static int createPlayerId(){
-        noOfPlayers++;
-        return noOfPlayers;
     }
 }
