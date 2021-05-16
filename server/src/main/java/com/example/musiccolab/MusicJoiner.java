@@ -1,3 +1,5 @@
+package main.java.com.example.musiccolab;
+
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.LinkedList;

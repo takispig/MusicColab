@@ -1,3 +1,5 @@
+package main.java.com.example.musiccolab;
+
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.sql.*;
@@ -46,7 +48,7 @@ public class LoginSystem {
             player = null;
             Communication.loggedInPlayers.remove(getId(name, passwort));
             return true;
-            //TODO: OWN Exeption so the Server dont crash
+            //TODO: OWN Exeption so the main.java.com.example.musiccolab.Server dont crash
 
         } else throw new RuntimeException("User not logged in!");
     }
@@ -66,7 +68,7 @@ public class LoginSystem {
             DataBase.addUser(name, email, passwort);
             return true;
         } else {
-            //TODO: OWN Exeption so the Server dont crash
+            //TODO: OWN Exeption so the main.java.com.example.musiccolab.Server dont crash
             throw new RuntimeException("User already registered!");
         }
     }
@@ -103,7 +105,7 @@ public class LoginSystem {
     private static int getId(String name, String passwort) throws SQLException, ClassNotFoundException {
         ResultSet res = DataBase.getUserlogin(name, passwort);
         if(!res.next()){
-            //TODO: OWN Exeption so the Server dont crash
+            //TODO: OWN Exeption so the main.java.com.example.musiccolab.Server dont crash
             throw new RuntimeException("User not found!");
         }
         return res.getInt(1);

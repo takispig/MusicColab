@@ -1,3 +1,5 @@
+package main.java.com.example.musiccolab;
+
 import java.util.LinkedList;
 import java.util.Random;
 

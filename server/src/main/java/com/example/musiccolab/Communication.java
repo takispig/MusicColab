@@ -1,3 +1,5 @@
+package main.java.com.example.musiccolab;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -87,7 +89,7 @@ public class Communication {
         channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE); //AddState as third parameter.
 
 
-        String message = "Welcome in MusicCoLab Server.";
+        String message = "Welcome in MusicCoLab main.java.com.example.musiccolab.Server.";
         ByteBuffer tempBuffer = ByteBuffer.allocate(message.length());
         tempBuffer.put(message.getBytes(messageCharset));
         tempBuffer.flip();
@@ -103,7 +105,7 @@ public class Communication {
         //int state = (Integer) key.attachment(); //To save the state of all clients. Integer --> Class
 
         SocketChannel clientChannel = (SocketChannel) key.channel();
-        //Read the first 6 indexes. (Protocol name, Action and data length. 2 Bytes each)
+        //Read the first 6 indexes. (main.java.com.example.musiccolab.Protocol name, Action and data length. 2 Bytes each)
 
         Protocol protocol = new Protocol();
 
@@ -117,7 +119,7 @@ public class Communication {
             clientChannel.close();
         }
         else if(result[1] == -3) {
-            System.out.println("Client is disconnected.");
+            System.out.println("main.java.com.example.musiccolab.Client is disconnected.");
             clientChannel.close();
         }
         else
