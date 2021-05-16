@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="TestDB.sqlite" uuid="7f3f6eee-f0a2-47c3-b03f-faff3c974998">
+    <data-source source="LOCAL" name="identifier" uuid="59be7bcb-81f6-4f91-a3b5-91892d315e76">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:database/TestDB.sqlite</jdbc-url>
+      <jdbc-url>jdbc:sqlite:G:\Uni\SoSe2021\PCPS\Server_Test_local\server\database\identifier.sqlite</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
+      <libraries>
+        <library>
+          <url>file://$APPLICATION_CONFIG_DIR$/jdbc-drivers/Xerial SQLiteJDBC/3.34.0/sqlite-jdbc-3.34.0.jar</url>
+        </library>
+      </libraries>
     </data-source>
   </component>
 </project>
