@@ -74,6 +74,8 @@ public class Protocol {
                     return new short[]{action, -2};
                 }
             } else {
+                if(nameOfProtocol == -3)
+                    return new short[]{action, -3};
                 return new short[]{action, -1};
             }
         }
