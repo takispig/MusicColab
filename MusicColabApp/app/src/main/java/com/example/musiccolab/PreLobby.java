@@ -75,7 +75,9 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             } else if (Instrument == "Drums") {
                 startActivity(new Intent(this, Lobby.class));
             } else if (Instrument == "Keyboards") {
-                startActivity(new Intent(this, Lobby.class));
+                // TODO: start new activity for the Keyboards
+                //startActivity(new Intent(this, Lobby.class));
+                Toast.makeText(getApplicationContext(), "Not yet Implemented. When done, add the Class in PreLobby.", Toast.LENGTH_SHORT).show();
             } else {
                 // may be redundant because it can never be empty (at least at this moment)
                 startActivity(new Intent(this, Lobby.class));
