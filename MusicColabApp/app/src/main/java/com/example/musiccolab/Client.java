@@ -42,11 +42,12 @@ public class Client extends AppCompatActivity implements Runnable {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String userInput = "Hallo Server! Shall i come in?";
             out.println(userInput);
-            String answer = in.readLine();
+            String answer = in.readLine().substring(0,29);  // just get the welcome message from server (if it's connected)
             System.out.println(answer);
             runOnUiThread(() -> Toast.makeText(context, "Server's response:\n" + answer, Toast.LENGTH_LONG).show());
         } catch (IOException e) {
             System.out.println("Error occurred 'probably' in Socket\nCheck host, port, and if Server is running.\n");
+            runOnUiThread(() -> Toast.makeText(context, "Can't connect to Server", Toast.LENGTH_LONG).show());
             e.printStackTrace();
         }
     }

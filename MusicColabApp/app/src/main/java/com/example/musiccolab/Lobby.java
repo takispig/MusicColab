@@ -119,7 +119,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             Toast.makeText(getApplicationContext(), "Replay is not yet implemented", Toast.LENGTH_SHORT).show();
         } else if (view.getId() == R.id.disconnect) {
             // do some stuff
-            Toast.makeText(getApplicationContext(), "Disconnect is not yet implemented", Toast.LENGTH_SHORT).show();
+
             // redirect user after logout to the main app screen
             startActivity(new Intent(this, Login.class));
         }
