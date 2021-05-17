@@ -49,14 +49,14 @@ public class Piano extends AppCompatActivity implements View.OnClickListener{
         }
 
         //match sound to the buttons
-        sound_a = soundPool.load(this, R.raw.a, 1);
-        sound_b = soundPool.load(this, R.raw.b, 1);
-        sound_c = soundPool.load(this, R.raw.c, 1);
-        sound_d = soundPool.load(this, R.raw.d, 1);
-        sound_e = soundPool.load(this, R.raw.e, 1);
-        sound_f = soundPool.load(this, R.raw.f, 1);
-        sound_g = soundPool.load(this, R.raw.g, 1);
-        sound_h = soundPool.load(this, R.raw.g2, 1);
+        sound_a = soundPool.load(this, R.raw.p_a, 1);
+        sound_b = soundPool.load(this, R.raw.p_b, 1);
+        sound_c = soundPool.load(this, R.raw.p_c, 1);
+        sound_d = soundPool.load(this, R.raw.p_d, 1);
+        sound_e = soundPool.load(this, R.raw.p_e, 1);
+        sound_f = soundPool.load(this, R.raw.p_f, 1);
+        sound_g = soundPool.load(this, R.raw.p_g, 1);
+        sound_h = soundPool.load(this, R.raw.p_g2, 1);
 
         a.setOnTouchListener(new View.OnTouchListener() {
             @Override
