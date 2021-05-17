@@ -12,6 +12,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.musiccolab.instruments.Piano;
+
 import java.net.Socket;
 
 public class PreLobby extends AppCompatActivity implements View.OnClickListener {
@@ -76,8 +78,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                 startActivity(new Intent(this, Lobby.class));
             } else if (Instrument == "Keyboards") {
                 // TODO: start new activity for the Keyboards
-                //startActivity(new Intent(this, Lobby.class));
-                Toast.makeText(getApplicationContext(), "Not yet Implemented. When done, add the Class in PreLobby.", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(this, Piano.class));
             } else {
                 // may be redundant because it can never be empty (at least at this moment)
                 startActivity(new Intent(this, Lobby.class));

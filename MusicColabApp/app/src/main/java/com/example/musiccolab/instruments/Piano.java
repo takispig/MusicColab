@@ -1,4 +1,4 @@
-package instruments;
+package com.example.musiccolab.instruments;
 
 import android.annotation.SuppressLint;
 import android.media.AudioManager;
@@ -13,12 +13,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.musiccolab.R;
+import com.example.musiccolab.instruments.InstrumentType;
 
 public class Piano extends AppCompatActivity implements View.OnClickListener{
 
     Button a, b, c, d, e, f, g, h;
 
     private SoundPool soundPool;
+    private static final InstrumentType INSTRUMENT_TYPE = InstrumentType.KEYBOARDS;
     private int sound_a, sound_b, sound_c, sound_d, sound_e, sound_f, sound_g, sound_h;
 
     //handles the screen rotation

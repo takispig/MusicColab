@@ -26,6 +26,7 @@
         <activity android:name=".LightsensorTestActivity"/>
         <activity android:name=".PreLobby"/>
         <activity android:name=".About"/>
+        <activity android:name=".instruments.Piano"/>
     </application>
 
 </manifest>

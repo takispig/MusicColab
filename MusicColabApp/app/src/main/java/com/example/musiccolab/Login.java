@@ -18,6 +18,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class Login extends AppCompatActivity implements View.OnClickListener {
 
@@ -66,11 +67,14 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             passView = (EditText) findViewById(R.id.password);
             password = passView.getText().toString();
 
-//            // call login() to login the user
+            // call login() to login the user
 //            new Thread(this::login).start();
-//            if (suc) System.out.println("Login was successful!\n");
+//            if (suc) {
+//                System.out.println("Login was successful!\n");
+//                startActivity(new Intent(this, PreLobby.class));
+//            }
 
-            if (email.contentEquals("User123") && password.contentEquals("a")) {
+            if (email.contentEquals("a") && password.contentEquals("a")) {
                 // send the user to the PreLobby activity
                 startActivity(new Intent(this, PreLobby.class));
             } else {
@@ -94,18 +98,19 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             short dataLength = (short) message.length();
             ByteBuffer buffer = ByteBuffer.allocate(6 + 2 + dataLength);
             // put all the data into the buffer to prepare them for sending
-            buffer.put((byte) 12845);   // set protocol name
-            buffer.put((byte) 1);       // action 1 -> login
-            buffer.put((byte) dataLength);
+            buffer.put(convertShortToByte(((short)12845)));   // set protocol name
+            buffer.put(convertShortToByte((short)1));         // action 1 -> login
+            buffer.put(convertShortToByte(dataLength));
             buffer.put(emailLength);
             buffer.put(pswdLength);
             buffer.put(message.getBytes(Charset.forName("US-ASCII")));
+            buffer.flip();
             // send data to server
-            out.println(buffer);
+            out.println(StandardCharsets.UTF_8.decode(buffer).toString());
+            buffer.clear();
             // receive respond
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String answer = in.readLine();
-            System.out.println(answer);
             if (answer.charAt(1) == (byte) 11) {    // 11 is Login-confirmation
                 runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Server's response:\n" + answer, Toast.LENGTH_LONG).show());
                 suc = true;
@@ -115,5 +120,13 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         } catch (IOException eo) {
             eo.printStackTrace();
         }
+    }
+
+    public byte[] convertShortToByte(short value){
+        byte[] temp = new byte[2];
+        temp[0] = (byte)(value & 0xff);
+        temp[1] = (byte)((value >> 8) & 0xff);
+
+        return temp;
     }
 }
