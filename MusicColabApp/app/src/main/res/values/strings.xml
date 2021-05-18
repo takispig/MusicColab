@@ -22,7 +22,8 @@
     <string name="disconnect">Disconnect</string>
     <string name="you_have_joined_server">You have joined Server: #</string>
     <string name="admin_access">Admin access: </string>
-    <string name="loop">Loop</string>
+    <string name="loop">Start Loop</string>
+    <string name="calibrate">Calibrate</string>
     <string name="about_text">\nMusicColab ist ein System, welches Musikbegeisterten es ermöglicht, gemeinsam zu musizieren, auch ohne dabei im gleichen Raum zu sitzen.\nNicht einmal reale Instrumente sind notwendig - es reicht das eigene Android-Smartphone.\n\nMusicColab ist simpel: einloggen, Instrument wählen und sobald alle bereit sind, kann es auch sofort losgehen! Abhängig vom gewählten Instrument wird auf unterschiedlichste Art und Weise mithilfe der im Smartphone integrierten Sensoren Musik gemacht.\n\nDie gespielten Töne der einzelnen Benutzer werden an einen Server gesendet, der alle eingehenden Tonspuren zu einem Stück zusammenfügt und dieses an allen anderen teilnehmenden Musiker zurücksendet.\nSomit wird ein gemeinsames Lied erschaffen, das bei allen Benutzern in Echtzeit abgespielt werden kann.</string>
 
     <string-array name="instruments">

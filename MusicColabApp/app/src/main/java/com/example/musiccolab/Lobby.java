@@ -1,6 +1,7 @@
 package com.example.musiccolab;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.app.Service;
 import android.content.Intent;
@@ -11,6 +12,8 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +41,8 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
     private List<Instrument> instrumentList = new ArrayList<Instrument>();
     private SensorManager sensorManager;
     private Sensor sensor;
+    private Boolean visible= false;
+    private Boolean loop= false;
 
 
     @Override
@@ -49,12 +54,12 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
 
         Button loop = (Button) findViewById(R.id.loop);
         loop.setOnClickListener(this);
-        TextView cancel_loop = (TextView) findViewById(R.id.cancel_loop);
-        cancel_loop.setOnClickListener(this);
-        TextView replay = (TextView) findViewById(R.id.replay);
-        replay.setOnClickListener(this);
-        TextView disconnect = (TextView) findViewById(R.id.disconnect);
+        Button calibrate = findViewById(R.id.calibrate);
+        calibrate.setOnClickListener(this);
+        ImageButton disconnect = findViewById(R.id.disconnect);
         disconnect.setOnClickListener(this);
+        ImageButton more = findViewById(R.id.more_button);
+        more.setOnClickListener(this);
 
         // TODO we should receive the selected instrument through the dropdown
 
@@ -105,23 +110,21 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
     // their IDs we will make the correct decision
     public void onClick(View view) {
         if (view.getId() == R.id.loop) {
-            // do some stuff
-            Toast.makeText(getApplicationContext(), "Create Loop is not yet implemented", Toast.LENGTH_SHORT).show();
+            Button x=findViewById(R.id.loop);
+            loop=!loop;
+            x.setText(loop ? "Start Loop":"Stop  Loop");
 
-            // TODO Create and implement a "ReCalibrate" button and move this method to it
+        } else if (view.getId() == R.id.calibrate) {
+            // do some stuff
             selectedInstrument.reCalibrate();
-
-        } else if (view.getId() == R.id.cancel_loop) {
-            // do some stuff
-            Toast.makeText(getApplicationContext(), "Cancel Loop is not yet implemented", Toast.LENGTH_SHORT).show();
-        } else if (view.getId() == R.id.replay) {
-            // do some stuff
-            Toast.makeText(getApplicationContext(), "Replay is not yet implemented", Toast.LENGTH_SHORT).show();
         } else if (view.getId() == R.id.disconnect) {
-            // do some stuff
+            // redirect user to lobby
+            startActivity(new Intent(this, PreLobby.class));
+        }else if (view.getId() == R.id.more_button) {
+            ConstraintLayout info = findViewById(R.id.info);
+            visible=!visible;
+            info.setVisibility(visible ? View.VISIBLE:View.GONE);
 
-            // redirect user after logout to the main app screen
-            startActivity(new Intent(this, Login.class));
         }
     }
 
