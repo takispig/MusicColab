@@ -48,7 +48,7 @@ public class LoginSystem {
             player = null;
             Server.loggedInPlayers.remove(getId(name, passwort));
             return true;
-            //TODO: OWN Exeption so the main.java.com.example.musiccolab.Server dont crash
+            //TODO: OWN Exeption so the Server dont crash
 
         } else throw new RuntimeException("User not logged in!");
     }
@@ -68,7 +68,7 @@ public class LoginSystem {
             DataBase.addUser(name, email, passwort);
             return true;
         } else {
-            //TODO: OWN Exeption so the main.java.com.example.musiccolab.Server dont crash
+            //TODO: OWN Exeption so the Server dont crash
             throw new RuntimeException("User already registered!");
         }
     }

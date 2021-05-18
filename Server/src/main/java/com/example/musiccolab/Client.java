@@ -251,7 +251,7 @@ public class Client{
                         }
 
                         System.out.println("\nPlease enter \"0\" to be able to receive response from  server or \n" +
-                                "enter an action to send it to main.java.com.example.musiccolab.Server: ");
+                                "enter an action to send it to Server: ");
                         Scanner getInput = new Scanner(System.in);
                         short input = getInput.nextShort();
                         if(input > 0) {
@@ -263,7 +263,7 @@ public class Client{
                             if(actionDataLength[1] == -1)
                                 System.out.println("Response from foreign server!");
                             else if(actionDataLength[1] == -2)
-                                System.out.println("main.java.com.example.musiccolab.Server sent unknown action!");
+                                System.out.println("Server sent unknown action!");
                             else{
                                 if(actionDataLength[0] == 1 || actionDataLength[0] == 2 || actionDataLength[0] == 3 ||
                                         actionDataLength[0] == 11 || actionDataLength[0] == 12 || actionDataLength[0] == 13){
@@ -289,7 +289,7 @@ public class Client{
                                             System.exit(1);
                                         }
                                         System.out.println("\nPlease enter \"0\" to be able to receive response from  server or \n" +
-                                                "enter an action to send it to main.java.com.example.musiccolab.Server: ");
+                                                "enter an action to send it to Server: ");
                                         input = getInput.nextShort();
                                         if (input > 0) {
                                             client.sendQueryToServer(input, channel);
@@ -307,7 +307,7 @@ public class Client{
                                     else
                                         System.out.println("Response: " + messageCharset.decode(responseBuffer).toString());
                                     System.out.println("\nPlease enter \"0\" to be able to receive response from  server or \n" +
-                                            "enter an action to send it to main.java.com.example.musiccolab.Server: ");
+                                            "enter an action to send it to Server: ");
                                     input = getInput.nextShort();
                                     if(input > 0) {
                                         client.sendQueryToServer(input, channel);
@@ -323,7 +323,7 @@ public class Client{
                                     else
                                         System.out.println("Response: " + messageCharset.decode(responseBuffer).toString());
                                     System.out.println("\nPlease enter \"0\" to be able to receive response from  server or \n" +
-                                            "enter an action to send it to main.java.com.example.musiccolab.Server: ");
+                                            "enter an action to send it to Server: ");
                                     input = getInput.nextShort();
                                     if(input > 0) {
                                         client.sendQueryToServer(input, channel);
