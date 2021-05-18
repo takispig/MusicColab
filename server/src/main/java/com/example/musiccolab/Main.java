@@ -131,7 +131,7 @@ public class Main {
             return;
         } catch (IPAddressException | SocketBindException e) {
             invalidInput = true;
-        } catch (IOException | UnsupportedCharsetException | SQLException | ClassNotFoundException e) {
+        } catch (IOException | UnsupportedCharsetException e) {
             System.err.println("ERROR: ----------------------------------------------------");
             e.printStackTrace();
             System.err.println("-----------------------------------------------------------");
