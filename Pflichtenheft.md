@@ -98,7 +98,7 @@ Und MusicColab ist simpel: einloggen, Instrument wählen und sobald alle bereit 
 - - -
 ## 4. Entwicklungsmethode
 ### 4.1 Organisation in Teams
-- **Team Client**: Vincent Happersberger, Marc-Fabio Pascal Niemella, Dimitrios Pigkas, Christoph Jacob Hermann, Raphael Kleemann Sánchez
+- **Team Client**: Vincent Happersberger, Marc-Fabio Pascal Niemella, Dimitrios Pigkas, Christoph Jacob Hermann
 	- Kümmert sich um die Entwicklung des Client und erstellt Funktionalität auf Seiten des Client zum Verbindungsaufbau mit Server
 	- Entwickelt Tests um den Client zu testen
 - **Team Server**: Zead Alshukairi, Nils Neurath, Benedikt Simon Kunz, Leon Hecht, Alexandros Laskos
