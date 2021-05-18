@@ -16,7 +16,7 @@ import java.sql.*;
 
 public class DataBase {
     //Constants to specify various values
-    private final static String PATH_TO_DB = "jdbc:sqlite:database/identifier.sqlite";
+    private final static String PATH_TO_DB = "jdbc:sqlite:src/main/res/database/identifier.sqlite";
     private final static String TABLE_NAME = "User";
     private final static String NAME_COL_NAME = "name";
     private final static String EMAIL_COL_NAME = "email";
