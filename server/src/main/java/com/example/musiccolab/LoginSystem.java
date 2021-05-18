@@ -1,3 +1,5 @@
+package main.java.com.example.musiccolab;
+
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.sql.*;
@@ -25,7 +27,7 @@ public class LoginSystem {
             Player player = new Player(name,passwort,res.getString(3),res.getInt(1),channel);
             player.setLoggedIn();
             //add data to List
-            Communication.loggedInPlayers.put(res.getInt(1),player);
+            Server.loggedInPlayers.put(res.getInt(1),player);
             return true;
         } else throw new RuntimeException("User not registered!");
 
@@ -40,13 +42,13 @@ public class LoginSystem {
      */
     public static boolean logout(String name,String passwort) throws SQLException, ClassNotFoundException {
         //check in list
-        if(checkLogin(name, passwort) & Communication.loggedInPlayers.get(getId(name, passwort)) != null){
+        if(checkLogin(name, passwort) & Server.loggedInPlayers.get(getId(name, passwort)) != null){
             //del player from list
-            Player player = Communication.loggedInPlayers.get(getId(name,passwort));
+            Player player = Server.loggedInPlayers.get(getId(name,passwort));
             player = null;
-            Communication.loggedInPlayers.remove(getId(name, passwort));
+            Server.loggedInPlayers.remove(getId(name, passwort));
             return true;
-            //TODO: OWN Exeption so the Server dont crash
+            //TODO: OWN Exeption so the main.java.com.example.musiccolab.Server dont crash
 
         } else throw new RuntimeException("User not logged in!");
     }
@@ -66,7 +68,7 @@ public class LoginSystem {
             DataBase.addUser(name, email, passwort);
             return true;
         } else {
-            //TODO: OWN Exeption so the Server dont crash
+            //TODO: OWN Exeption so the main.java.com.example.musiccolab.Server dont crash
             throw new RuntimeException("User already registered!");
         }
     }
@@ -103,14 +105,14 @@ public class LoginSystem {
     private static int getId(String name, String passwort) throws SQLException, ClassNotFoundException {
         ResultSet res = DataBase.getUserlogin(name, passwort);
         if(!res.next()){
-            //TODO: OWN Exeption so the Server dont crash
+            //TODO: OWN Exeption so the main.java.com.example.musiccolab.Server dont crash
             throw new RuntimeException("User not found!");
         }
         return res.getInt(1);
     }
 
     public static Player getPlayerByChannel(SocketChannel channel){
-        Iterator<Map.Entry<Integer,Player>> i = Communication.loggedInPlayers.entrySet().iterator();
+        Iterator<Map.Entry<Integer,Player>> i = Server.loggedInPlayers.entrySet().iterator();
         while(i.hasNext()){
             Map.Entry<Integer,Player> entry = i.next();
             if(entry.getValue().getPlayerChannel() == channel){

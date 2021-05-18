@@ -1,3 +1,5 @@
+package main.java.com.example.musiccolab;
+
 import java.nio.ByteBuffer;
 
 public class ClientState {

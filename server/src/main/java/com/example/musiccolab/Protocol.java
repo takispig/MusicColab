@@ -1,3 +1,5 @@
+package main.java.com.example.musiccolab;
+
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -31,9 +33,9 @@ public class Protocol {
 
 
 
-    final private String[][] responsesArray = { {"Client logged in", "error"},
-                                          {"Client logged out", "error"},
-                                          {"Client registered", "error"},};
+    final private String[][] responsesArray = { {"main.java.com.example.musiccolab.Client logged in", "error"},
+                                          {"main.java.com.example.musiccolab.Client logged out", "error"},
+                                          {"main.java.com.example.musiccolab.Client registered", "error"},};
 
     public Protocol(){
         for(short index = 1; index < 11; index++)
@@ -136,17 +138,17 @@ public class Protocol {
         if(action == register) {
             checkResponse = LoginSystem.register(username, email, password);
             sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
-            System.out.println("Client is registered.");
+            System.out.println("main.java.com.example.musiccolab.Client is registered.");
         }
         else if(action == login) {
             checkResponse = LoginSystem.login(username, password, clientChannel);
             sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
-            System.out.println("Client is logged in.");
+            System.out.println("main.java.com.example.musiccolab.Client is logged in.");
         }
         else if(LoginSystem.getPlayerByChannel(clientChannel) != null){
             checkResponse = LoginSystem.logout(username, password);
             sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
-            System.out.println("Client is logged out.");
+            System.out.println("main.java.com.example.musiccolab.Client is logged out.");
         }
     }
 
@@ -160,33 +162,33 @@ public class Protocol {
         lobbyBuffer.flip();
         if(action == createLobby && player != null){
             String lobbyName = messageCharset.decode(lobbyBuffer).toString();
-            int id = Communication.createLobbyId();
+            int id = Server.createLobbyId();
             Lobby lobby = new Lobby(player, lobbyName, id);
-            Communication.lobbyMap.put(id,lobby);
+            Server.lobbyMap.put(id,lobby);
             sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(true, lobby, " created by client."));
-            System.out.println("Lobby with ID " + lobby.getLobby_id() + " is for Client " + player.getId() + " created");
+            System.out.println("main.java.com.example.musiccolab.Lobby with ID " + lobby.getLobby_id() + " is for main.java.com.example.musiccolab.Client " + player.getId() + " created");
         }
         else if((action == joinLobby || action == leaveLobby) && player != null){
             int lobbyID = Integer.parseInt(messageCharset.decode(lobbyBuffer).toString());
-            Lobby currentLobby = Communication.lobbyMap.get(lobbyID);
+            Lobby currentLobby = Server.lobbyMap.get(lobbyID);
             if(action == joinLobby){
                 boolean checkResponse = (currentLobby != null);
                 if(checkResponse)
                     checkResponse = currentLobby.addPlayer(player);
                 sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " --> you are in."));
-                System.out.println("Client with ID " + player.getId() + " is now in lobby: " + currentLobby.getLobby_id());
+                System.out.println("main.java.com.example.musiccolab.Client with ID " + player.getId() + " is now in lobby: " + currentLobby.getLobby_id());
             } else if(action == leaveLobby){
                 boolean checkResponse = (currentLobby != null);
                 if(checkResponse)
                     currentLobby.removePlayer(player);
                 sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " you are out."));
-                System.out.println("Client with ID " + player.getId() + " is now out from lobby: " + currentLobby.getLobby_id());
+                System.out.println("main.java.com.example.musiccolab.Client with ID " + player.getId() + " is now out from lobby: " + currentLobby.getLobby_id());
             }
 
         }
         else if(player != null){//
             int lobbyID = Integer.parseInt(messageCharset.decode(lobbyBuffer).toString());
-            Game game = new Game(Communication.lobbyMap.get(lobbyID));
+            Game game = new Game(Server.lobbyMap.get(lobbyID));
             responseAction = action;
             sendResponseToClient(messageCharset,clientChannel,Integer.toString(lobbyID));
         }
@@ -215,7 +217,7 @@ public class Protocol {
         String toneData= messageCharset.decode(toneBuffer).toString();
         toneBuffer.clear();
 
-        Lobby clientLobby = Communication.lobbyMap.get(LoginSystem.getPlayerByChannel(clientChannel).getLobbyId());
+        Lobby clientLobby = Server.lobbyMap.get(LoginSystem.getPlayerByChannel(clientChannel).getLobbyId());
         musicJoiner = new MusicJoiner(clientLobby, toneAction, toneType, toneData, clientChannel);
         musicJoiner.handleToneData();
         responseAction = action;
@@ -263,7 +265,7 @@ public class Protocol {
     private String getLobbyResponse(boolean result, Lobby lobby, String additionPart){
         String message;
         if(result){
-            message = "Lobby "+ lobby.getLobby_id() + additionPart;
+            message = "main.java.com.example.musiccolab.Lobby "+ lobby.getLobby_id() + additionPart;
             responseAction = action;
         }
         else{

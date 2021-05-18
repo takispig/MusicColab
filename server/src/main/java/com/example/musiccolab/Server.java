@@ -1,3 +1,8 @@
+package main.java.com.example.musiccolab;
+
+import main.java.com.example.musiccolab.exceptions.IPAddressException;
+import main.java.com.example.musiccolab.exceptions.SocketBindException;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -5,16 +10,13 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CharsetEncoder;
-import java.nio.charset.UnsupportedCharsetException;
+import java.nio.charset.*;
 import java.sql.SQLException;
 import java.util.*;
 
 import static java.lang.System.exit;
 
-public class Communication {
+public class Server {
     private static Charset messageCharset = null;
     private static CharsetDecoder decoder = null;//Network order = Byte --> Characters = Host order
     private static CharsetEncoder encoder = null;//Characters = Host order -->  Network order = Byte
@@ -22,64 +24,47 @@ public class Communication {
     private InetSocketAddress serverAddress = null;
     private Selector selector = null;
 
+    private static boolean running = true;
+    private static boolean finished = false;
+
     private static int noOfLobbies = -1;
     private static int noOfPlayers = -1;
 
     public static HashMap<Integer,Lobby> lobbyMap = new HashMap<>();
     public static HashMap<Integer,Player> loggedInPlayers = new HashMap<>();
 
-    private static void printUsage() {
-
-        System.err.println("Usage: MusicCoLabServer needs <address> <port>");
-    }
-
-    public void CheckParameters(int length){
-        //we need address and port, so we have two parameters.
-        if(length != 2){
-            printUsage();
-            exit(1);
-        }
-    }
-
-    public void defineCharType(String Address, String Port){
+    public void setupServerAddress(String address, int port) throws IPAddressException {
         try {
-            messageCharset = Charset.forName("US-ASCII");
-        } catch(UnsupportedCharsetException uce) {
-            System.err.println("Cannot create charset for this application. Exiting...");
-            System.exit(1);
+            serverAddress = new InetSocketAddress(address, port);
+        } catch (IllegalArgumentException | SecurityException e) {
+            throw new IPAddressException();
         }
+    }
+
+    public void defineCharType() {
+        messageCharset = StandardCharsets.US_ASCII;
+
         decoder = messageCharset.newDecoder();
         encoder = messageCharset.newEncoder();
-
-        try {
-            serverAddress = new InetSocketAddress(Address, Integer.parseInt(Port));
-        } catch (IllegalArgumentException | SecurityException e) {
-            printUsage();
-            exit(1);
-        }
     }
 
-    public void OpenSelectorAndSetupSocket(){
-        try {
-            selector = Selector.open();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-            System.exit(1);
-        }
+    public void OpenSelectorAndSetupSocket() throws IOException, SocketBindException {
+
+        selector = Selector.open();
+
+        serverChannel = ServerSocketChannel.open();
+
+        serverChannel.configureBlocking(false);
+        serverChannel.register(selector, SelectionKey.OP_ACCEPT);
 
         try {
-            serverChannel = ServerSocketChannel.open();
-            serverChannel.configureBlocking(false);
-            serverChannel.register(selector, SelectionKey.OP_ACCEPT);
             serverChannel.socket().bind(serverAddress);
         } catch (IOException e) {
-            e.printStackTrace();
-            exit(1);
+            throw new SocketBindException();
         }
     }
 
     //bufferHandleIsNeeded?
-
     private void handleConnectionWhenAcceptable(SelectionKey key) throws IOException {
         ServerSocketChannel sChannel = (ServerSocketChannel) key.channel();
         SocketChannel channel = sChannel.accept();
@@ -99,7 +84,7 @@ public class Communication {
      * According to the return value of function "analyseMainBuffer" send an error message or
      * handle the received action.
      */
-    private void handleConnectionWhenReadable(SelectionKey key) throws SQLException, IOException, ClassNotFoundException {
+    private void handleConnectionWhenReadable(SelectionKey key) throws IOException, SQLException, ClassNotFoundException {
         //int state = (Integer) key.attachment(); //To save the state of all clients. Integer --> Class
 
         SocketChannel clientChannel = (SocketChannel) key.channel();
@@ -116,10 +101,6 @@ public class Communication {
             protocol.sendResponseToClient(messageCharset, clientChannel, "Action is not known.");
             clientChannel.close();
         }
-        else if(result[1] == -3) {
-            System.out.println("Client is disconnected.");
-            clientChannel.close();
-        }
         else
             protocol.handleAction(messageCharset, clientChannel, result[1]);
     }
@@ -127,10 +108,10 @@ public class Communication {
     public void handleConnection() throws IOException, SQLException, ClassNotFoundException {
         System.out.println("Waiting for connection: ");
 
-        while (true) {
+        while (running) {
             selector.select();
 
-            Iterator selectedKeys = selector.selectedKeys().iterator();
+            Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
 
             while (selectedKeys.hasNext()) {
                 SelectionKey key = (SelectionKey) selectedKeys.next();
@@ -144,6 +125,8 @@ public class Communication {
                 selectedKeys.remove();
             }
         }
+
+        finished = true;
     }
 
     public static int createLobbyId(){
@@ -153,5 +136,33 @@ public class Communication {
     public static int createPlayerId(){
         noOfPlayers++;
         return noOfPlayers;
+    }
+
+    public void finishServer() {
+        running = false;
+        if (selector != null)
+            selector.wakeup();
+        while (!finished) {
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        for (int i = 3; i > 0; i--) {
+            try {
+                if (serverChannel != null)
+                    serverChannel.close();
+                if (selector != null)
+                    selector.close();
+                i = 0;
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+        }
+    }
+
+    public void setFinishedTrue() {
+        finished = true;
     }
 }

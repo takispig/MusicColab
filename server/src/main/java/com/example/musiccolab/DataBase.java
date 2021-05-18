@@ -1,3 +1,5 @@
+package main.java.com.example.musiccolab;
+
 import java.sql.*;
 
 /**
@@ -71,7 +73,7 @@ public class DataBase {
                 state.execute("CREATE TABLE "+TABLE_NAME+"(id integer,"
                         + NAME_COL_NAME +" varchar(60),"+ EMAIL_COL_NAME +" varchar (60),"+ PASSWORT_COL_NAME +" varchar (60),"+"primary key(id));");
                 PreparedStatement prep = con.prepareStatement("INSERT INTO User values(?,?,?,?);");
-                //prep.setInt(1, Communication.createPlayerId());
+                //prep.setInt(1, main.java.com.example.musiccolab.Communication.createPlayerId());
                 prep.setString(2,"Max Mustermann");
                 prep.setString(3,"maxmustermann@mail.de");
                 prep.setString(4,"1234");
@@ -94,7 +96,7 @@ public class DataBase {
         }
 
         PreparedStatement prep = con.prepareStatement("INSERT INTO "+ TABLE_NAME + " values(?,?,?,?);");
-        prep.setInt(1, Communication.createPlayerId());
+        prep.setInt(1, Server.createPlayerId());
         prep.setString(2,name);
         prep.setString(3,email);
         prep.setString(4,passwort);
