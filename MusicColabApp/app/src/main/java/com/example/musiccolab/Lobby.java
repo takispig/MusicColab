@@ -112,7 +112,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         if (view.getId() == R.id.loop) {
             Button x=findViewById(R.id.loop);
             loop=!loop;
-            x.setText(loop ? "Start Loop":"Stop  Loop");
+            x.setText(loop ? "Stop  Loop":"Start Loop");
 
         } else if (view.getId() == R.id.calibrate) {
             // do some stuff
