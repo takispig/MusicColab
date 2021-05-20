@@ -1,4 +1,4 @@
-package instruments;
+package com.example.musiccolab.instruments;
 
 import android.annotation.SuppressLint;
 import android.media.AudioManager;

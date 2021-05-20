@@ -64,7 +64,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
         if (view.getId() == R.id.create_server) {
             // send a request to the server by calling the client
             // create a new Thread to handle the asynchron communication
-            new Thread(new Client(getApplicationContext())).start();
+            Toast.makeText(getApplicationContext(), "Create Server is not yet implemented", Toast.LENGTH_SHORT).show();
         } else if (view.getId() == R.id.join_server) {
             // do some stuff
             Toast.makeText(getApplicationContext(), "Join Server is not yet implemented", Toast.LENGTH_SHORT).show();

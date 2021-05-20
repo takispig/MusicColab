@@ -15,10 +15,21 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
 
 public class Login extends AppCompatActivity implements View.OnClickListener {
 
@@ -67,66 +78,21 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             passView = (EditText) findViewById(R.id.password);
             password = passView.getText().toString();
 
-            // call login() to login the user
-//            new Thread(this::login).start();
-//            if (suc) {
-//                System.out.println("Login was successful!\n");
+            // call Client() constructor ny passing the suitable arguments -> action=1 (login)
+            new Thread(new Client(getApplicationContext(), (short) 1, email, email, password)).start();
+            if (suc) {
+                System.out.println("Login was successful!\n");
+                startActivity(new Intent(this, PreLobby.class));
+            }
+
+//            if (email.contentEquals("a") && password.contentEquals("a")) {
+//                // send the user to the PreLobby activity
 //                startActivity(new Intent(this, PreLobby.class));
+//            } else {
+//                // show a message that password or username is incorrect
+//                Toast.makeText(getApplicationContext(), "Username or Password incorrect", Toast.LENGTH_LONG).show();
 //            }
 
-            if (email.contentEquals("a") && password.contentEquals("a")) {
-                // send the user to the PreLobby activity
-                startActivity(new Intent(this, PreLobby.class));
-            } else {
-                // show a message that password or username is incorrect
-                Toast.makeText(getApplicationContext(), "Username or Password incorrect", Toast.LENGTH_LONG).show();
-            }
-
         }
-    }
-
-    // login -> not tested yet
-    private void login() {
-        try {
-            // create socket and output stream
-            Socket socket = new Socket(localhost, port);
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            // create all necessary variables
-            byte emailLength = (byte) email.length();
-            byte pswdLength = (byte) password.length();
-            String message = email + password;
-            short dataLength = (short) message.length();
-            ByteBuffer buffer = ByteBuffer.allocate(6 + 2 + dataLength);
-            // put all the data into the buffer to prepare them for sending
-            buffer.put(convertShortToByte(((short)12845)));   // set protocol name
-            buffer.put(convertShortToByte((short)1));         // action 1 -> login
-            buffer.put(convertShortToByte(dataLength));
-            buffer.put(emailLength);
-            buffer.put(pswdLength);
-            buffer.put(message.getBytes(Charset.forName("US-ASCII")));
-            buffer.flip();
-            // send data to server
-            out.println(StandardCharsets.UTF_8.decode(buffer).toString());
-            buffer.clear();
-            // receive respond
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            String answer = in.readLine();
-            if (answer.charAt(1) == (byte) 11) {    // 11 is Login-confirmation
-                runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Server's response:\n" + answer, Toast.LENGTH_LONG).show());
-                suc = true;
-            } else {
-                runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Failed\nServer's response:\n" + answer, Toast.LENGTH_LONG).show());
-            }
-        } catch (IOException eo) {
-            eo.printStackTrace();
-        }
-    }
-
-    public byte[] convertShortToByte(short value){
-        byte[] temp = new byte[2];
-        temp[0] = (byte)(value & 0xff);
-        temp[1] = (byte)((value >> 8) & 0xff);
-
-        return temp;
     }
 }
