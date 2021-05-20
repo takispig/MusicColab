@@ -118,9 +118,9 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             // do some stuff
             selectedInstrument.reCalibrate();
         } else if (view.getId() == R.id.disconnect) {
-            // redirect user to lobby
+            // redirect user to login page
             startActivity(new Intent(this, PreLobby.class));
-        }else if (view.getId() == R.id.more_button) {
+        } else if (view.getId() == R.id.more_button) {
             ConstraintLayout info = findViewById(R.id.info);
             visible=!visible;
             info.setVisibility(visible ? View.VISIBLE:View.GONE);

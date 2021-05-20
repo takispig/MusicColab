@@ -54,14 +54,7 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
 
             // call Client() constructor ny passing the suitable arguments -> action=1 (login)
             new Thread(new Client(getApplicationContext(), (short) 3, email, username, password)).start();
-            // check confirmation
-//            if (suc) {
-//                startActivity(new Intent(this, Login.class));
-//                Toast.makeText(getApplicationContext(), "Successfully registered", Toast.LENGTH_SHORT).show();
-//            } else {
-//                System.out.println("Registration Failed!\n");
-//                Toast.makeText(getApplicationContext(), "Registration Failed", Toast.LENGTH_SHORT).show();
-//            }
+
         } else if (view.getId() == R.id.aboutt) {
             // send the user to about us website, or pip up a new window
             startActivity(new Intent(this, About.class));

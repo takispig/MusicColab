@@ -80,18 +80,6 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
 
             // call Client() constructor ny passing the suitable arguments -> action=1 (login)
             new Thread(new Client(getApplicationContext(), (short) 1, email, email, password)).start();
-            if (suc) {
-                System.out.println("Login was successful!\n");
-                startActivity(new Intent(this, PreLobby.class));
-            }
-
-//            if (email.contentEquals("a") && password.contentEquals("a")) {
-//                // send the user to the PreLobby activity
-//                startActivity(new Intent(this, PreLobby.class));
-//            } else {
-//                // show a message that password or username is incorrect
-//                Toast.makeText(getApplicationContext(), "Username or Password incorrect", Toast.LENGTH_LONG).show();
-//            }
 
         }
     }

@@ -1,6 +1,7 @@
 package com.example.musiccolab;
 
 import android.content.Context;
+import android.content.Intent;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +19,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -38,6 +40,7 @@ public class Client extends AppCompatActivity implements Runnable {
     int port = 3001;                         // 3001, 8080, 1201, etc...
     Context context;
 
+    // general constructor
     public Client(Context context, short action, String email, String userName, String password) {
         this.context = context;
         this.action = action;
@@ -49,6 +52,11 @@ public class Client extends AppCompatActivity implements Runnable {
             codesList.add(index);
             errorCodesList.add( (short) (index + 10));
         }
+    }
+
+    // this constructor is just for the disconnect
+    public Client(short action) {
+        this.action = action;
     }
 
     private static Charset messageCharset = null;
@@ -153,7 +161,7 @@ public class Client extends AppCompatActivity implements Runnable {
                         ByteBuffer helloBuffer = ByteBuffer.allocate(100);
                         channel = (SocketChannel) key.channel();
                         short[] actionDataLength;
-                        if(flag) {
+                        if (flag) {
                             channel.read(helloBuffer);
                             helloBuffer.flip();
                             System.out.println(messageCharset.decode(helloBuffer).toString());
@@ -163,29 +171,40 @@ public class Client extends AppCompatActivity implements Runnable {
 
                         System.out.println("\nPlease enter \"0\" to be able to receive response from  server or \n" +
                                 "enter an action to send it to Server: ");
+
                         // TODO: here was a Scanner input, but we can't use it in real life App
-                        if(action > 0) {
+                        if (action > 0) {
                             sendQueryToServer(action, channel);
-                        }
-                        else{
+                            action = 0; // set action = 0 afterwards, to end infinite loop
+                        } else {
                             actionDataLength = analyseResponse(messageCharset, channel);
                             ByteBuffer responseBuffer = ByteBuffer.allocate(actionDataLength[1]);
-                            if(actionDataLength[1] == -1)
+                            // actionDataLength[0] is the confirmation-code
+                            if (actionDataLength[1] == -1)
                                 System.out.println("Response from foreign server!");
-                            else if(actionDataLength[1] == -2)
+                            else if (actionDataLength[1] == -2)
                                 System.out.println("Server sent unknown action!");
-                            else{
-                                if(actionDataLength[0] == 1 || actionDataLength[0] == 2 || actionDataLength[0] == 3 ||
-                                        actionDataLength[0] == 11 || actionDataLength[0] == 12 || actionDataLength[0] == 13){
+                            else {
+                                if (actionDataLength[0] == 1 || actionDataLength[0] == 2 || actionDataLength[0] == 3 ||
+                                        actionDataLength[0] == 11 || actionDataLength[0] == 12 || actionDataLength[0] == 13) {
                                     channel.read(responseBuffer);
                                     responseBuffer.flip();
                                     System.out.println("Action: " + actionDataLength[0] + "\n" +
                                             "Data length: " + actionDataLength[1]);
-                                    if(actionDataLength[0] > 10)
+                                    if (actionDataLength[0] > 10)
                                         System.out.println("Error message: " + messageCharset.decode(responseBuffer).toString());
                                     else
                                         System.out.println("Response: " + messageCharset.decode(responseBuffer).toString());
-                                    if(actionDataLength[0] == 3) {
+                                    if (actionDataLength[0] == 1) {
+                                        // i have set "FLAG_ACTIVITY_NEW_TASK" to force the Client to open a new Activity
+                                        context.startActivity(new Intent(context, PreLobby.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                                    }
+                                    if (actionDataLength[0] == 2) {
+                                        context.startActivity(new Intent(context, Login.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                                        System.exit(1);
+                                    }
+                                    // register confirmation
+                                    if (actionDataLength[0] == 3) {
                                         channel.close();
                                         channel = SocketChannel.open();
                                         channel.configureBlocking(false);
@@ -193,53 +212,30 @@ public class Client extends AppCompatActivity implements Runnable {
                                         channel.connect(remoteAddress);
                                         flag = true;
                                     }
-                                    if(!flag) {
-                                        if(actionDataLength[0] == 2) {
-                                            System.out.println("See you later.");
-                                            System.exit(1);
-                                        }
-                                        System.out.println("\nPlease enter \"0\" to be able to receive response from  server or \n" +
-                                                "enter an action to send it to Server: ");
-                                        if (action > 0) {
-                                            sendQueryToServer(action, channel);
-                                        }
-                                    }
-                                }
-                                else if(actionDataLength[0] == 4 || actionDataLength[0] == 5 || actionDataLength[0] == 6 ||
-                                        actionDataLength[0] == 8 || actionDataLength[0] == 9 || actionDataLength[0] == 10){
+
+                                } else if (actionDataLength[0] == 4 || actionDataLength[0] == 5 || actionDataLength[0] == 6 ||
+                                        actionDataLength[0] == 8 || actionDataLength[0] == 9 || actionDataLength[0] == 10) {
                                     channel.read(responseBuffer);
                                     responseBuffer.flip();
                                     System.out.println("Action: " + actionDataLength[0] + "\n" +
                                             "Data length: " + actionDataLength[1]);
-                                    if(actionDataLength[0] > 10)
+                                    if (actionDataLength[0] > 10)
                                         System.out.println("Error message: " + messageCharset.decode(responseBuffer).toString());
                                     else
                                         System.out.println("Response: " + messageCharset.decode(responseBuffer).toString());
-                                    System.out.println("\nPlease enter \"0\" to be able to receive response from  server or \n" +
-                                            "enter an action to send it to Server: ");
-                                    if(action > 0) {
-                                        sendQueryToServer(action, channel);
-                                    }
-                                }
-                                else{
+                                } else {
                                     channel.read(responseBuffer);
                                     responseBuffer.flip();
                                     System.out.println("Action: " + actionDataLength[0] + "\n" +
                                             "Data length: " + actionDataLength[1]);
-                                    if(actionDataLength[0] > 10)
+                                    if (actionDataLength[0] > 10)
                                         System.out.println("Error message: " + messageCharset.decode(responseBuffer).toString());
                                     else
                                         System.out.println("Response: " + messageCharset.decode(responseBuffer).toString());
-                                    System.out.println("\nPlease enter \"0\" to be able to receive response from  server or \n" +
-                                            "enter an action to send it to Server: ");
-                                    if(action > 0) {
-                                        sendQueryToServer(action, channel);
-                                    }
                                 }
                             }
                         }
                     }
-
                 } catch(IOException ioe) {
                     ioe.printStackTrace();
                     System.exit(1);
