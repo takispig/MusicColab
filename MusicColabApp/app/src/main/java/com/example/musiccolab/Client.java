@@ -37,7 +37,7 @@ import java.util.Set;
 public class Client extends AppCompatActivity implements Runnable {
 
     String localhost = "10.0.2.2";           // localhost for android devices (finally)
-    int port = 3001;                         // 3001, 8080, 1201, etc...
+    int port = 8080;                         // 3001, 8080, 1201, etc...
     Context context;
 
     // general constructor
@@ -80,10 +80,9 @@ public class Client extends AppCompatActivity implements Runnable {
     private static void printUsage() {
         System.err.println("Usage: java SMTPClient <address> <port>");
     }
-
+    public SocketChannel channel = null;
     @Override
     public void run() {
-        SocketChannel channel = null;
         InetSocketAddress remoteAddress = null;
         Selector selector = null;
         try {
@@ -257,7 +256,7 @@ public class Client extends AppCompatActivity implements Runnable {
         return (short) (((b[1] << 8) | b[0] & 0xff));
     }
 
-    private void sendQueryToServer(short action, SocketChannel channel) throws IOException {
+    public void sendQueryToServer(short action, SocketChannel channel) throws IOException {
         short dataLength;
         byte userNameLength;
         byte passwordLength;

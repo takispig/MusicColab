@@ -14,6 +14,7 @@ import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.musiccolab.Login;
 import com.example.musiccolab.R;
 
 public class Piano extends AppCompatActivity implements View.OnClickListener{
@@ -71,6 +72,11 @@ public class Piano extends AppCompatActivity implements View.OnClickListener{
                         a.startAnimation(scaleDown);
                         soundPool.play(sound_a, 1, 1, 0, 0, 1);
                         System.out.println("a pressed");
+                        try {
+                            Login.client.sendQueryToServer((short) 7, Login.client.channel);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
                         break;
                     case MotionEvent.ACTION_UP:
                         a.startAnimation(scaleUp);

@@ -57,7 +57,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
 
     }
 
-
+    public static Client client;
     @Override
     // In this function we will 'hear' for onClick events and according to
     // their IDs we will make the correct decision
@@ -77,9 +77,9 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             email = emailView.getText().toString();
             passView = (EditText) findViewById(R.id.password);
             password = passView.getText().toString();
-
+            client = new Client(getApplicationContext(), (short) 1, email, email, password);
             // call Client() constructor ny passing the suitable arguments -> action=1 (login)
-            new Thread(new Client(getApplicationContext(), (short) 1, email, email, password)).start();
+            new Thread(client).start();
 
         }
     }
