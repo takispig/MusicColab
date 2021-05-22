@@ -10,8 +10,8 @@ import java.util.Scanner;
 
 public class Main {
 
-    private static final String DEFAULT_ADDRESS = "localhost";
-    private static final int DEFAULT_PORT = 8080;
+    private static final String DEFAULT_ADDRESS = "127.0.0.1";
+    private static final int DEFAULT_PORT = 3001;
 
     private static boolean exit = false;
     private static boolean finish = false;
