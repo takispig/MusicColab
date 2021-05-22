@@ -71,9 +71,9 @@ public class Client extends AppCompatActivity implements Runnable {
     private String email;
     private String userName;
     private String password;
-    private byte toneAction = 1;
-    private byte toneType = 1;
-    private String toneData = "dataExample2";
+    private byte toneAction = 1; //1 taste gedrückt, 2 taste wieder los gelassen
+    private byte toneType = 1; //1= Klavier, 2=drums, 3= theremin
+    private String toneData = "dataExample2"; //gespielter ton
     private String lobbyName = "example";
     private String lobbyID = "0";
 
