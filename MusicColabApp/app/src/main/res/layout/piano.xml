@@ -23,41 +23,17 @@
         android:weightSum="8">
 
         <Button
-            android:id="@+id/btnA"
+            android:id="@+id/btnC"
             android:layout_width="wrap_content"
             android:layout_height="186dp"
             android:layout_weight="1"
             android:background="#FDF0EC"
             android:backgroundTint="#FDF0EC"
-            android:text="a"
+            android:text="c"
             android:textColor="@android:color/black"
             app:strokeColor="@android:color/black"
             app:strokeWidth="2dp">
         </Button>
-
-        <Button
-            android:id="@+id/btnB"
-            android:layout_width="wrap_content"
-            android:layout_height="186dp"
-            android:layout_weight="1"
-            android:background="#EDCFC7"
-            android:textColor="@android:color/black"
-            android:backgroundTint="#FDF0EC"
-            android:text="b"
-            app:strokeColor="@android:color/black"
-            app:strokeWidth="2dp"></Button>
-
-        <Button
-            android:id="@+id/btnC"
-            android:layout_width="wrap_content"
-            android:layout_height="186dp"
-            android:layout_weight="1"
-            android:background="#EDCFC7"
-            android:textColor="@android:color/black"
-            android:backgroundTint="#FDF0EC"
-            android:text="c"
-            app:strokeColor="@android:color/black"
-            app:strokeWidth="2dp"></Button>
 
         <Button
             android:id="@+id/btnD"
@@ -103,7 +79,19 @@
             android:background="#EDCFC7"
             android:textColor="@android:color/black"
             android:backgroundTint="#FDF0EC"
-            android:text="g"
+            android:text="G"
+            app:strokeColor="@android:color/black"
+            app:strokeWidth="2dp"></Button>
+
+        <Button
+            android:id="@+id/btnA"
+            android:layout_width="wrap_content"
+            android:layout_height="186dp"
+            android:layout_weight="1"
+            android:background="#EDCFC7"
+            android:textColor="@android:color/black"
+            android:backgroundTint="#FDF0EC"
+            android:text="a"
             app:strokeColor="@android:color/black"
             app:strokeWidth="2dp"></Button>
 
@@ -116,6 +104,18 @@
             android:textColor="@android:color/black"
             android:backgroundTint="#FDF0EC"
             android:text="h"
+            app:strokeColor="@android:color/black"
+            app:strokeWidth="2dp"></Button>
+
+        <Button
+            android:id="@+id/btnC2"
+            android:layout_width="wrap_content"
+            android:layout_height="186dp"
+            android:layout_weight="1"
+            android:background="#EDCFC7"
+            android:textColor="@android:color/black"
+            android:backgroundTint="#FDF0EC"
+            android:text="c"
             app:strokeColor="@android:color/black"
             app:strokeWidth="2dp"></Button>
 

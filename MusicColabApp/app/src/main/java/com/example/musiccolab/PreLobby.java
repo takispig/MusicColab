@@ -68,8 +68,9 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
         if (view.getId() == R.id.create_server) {
             // send a request to the server (change only action, all other are the same)
             Client.getInstance();
-            Client.action = (short) 2;
-            new Thread(()->Client.getInstance().run()).start();
+            Client.action = (short) 4;
+            Thread serverThread = new Thread(()->Client.getInstance().run());
+            serverThread.start();
             // check for any changes in Client...when login succeed then confirmation_code will be 1
             while (Client.confirmation_code == 0) {
                 Client.getInstance();   // retrieve latest changes in Client to check again for the confirmation
@@ -83,7 +84,9 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                     Toast.makeText(getApplicationContext(), "Can't create Lobby\nPlease try again", Toast.LENGTH_LONG).show();
                 }
             }
-            Client.confirmation_code = 0;   // reset to 0 for future operations
+            Client.confirmation_code = 0;// reset to 0 for future operations
+            Client.action = 0;
+            serverThread.interrupt();
 
         } else if (view.getId() == R.id.join_server) {
             // do some stuff

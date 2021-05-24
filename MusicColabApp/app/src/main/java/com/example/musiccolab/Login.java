@@ -101,7 +101,8 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                     Toast.makeText(getApplicationContext(), "Login Failed\nPlease try again", Toast.LENGTH_LONG).show();
                 }
             }
-            Client.confirmation_code = 0;   // reset to 0 for future operations
+            Client.confirmation_code = (short) 0;   // reset to 0 for future operations
+            Client.action = (short) 0;
             loginThread.interrupt();
         }
     }
