@@ -34,55 +34,52 @@ import java.util.Set;
  * Receive:     <answer from Server>
  */
 
-public class Client extends AppCompatActivity implements Runnable {
+public class Client extends AppCompatActivity implements Runnable{
 
-    String localhost = "192.168.178.52";           // localhost for android devices (finally)
-    int port = 8080;                         // 3001, 8080, 1201, etc...
-    Context context;
+    private static Client client = null;
 
-    // general constructor
-    public Client(Context context, short action, String email, String userName, String password) {
-        this.context = context;
-        this.action = action;
-        this.email = email;
-        this.userName = userName;
-        this.password = password;
-        // took it from server team as it is
+    public static String localhost = "192.168.178.52";           // localhost for android devices (finally)
+    public static int port = 8080;                         // 3001, 8080, 1201, etc...
+    public static Context context;
+
+    private static Charset messageCharset = null;
+    private static CharsetDecoder decoder = null;
+    private static byte [] clientName = null;
+
+    final private  List<Short> codesList = new ArrayList<Short>();
+    final private  List<Short> errorCodesList = new ArrayList<Short>();
+    public static boolean neededAction = false;
+    final private static short protocolName = 12845;
+    public static short confirmation_code = 0;
+    public static short action;
+    public static String email;
+    public static String userName;
+    public static String password;
+    public static byte toneAction = 1; //1 taste gedrückt, 2 taste wieder los gelassen
+    public static byte toneType = 1; //1= Klavier, 2=drums, 3= theremin
+    public static String toneData = "dataExample2"; //gespielter ton
+    public static String lobbyName = "example";
+    public static String lobbyID = "0";
+
+    private Client() {
         for(short index = 1; index < 11; index++) {
             codesList.add(index);
             errorCodesList.add( (short) (index + 10));
         }
     }
 
-    // this constructor is just for the disconnect
-    public Client(short action) {
-        this.action = action;
+    public static synchronized Client getInstance() {
+        if (client == null) client = new Client();
+        return client;
     }
-
-    private static Charset messageCharset = null;
-    private static CharsetDecoder decoder = null;
-    private static byte [] clientName = null;
-
-    final private List<Short> codesList = new ArrayList<Short>();
-    final private List<Short> errorCodesList = new ArrayList<Short>();
-    private boolean neededAction = false;
-    final private short protocolName = 12845;
-    private short action;
-    private String email;
-    private String userName;
-    private String password;
-    private byte toneAction = 1; //1 taste gedrückt, 2 taste wieder los gelassen
-    private byte toneType = 1; //1= Klavier, 2=drums, 3= theremin
-    private String toneData = "dataExample2"; //gespielter ton
-    private String lobbyName = "example";
-    private String lobbyID = "0";
 
     private static void printUsage() {
         System.err.println("Usage: java SMTPClient <address> <port>");
     }
-    public SocketChannel channel = null;
+
     @Override
     public void run() {
+        SocketChannel channel = null;
         InetSocketAddress remoteAddress = null;
         Selector selector = null;
         try {
@@ -184,8 +181,10 @@ public class Client extends AppCompatActivity implements Runnable {
                             else if (actionDataLength[1] == -2)
                                 System.out.println("Server sent unknown action!");
                             else {
+
                                 if (actionDataLength[0] == 1 || actionDataLength[0] == 2 || actionDataLength[0] == 3 ||
                                         actionDataLength[0] == 11 || actionDataLength[0] == 12 || actionDataLength[0] == 13) {
+                                    confirmation_code = actionDataLength[0];
                                     channel.read(responseBuffer);
                                     responseBuffer.flip();
                                     System.out.println("Action: " + actionDataLength[0] + "\n" +
@@ -194,14 +193,6 @@ public class Client extends AppCompatActivity implements Runnable {
                                         System.out.println("Error message: " + messageCharset.decode(responseBuffer).toString());
                                     else
                                         System.out.println("Response: " + messageCharset.decode(responseBuffer).toString());
-                                    if (actionDataLength[0] == 1) {
-                                        // i have set "FLAG_ACTIVITY_NEW_TASK" to force the Client to open a new Activity
-                                        context.startActivity(new Intent(context, PreLobby.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-                                    }
-                                    if (actionDataLength[0] == 2) {
-                                        context.startActivity(new Intent(context, Login.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-                                        System.exit(1);
-                                    }
                                     // register confirmation
                                     if (actionDataLength[0] == 3) {
                                         channel.close();
@@ -214,6 +205,7 @@ public class Client extends AppCompatActivity implements Runnable {
 
                                 } else if (actionDataLength[0] == 4 || actionDataLength[0] == 5 || actionDataLength[0] == 6 ||
                                         actionDataLength[0] == 8 || actionDataLength[0] == 9 || actionDataLength[0] == 10) {
+                                    confirmation_code = actionDataLength[0];
                                     channel.read(responseBuffer);
                                     responseBuffer.flip();
                                     System.out.println("Action: " + actionDataLength[0] + "\n" +
@@ -222,6 +214,7 @@ public class Client extends AppCompatActivity implements Runnable {
                                         System.out.println("Error message: " + messageCharset.decode(responseBuffer).toString());
                                     else
                                         System.out.println("Response: " + messageCharset.decode(responseBuffer).toString());
+
                                 } else {
                                     channel.read(responseBuffer);
                                     responseBuffer.flip();
@@ -244,7 +237,7 @@ public class Client extends AppCompatActivity implements Runnable {
         }
     }
 
-    public byte[] convertShortToByte(short value){
+    public static byte[] convertShortToByte(short value){
         byte[] temp = new byte[2];
         temp[0] = (byte)(value & 0xff);
         temp[1] = (byte)((value >> 8) & 0xff);
@@ -256,7 +249,7 @@ public class Client extends AppCompatActivity implements Runnable {
         return (short) (((b[1] << 8) | b[0] & 0xff));
     }
 
-    public void sendQueryToServer(short action, SocketChannel channel) throws IOException {
+    private void sendQueryToServer(short action, SocketChannel channel) throws IOException {
         short dataLength;
         byte userNameLength;
         byte passwordLength;
@@ -282,9 +275,9 @@ public class Client extends AppCompatActivity implements Runnable {
 
             if (action == 2) {
                 // if user want to disconnect, clear the sensitive data
-                this.email = null;
-                this.userName = null;
-                this.password = null;
+                email = null;
+                userName = null;
+                password = null;
             }
         }
         // register

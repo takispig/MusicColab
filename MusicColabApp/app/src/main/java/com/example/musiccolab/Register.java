@@ -17,6 +17,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.concurrent.TimeUnit;
 
 public class Register extends AppCompatActivity implements View.OnClickListener {
 
@@ -52,8 +53,26 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
             userView = (EditText) findViewById(R.id.username);
             username = userView.getText().toString();
 
-            // call Client() constructor ny passing the suitable arguments -> action=1 (login)
-            new Thread(new Client(getApplicationContext(), (short) 3, email, username, password)).start();
+            // fetch Client data  -> action=2 (register)
+            Client.getInstance();
+            Client.email = email;
+            Client.userName = username;
+            Client.password = password;
+            Client.action = (short) 3;
+            Thread registerThread = new Thread(()->Client.getInstance().run());
+            registerThread.start();
+            // check for any changes in Client...when login succeed then confirmation_code will be 1
+            while (Client.confirmation_code == 0) {
+                Client.getInstance();   // retrieve latest changes in Client to check again for the confirmation
+                if (Client.confirmation_code == 3) {
+                    Toast.makeText(getApplicationContext(), "Registration Successful\nRedirecting to Login page...", Toast.LENGTH_LONG).show();
+                    startActivity(new Intent(this, Login.class));
+                } else if (Client.confirmation_code == 13) {
+                    Toast.makeText(getApplicationContext(), "Registration Failed\nPlease try again", Toast.LENGTH_LONG).show();
+                }
+            }
+            Client.confirmation_code = 0;   // reset to 0 for future operations
+            registerThread.interrupt();
 
         } else if (view.getId() == R.id.aboutt) {
             // send the user to about us website, or pip up a new window
