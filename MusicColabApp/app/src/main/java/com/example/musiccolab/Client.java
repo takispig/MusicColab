@@ -36,7 +36,7 @@ import java.util.Set;
 
 public class Client extends AppCompatActivity implements Runnable {
 
-    String localhost = "10.0.2.2";           // localhost for android devices (finally)
+    String localhost = "192.168.178.52";           // localhost for android devices (finally)
     int port = 8080;                         // 3001, 8080, 1201, etc...
     Context context;
 
