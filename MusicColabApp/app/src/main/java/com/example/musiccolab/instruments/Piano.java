@@ -1,4 +1,4 @@
-package com.example.musiccolab.instruments;
+package instruments;
 
 import android.annotation.SuppressLint;
 import android.media.AudioManager;
@@ -73,7 +73,7 @@ public class Piano extends AppCompatActivity implements View.OnClickListener{
                         System.out.println("a pressed");
                         break;
                     case MotionEvent.ACTION_UP:
-                        a.startAnimation(scaleUp);
+                        a.clearAnimation();
                         soundPool.pause(sound_a);
                         System.out.println("a released");
                         break;
@@ -95,7 +95,7 @@ public class Piano extends AppCompatActivity implements View.OnClickListener{
                         System.out.println("b pressed");
                         break;
                     case MotionEvent.ACTION_UP:
-                        b.startAnimation(scaleUp);
+                        b.clearAnimation();
                         soundPool.pause(sound_b);
                         System.out.println("b released");
                         break;
@@ -117,7 +117,7 @@ public class Piano extends AppCompatActivity implements View.OnClickListener{
                         System.out.println("c pressed");
                         break;
                     case MotionEvent.ACTION_UP:
-                        c.startAnimation(scaleUp);
+                        c.clearAnimation();
                         soundPool.pause(sound_c);
                         System.out.println("c released");
                         break;
@@ -139,7 +139,7 @@ public class Piano extends AppCompatActivity implements View.OnClickListener{
                         System.out.println("d pressed");
                         break;
                     case MotionEvent.ACTION_UP:
-                        d.startAnimation(scaleUp);
+                        d.clearAnimation();
                         soundPool.pause(sound_d);
                         System.out.println("d released");
                         break;
@@ -161,7 +161,7 @@ public class Piano extends AppCompatActivity implements View.OnClickListener{
                         System.out.println("e pressed");
                         break;
                     case MotionEvent.ACTION_UP:
-                        e.startAnimation(scaleUp);
+                        e.clearAnimation();
                         soundPool.pause(sound_e);
                         System.out.println("e released");
                         break;
@@ -183,7 +183,7 @@ public class Piano extends AppCompatActivity implements View.OnClickListener{
                         System.out.println("f pressed");
                         break;
                     case MotionEvent.ACTION_UP:
-                        f.startAnimation(scaleUp);
+                        f.clearAnimation();
                         soundPool.pause(sound_f);
                         System.out.println("f released");
                         break;
@@ -205,7 +205,7 @@ public class Piano extends AppCompatActivity implements View.OnClickListener{
                         System.out.println("g pressed");
                         break;
                     case MotionEvent.ACTION_UP:
-                        g.startAnimation(scaleUp);
+                        g.clearAnimation();
                         soundPool.pause(sound_g);
                         System.out.println("g released");
                         break;
@@ -227,7 +227,7 @@ public class Piano extends AppCompatActivity implements View.OnClickListener{
                         System.out.println("h pressed");
                         break;
                     case MotionEvent.ACTION_UP:
-                        h.startAnimation(scaleUp);
+                        h.clearAnimation();
                         soundPool.pause(sound_h);
                         System.out.println("h released");
                         break;
