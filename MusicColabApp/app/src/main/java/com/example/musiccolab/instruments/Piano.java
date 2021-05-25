@@ -1,4 +1,4 @@
-package com.example.musiccolab.instruments;
+package instruments;
 
 import android.annotation.SuppressLint;
 import android.media.AudioManager;
@@ -14,7 +14,6 @@ import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.musiccolab.Client;
 import com.example.musiccolab.R;
 
 public class Piano extends AppCompatActivity implements View.OnClickListener{
@@ -64,11 +63,49 @@ public class Piano extends AppCompatActivity implements View.OnClickListener{
         sound_h = soundPool.load(this, R.raw.p_h, 1);
         sound_c2 = soundPool.load(this, R.raw.p_c2, 1);
 
+        a.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getActionMasked()){
+                    case MotionEvent.ACTION_DOWN:
+                        a.startAnimation(scaleDown);
+                        soundPool.play(sound_a, 1, 1, 0, 0, 1);
+                        System.out.println("a pressed");
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        a.clearAnimation();
+                        soundPool.pause(sound_a);
+                        System.out.println("a released");
+                        break;
+                    default:
+                        System.out.println("no key pressed");
+                        break;
+                }
+                return true;
+            }
+        });
 
-        Thread pianoThread = new Thread(()->Client.getInstance().run());
-        pianoThread.start();
-        Client.toneType= 1;
-        Client.action=7;
+        b.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getActionMasked()){
+                    case MotionEvent.ACTION_DOWN:
+                        b.startAnimation(scaleDown);
+                        soundPool.play(sound_b, 1, 1, 0, 0, 1);
+                        System.out.println("b pressed");
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        b.clearAnimation();
+                        soundPool.pause(sound_b);
+                        System.out.println("b released");
+                        break;
+                    default:
+                        System.out.println("no key pressed");
+                        break;
+                }
+                return true;
+            }
+        });
 
         c.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -78,14 +115,11 @@ public class Piano extends AppCompatActivity implements View.OnClickListener{
                         c.startAnimation(scaleDown);
                         soundPool.play(sound_c, 1, 1, 0, 0, 1);
                         System.out.println("c pressed");
-                        Client.toneAction=1;
-                        Client.toneData="c";
                         break;
                     case MotionEvent.ACTION_UP:
-                        c.startAnimation(scaleUp);
+                        c.clearAnimation();
                         soundPool.pause(sound_c);
                         System.out.println("c released");
-                        Client.toneAction=2;
                         break;
                     default:
                         System.out.println("no key pressed");
@@ -103,14 +137,11 @@ public class Piano extends AppCompatActivity implements View.OnClickListener{
                         d.startAnimation(scaleDown);
                         soundPool.play(sound_d, 1, 1, 0, 0, 1);
                         System.out.println("d pressed");
-                        Client.toneAction=1;
-                        Client.toneData="d";
                         break;
                     case MotionEvent.ACTION_UP:
-                        d.startAnimation(scaleUp);
+                        d.clearAnimation();
                         soundPool.pause(sound_d);
                         System.out.println("d released");
-                        Client.toneAction=2;
                         break;
                     default:
                         System.out.println("no key pressed");
@@ -128,14 +159,11 @@ public class Piano extends AppCompatActivity implements View.OnClickListener{
                         e.startAnimation(scaleDown);
                         soundPool.play(sound_e, 1, 1, 0, 0, 1);
                         System.out.println("e pressed");
-                        Client.toneAction=1;
-                        Client.toneData="e";
                         break;
                     case MotionEvent.ACTION_UP:
-                        e.startAnimation(scaleUp);
+                        e.clearAnimation();
                         soundPool.pause(sound_e);
                         System.out.println("e released");
-                        Client.toneAction=2;
                         break;
                     default:
                         System.out.println("no key pressed");
@@ -153,14 +181,11 @@ public class Piano extends AppCompatActivity implements View.OnClickListener{
                         f.startAnimation(scaleDown);
                         soundPool.play(sound_f, 1, 1, 0, 0, 1);
                         System.out.println("f pressed");
-                        Client.toneAction=1;
-                        Client.toneData="f";
                         break;
                     case MotionEvent.ACTION_UP:
-                        f.startAnimation(scaleUp);
+                        f.clearAnimation();
                         soundPool.pause(sound_f);
                         System.out.println("f released");
-                        Client.toneAction=2;
                         break;
                     default:
                         System.out.println("no key pressed");
@@ -178,40 +203,11 @@ public class Piano extends AppCompatActivity implements View.OnClickListener{
                         g.startAnimation(scaleDown);
                         soundPool.play(sound_g, 1, 1, 0, 0, 1);
                         System.out.println("g pressed");
-                        Client.toneAction=1;
-                        Client.toneData="g";
                         break;
                     case MotionEvent.ACTION_UP:
-                        g.startAnimation(scaleUp);
+                        g.clearAnimation();
                         soundPool.pause(sound_g);
                         System.out.println("g released");
-                        Client.toneAction=2;
-                        break;
-                    default:
-                        System.out.println("no key pressed");
-                        break;
-                }
-                return true;
-            }
-        });
-
-        a.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getActionMasked()){
-                    case MotionEvent.ACTION_DOWN:
-                        a.startAnimation(scaleDown);
-                        soundPool.play(sound_a, 1, 1, 0, 0, 1);
-                        System.out.println("a pressed");
-                        Client.toneAction=1;
-                        Client.toneData="a";
-                        Client.toneAction=2;
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        a.startAnimation(scaleUp);
-                        soundPool.pause(sound_a);
-                        System.out.println("a released");
-                        Client.toneAction=2;
                         break;
                     default:
                         System.out.println("no key pressed");
@@ -229,39 +225,11 @@ public class Piano extends AppCompatActivity implements View.OnClickListener{
                         h.startAnimation(scaleDown);
                         soundPool.play(sound_h, 1, 1, 0, 0, 1);
                         System.out.println("h pressed");
-                        Client.toneAction=1;
-                        Client.toneData="h";
                         break;
                     case MotionEvent.ACTION_UP:
-                        h.startAnimation(scaleUp);
+                        h.clearAnimation();
                         soundPool.pause(sound_h);
                         System.out.println("h released");
-                        Client.toneAction=2;
-                        break;
-                    default:
-                        System.out.println("no key pressed");
-                        break;
-                }
-                return true;
-            }
-        });
-
-        c2.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getActionMasked()){
-                    case MotionEvent.ACTION_DOWN:
-                        c2.startAnimation(scaleDown);
-                        soundPool.play(sound_c2, 1, 1, 0, 0, 1);
-                        System.out.println("c2 pressed");
-                        Client.toneAction=1;
-                        Client.toneData="c2";
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        c2.startAnimation(scaleUp);
-                        soundPool.pause(sound_c2);
-                        System.out.println("c2 released");
-                        Client.toneAction=2;
                         break;
                     default:
                         System.out.println("no key pressed");
