@@ -6,9 +6,26 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.util.concurrent.TimeUnit;
 
 public class Register extends AppCompatActivity implements View.OnClickListener {
+
+    String email, password, username;
+    EditText emailView, passView, userView;
+    String localhost = "10.0.2.2";
+    int port = 3001;
+    boolean suc = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -16,28 +33,51 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
         setContentView(R.layout.register);
 
         // Create Listeners for the IDs: about, register
-
         Button register = (Button) findViewById(R.id.registerr);
         register.setOnClickListener(this);
         TextView about = (TextView) findViewById(R.id.aboutt);
         about.setOnClickListener(this);
 
     }
+
     @Override
     // In this function we will 'hear' for onClick events and according to
     // their IDs we will make the correct decision
     public void onClick(View view) {
         if (view.getId() == R.id.registerr) {
-            boolean suc = false;
-            // send data to the server and wait for registration-confirmation
-            // change suc accordingly
-            // if successful redirect the user to login page
-            if (suc == true) {
-                startActivity(new Intent(this, Login.class));
+            // get variable inputs from the app
+            emailView = (EditText) findViewById(R.id.email);
+            email = emailView.getText().toString();
+            passView = (EditText) findViewById(R.id.password);
+            password = passView.getText().toString();
+            userView = (EditText) findViewById(R.id.username);
+            username = userView.getText().toString();
+
+            // fetch Client data  -> action=2 (register)
+            Client.getInstance();
+            Client.email = email;
+            Client.userName = username;
+            Client.password = password;
+            Client.action = (short) 3;
+            Thread registerThread = new Thread(()->Client.getInstance().run());
+            registerThread.start();
+            // check for any changes in Client...when login succeed then confirmation_code will be 1
+            while (Client.confirmation_code == 0) {
+                Client.getInstance();   // retrieve latest changes in Client to check again for the confirmation
+                if (Client.confirmation_code == 3) {
+                    Toast.makeText(getApplicationContext(), "Registration Successful\nRedirecting to Login page...", Toast.LENGTH_LONG).show();
+                    startActivity(new Intent(this, Login.class));
+                } else if (Client.confirmation_code == 13) {
+                    Toast.makeText(getApplicationContext(), "Registration Failed\nPlease try again", Toast.LENGTH_LONG).show();
+                }
             }
+            Client.confirmation_code = 0;   // reset to 0 for future operations
+            registerThread.interrupt();
+
         } else if (view.getId() == R.id.aboutt) {
             // send the user to about us website, or pip up a new window
-            System.out.println("About is not yet implemented.");
+            startActivity(new Intent(this, About.class));
         }
     }
+
 }

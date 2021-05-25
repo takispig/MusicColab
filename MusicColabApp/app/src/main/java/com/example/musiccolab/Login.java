@@ -4,24 +4,54 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
+
 public class Login extends AppCompatActivity implements View.OnClickListener {
 
-    String email, password;
-    EditText emailView, passView;
+    String userName, password;
+    EditText userNameView, passView;
+    String localhost = "10.0.2.2";
+    int port = 3001;
+    boolean suc = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
 
-        // Create Listeners for the IDs: login, about, register, forgot_password
+        // uncomment ONLY IF NECESSARY -> eliminates ERRORS but make the App unresponsive
+//        if (android.os.Build.VERSION.SDK_INT > 9) {
+//            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+//            StrictMode.setThreadPolicy(policy);
+//        }
 
+        // Create Listeners for the IDs: login, about, register, forgot_password
         TextView register = (TextView) findViewById(R.id.register);
         register.setOnClickListener(this);
         TextView about = (TextView) findViewById(R.id.about);
@@ -33,35 +63,47 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
 
     }
 
-
     @Override
     // In this function we will 'hear' for onClick events and according to
     // their IDs we will make the correct decision
     public void onClick(View view) {
         if (view.getId() == R.id.register) {
             // this open the Register activity in the app
+            Client.getInstance();
+            Client.context = getApplicationContext();
             startActivity(new Intent(this, Register.class));
         } else if (view.getId() == R.id.about) {
             // send the user to about us website, or pip up a new window
-            Toast.makeText(getApplicationContext(), "About is not yet implemented", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, About.class));
         } else if (view.getId() == R.id.forgot_password) {
             // send a reset link/code to the user
             Toast.makeText(getApplicationContext(), "Forgot Password is not yet implemented", Toast.LENGTH_SHORT).show();
         } else if (view.getId() == R.id.login_submit) {
             // send the email + password in the server to check authorisation
-            emailView = (EditText) findViewById(R.id.email);
-            email = emailView.getText().toString();
-
+            userNameView = (EditText) findViewById(R.id.email);
+            userName = userNameView.getText().toString();
             passView = (EditText) findViewById(R.id.password);
             password = passView.getText().toString();
 
-            if (email.contentEquals("a") && password.contentEquals("a")) {
-                // send the user to the PreLobby activity
-                startActivity(new Intent(this, PreLobby.class));
-            } else {
-                // show a message that password or username is incorrect
-                Toast.makeText(getApplicationContext(), "Username or Password incorrect", Toast.LENGTH_LONG).show();
+            // fetch Client() data and modify them -> action=1 (login)
+            Client.getInstance();
+            Client.userName = userName;
+            Client.password = password;
+            Client.action = (short) 1;
+            Thread loginThread = new Thread(()->Client.getInstance().run());
+            loginThread.start();
+            // check for any changes in Client...when login succeed then confirmation_code will be 1
+            while (Client.confirmation_code == 0) {
+                Client.getInstance();   // retrieve latest changes in Client to check again for the confirmation
+                if (Client.confirmation_code == 1) {
+                    startActivity(new Intent(this, PreLobby.class));
+                } else if (Client.confirmation_code == 11) {
+                    Toast.makeText(getApplicationContext(), "Login Failed\nPlease try again", Toast.LENGTH_LONG).show();
+                }
             }
+            Client.confirmation_code = (short) 0;   // reset to 0 for future operations
+            Client.action = (short) 0;
+            loginThread.interrupt();
         }
     }
 }
