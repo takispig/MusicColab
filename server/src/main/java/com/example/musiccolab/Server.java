@@ -84,7 +84,7 @@ public class Server {
      * According to the return value of function "analyseMainBuffer" send an error message or
      * handle the received action.
      */
-    private void handleConnectionWhenReadable(SelectionKey key) throws IOException, SQLException, ClassNotFoundException {
+    private void handleConnectionWhenReadable(SelectionKey key) throws IOException {
         //int state = (Integer) key.attachment(); //To save the state of all clients. Integer --> Class
 
         SocketChannel clientChannel = (SocketChannel) key.channel();
@@ -109,7 +109,7 @@ public class Server {
             protocol.handleAction(messageCharset, clientChannel, result[1]);
     }
 
-    public void handleConnection() throws IOException, SQLException, ClassNotFoundException {
+    public void handleConnection() throws IOException {
         System.out.println("Waiting for connection: ");
 
         while (running) {

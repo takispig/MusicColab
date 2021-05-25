@@ -107,7 +107,7 @@ public class Protocol {
         loginSystemBuffer.clear();
     }
 
-    private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel) throws IOException, SQLException, ClassNotFoundException {
+    private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel) throws IOException {
 
         String username, password, email = "";
         boolean checkResponse;
@@ -136,19 +136,49 @@ public class Protocol {
         loginSystemBuffer.clear();
 
         if(action == register) {
-            checkResponse = LoginSystem.register(username, email, password);
-            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
-            System.out.println("main.java.com.example.musiccolab.Client is registered.");
+            try {
+                checkResponse = LoginSystem.register(username, email, password);
+                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+                System.out.println("main.java.com.example.musiccolab.Client is registered.");
+            } catch (SQLException e) {
+                checkResponse = false;
+                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+                System.out.println("ERROR: SQL");
+            } catch (ClassNotFoundException e) {
+                checkResponse = false;
+                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+                System.out.println("ERROR: ClassNotFound");
+            }
         }
         else if(action == login) {
-            checkResponse = LoginSystem.login(username, password, clientChannel);
-            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
-            System.out.println("main.java.com.example.musiccolab.Client is logged in.");
+            try {
+                checkResponse = LoginSystem.login(username, password, clientChannel);
+                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+                System.out.println("main.java.com.example.musiccolab.Client is logged in.");
+            } catch (SQLException e) {
+                checkResponse = false;
+                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+                System.out.println("ERROR: SQL");
+            } catch (ClassNotFoundException e) {
+                checkResponse = false;
+                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+                System.out.println("ERROR: ClassNotFound");
+            }
         }
         else if(LoginSystem.getPlayerByChannel(clientChannel) != null){
-            checkResponse = LoginSystem.logout(username, password);
-            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
-            System.out.println("main.java.com.example.musiccolab.Client is logged out.");
+            try {
+                checkResponse = LoginSystem.logout(username, password);
+                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+                System.out.println("main.java.com.example.musiccolab.Client is logged out.");
+            } catch (SQLException e){
+                checkResponse = false;
+                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+                System.out.println("ERROR: SQL");
+            } catch (ClassNotFoundException e){
+                checkResponse = false;
+                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+                System.out.println("ERROR: ClassNotFound");
+            }
         }
     }
 
@@ -216,16 +246,19 @@ public class Protocol {
         toneBuffer.flip();
         String toneData= messageCharset.decode(toneBuffer).toString();
         toneBuffer.clear();
-
-        Lobby clientLobby = Server.lobbyMap.get(LoginSystem.getPlayerByChannel(clientChannel).getLobbyId());
-        musicJoiner = new MusicJoiner(clientLobby, toneAction, toneType, toneData, clientChannel);
-        musicJoiner.handleToneData();
-        responseAction = action;
-        for(byte index = 0; index < clientLobby.getUsersNumber(); index++)
-            sendResponseToClient(messageCharset, musicJoiner.getClientChannels().get(index), musicJoiner.getClientResponses().get(index));
+        if (LoginSystem.getPlayerByChannel(clientChannel) != null) {
+            Lobby clientLobby = Server.lobbyMap.get(LoginSystem.getPlayerByChannel(clientChannel).getLobbyId());
+            musicJoiner = new MusicJoiner(clientLobby, toneAction, toneType, toneData, clientChannel);
+            musicJoiner.handleToneData();
+            responseAction = action;
+            for (byte index = 0; index < clientLobby.getUsersNumber(); index++)
+                sendResponseToClient(messageCharset, musicJoiner.getClientChannels().get(index), musicJoiner.getClientResponses().get(index));
+        } else {
+            //todo: ERROR
+        }
     }
 
-    public void handleAction(Charset messageCharset, SocketChannel clientChannel, int bufferSize) throws SQLException, IOException, ClassNotFoundException {
+    public void handleAction(Charset messageCharset, SocketChannel clientChannel, int bufferSize) throws IOException {
         if(bufferSize != 0){
             playerAddress = clientChannel.getRemoteAddress();
 
