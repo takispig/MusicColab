@@ -102,7 +102,6 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                 }
             }
             Client.confirmation_code = (short) 0;   // reset to 0 for future operations
-            Client.action = (short) 0;
             loginThread.interrupt();
         }
     }

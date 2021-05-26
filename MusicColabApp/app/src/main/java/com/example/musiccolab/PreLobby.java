@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,6 +35,8 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
         join_server.setOnClickListener(this);
         TextView connect = (TextView) findViewById(R.id.connect);
         connect.setOnClickListener(this);
+        ImageButton logout = findViewById(R.id.logout);
+        logout.setOnClickListener(this);
 
         // Update the Username from the Client (data are stored from login)
         Client.getInstance();
@@ -85,13 +88,26 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                 }
             }
             Client.confirmation_code = 0;// reset to 0 for future operations
-            Client.action = 0;
             serverThread.interrupt();
 
         } else if (view.getId() == R.id.join_server) {
             // do some stuff
             Toast.makeText(getApplicationContext(), "Join Server is not yet implemented", Toast.LENGTH_SHORT).show();
-
+        } else if (view.getId() == R.id.logout) {
+            // do some stuff
+            Client.action = (short) 2;
+            Thread logoutThread = new Thread(()->Client.getInstance().run());
+            logoutThread.start();
+            while (Client.confirmation_code == 0) {
+                Client.getInstance();   // retrieve latest changes in Client to check again for the confirmation
+                if (Client.confirmation_code == 2) {
+                    startActivity(new Intent(this, Login.class));
+                } else if (Client.confirmation_code == 12) {
+                    Toast.makeText(getApplicationContext(), "Logout Failed\nPlease try again", Toast.LENGTH_LONG).show();
+                }
+            }
+            Client.confirmation_code = (short) 0;   // reset to 0 for future operations
+            logoutThread.interrupt();
         } else if (view.getId() == R.id.connect) {
             // do some stuff
             System.out.println("Redirect to Lobby - Testing!");
