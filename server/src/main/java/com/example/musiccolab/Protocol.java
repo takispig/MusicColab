@@ -5,6 +5,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -33,12 +34,12 @@ public class Protocol {
 
 
 
-    final private String[][] responsesArray = { {"main.java.com.example.musiccolab.Client logged in", "error"},
-                                          {"main.java.com.example.musiccolab.Client logged out", "error"},
-                                          {"main.java.com.example.musiccolab.Client registered", "error"},};
+    final private String[][] responsesArray = { {"main.java.com.example.musiccolab.Client logged in", "error with login"},
+                                          {"main.java.com.example.musiccolab.Client logged out", "error with logout"},
+                                          {"main.java.com.example.musiccolab.Client registered", "Client is already registered."},};
 
     public Protocol(){
-        for(short index = 1; index < 11; index++)
+        for(short index = 0; index < 11; index++)
             codesList.add(index);
     }
 
@@ -110,7 +111,7 @@ public class Protocol {
     private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel) throws IOException {
 
         String username, password, email = "";
-        boolean checkResponse;
+        boolean checkResponse = false;
 
         readSizes(messageCharset, clientChannel);
         ByteBuffer loginSystemBuffer;
@@ -135,51 +136,27 @@ public class Protocol {
         password = messageCharset.decode(loginSystemBuffer).toString();
         loginSystemBuffer.clear();
 
-        if(action == register) {
-            try {
+        try {
+            if (action == register) {
                 checkResponse = LoginSystem.register(username, email, password);
-                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
                 System.out.println("main.java.com.example.musiccolab.Client is registered.");
-            } catch (SQLException e) {
-                checkResponse = false;
-                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-                System.out.println("ERROR: SQL");
-            } catch (ClassNotFoundException e) {
-                checkResponse = false;
-                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-                System.out.println("ERROR: ClassNotFound");
-            }
-        }
-        else if(action == login) {
-            try {
+
+            } else if (action == login) {
                 checkResponse = LoginSystem.login(username, password, clientChannel);
-                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
                 System.out.println("main.java.com.example.musiccolab.Client is logged in.");
-            } catch (SQLException e) {
-                checkResponse = false;
-                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-                System.out.println("ERROR: SQL");
-            } catch (ClassNotFoundException e) {
-                checkResponse = false;
-                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-                System.out.println("ERROR: ClassNotFound");
-            }
-        }
-        else if(LoginSystem.getPlayerByChannel(clientChannel) != null){
-            try {
-                checkResponse = LoginSystem.logout(username, password);
-                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+
+            } else if (action == logout) {
+                checkResponse = LoginSystem.getPlayerByChannel(clientChannel) != null && LoginSystem.logout(username, password);
                 System.out.println("main.java.com.example.musiccolab.Client is logged out.");
-            } catch (SQLException e){
-                checkResponse = false;
-                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-                System.out.println("ERROR: SQL");
-            } catch (ClassNotFoundException e){
-                checkResponse = false;
-                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-                System.out.println("ERROR: ClassNotFound");
             }
+            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+            return;
+        } catch (SQLException e) {
+            System.out.println("ERROR: SQL");
+        } catch (ClassNotFoundException e) {
+            System.out.println("ERROR: ClassNotFound");
         }
+        sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
     }
 
     private void parseBufferForLobbyOrGame(Charset messageCharset, SocketChannel clientChannel, int lobbyNameIsSize) throws IOException {
@@ -302,19 +279,19 @@ public class Protocol {
             responseAction = action;
         }
         else{
-            message = "either lobby is full, lobbyId is wrong or you are already in.";
+            message = "either lobby is full or lobbyId is wrong or you are already in.";
             responseAction = (short) (action + 10);
         }
         return message;
     }
 
     public void sendResponseToClient(Charset messageCharset, SocketChannel clientChannel, String message){
+        message += "\r\n";
         short dataLength = (short) message.length();
-        ByteBuffer messageBuffer = ByteBuffer.allocate(6 + dataLength);
-        messageBuffer.put(convertShortToByte(protocolName));
-        messageBuffer.put(convertShortToByte(responseAction));
-        messageBuffer.put(convertShortToByte(dataLength));
-        messageBuffer.put(message.getBytes(messageCharset));
+        String tempString = "" + protocolName + "," + responseAction + "," + dataLength + ",";
+        tempString += message;
+        ByteBuffer messageBuffer = ByteBuffer.allocate(tempString.length());
+        messageBuffer.put(tempString.getBytes(messageCharset));
         messageBuffer.flip();
         try {
             clientChannel.write(messageBuffer);

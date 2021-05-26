@@ -72,7 +72,7 @@ public class Server {
         channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE); //AddState as third parameter.
 
 
-        String message = "Welcome in MusicCoLab Server.";
+        String message = "Welcome in MusicCoLab Server.\r\n";
         ByteBuffer tempBuffer = ByteBuffer.allocate(message.length());
         tempBuffer.put(message.getBytes(messageCharset));
         tempBuffer.flip();
@@ -94,18 +94,20 @@ public class Server {
 
         short[] result = protocol.analyseMainBuffer(messageCharset, clientChannel);
         if(result[1] == -1) {
-            protocol.sendResponseToClient(messageCharset, clientChannel, "You are not our customer.");
+            protocol.sendResponseToClient(messageCharset, clientChannel, "You are not our customer.\r\n");
             clientChannel.close();
         }
         else if(result[1] == -2) {
-            protocol.sendResponseToClient(messageCharset, clientChannel, "Action is not known.");
-            clientChannel.close();
+            if(result[0] != 0) {
+                protocol.sendResponseToClient(messageCharset, clientChannel, "Action is not known.\r\n");
+                clientChannel.close();
+            }
         }
         else if(result[1] == -3) {
             System.out.println("main.java.com.example.musiccolab.Client is disconnected.");
             clientChannel.close();
         }
-        else
+        else if(result[1] != 0)
             protocol.handleAction(messageCharset, clientChannel, result[1]);
     }
 
