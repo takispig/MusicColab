@@ -1,6 +1,7 @@
 package com.example.musiccolab;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -37,6 +39,8 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
         connect.setOnClickListener(this);
         ImageButton logout = findViewById(R.id.logout);
         logout.setOnClickListener(this);
+        Button create = findViewById(R.id.create);
+        create.setOnClickListener(this);
 
         // Update the Username from the Client (data are stored from login)
         Client.getInstance();
@@ -69,8 +73,15 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
     public void onClick(View view) {
 
         if (view.getId() == R.id.create_server) {
-            // send a request to the server (change only action, all other are the same)
-            Client.getInstance();
+            findViewById(R.id.create_server_popup).setVisibility(View.VISIBLE);
+        } else if (view.getId() == R.id.create) {
+            EditText name = findViewById(R.id.servername);
+            if (name.getText().toString().equals("")){
+                Toast.makeText(getApplicationContext(), "Please enter server name", Toast.LENGTH_LONG).show();
+                return;
+            }
+            else Client.lobbyName = name.getText().toString();
+            findViewById(R.id.create_server_popup).setVisibility(View.GONE);
             Client.action = (short) 4;
             Thread serverThread = new Thread(()->Client.getInstance().run());
             serverThread.start();

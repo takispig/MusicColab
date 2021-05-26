@@ -41,6 +41,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+
     <Button
         android:id="@+id/create_server"
         android:layout_width="wrap_content"
@@ -71,6 +72,54 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/or" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/create_server_popup"
+        android:layout_width="wrap_content"
+        android:layout_height="190dp"
+        android:background="#919191"
+        android:visibility="gone"
+        android:padding="20dp"
+        android:translationZ="100dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/username">
+
+        <TextView
+            android:id="@+id/choose_server_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Choose a name for your server:"
+            android:textSize="25sp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/servername"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:hint="Servername"
+            android:inputType="textEmailAddress"
+            android:textSize="25sp"
+            android:layout_marginTop="5dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/choose_server_name" />
+
+        <Button
+            android:id="@+id/create"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create"
+            android:textSize="25sp"
+            android:layout_marginTop="5dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/servername" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <TextView
         android:id="@+id/choose_instr"
