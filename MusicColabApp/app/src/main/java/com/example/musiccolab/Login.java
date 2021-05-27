@@ -82,10 +82,10 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             passView = (EditText) findViewById(R.id.password);
             userName = userNameView.getText().toString();
             password = passView.getText().toString();
-            CommunicationHandling communicationHandling = new CommunicationHandling(ip,port);
-            communicationHandling.login(userName,password);
+/*            CommunicationHandling communicationHandling = new CommunicationHandling(ip,port);
+            communicationHandling.login(userName,password);*/
 
-/*            // fetch Client() data and modify them -> action=1 (login)
+            // fetch Client() data and modify them -> action=1 (login)
             Client.getInstance();
             Client.userName = userName;
             Client.password = password;
@@ -102,7 +102,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                 }
             }
             Client.confirmation_code = (short) 0;   // reset to 0 for future operations
-            loginThread.interrupt();*/
+            loginThread.interrupt();
         }
     }
 }
