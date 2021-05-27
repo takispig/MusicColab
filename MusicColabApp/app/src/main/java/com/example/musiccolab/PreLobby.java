@@ -82,7 +82,8 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             }
             else Client.lobbyName = name.getText().toString();
             findViewById(R.id.create_server_popup).setVisibility(View.GONE);
-            Client.action = (short) 4;
+
+/*            Client.action = (short) 4;
             Thread serverThread = new Thread(()->Client.getInstance().run());
             serverThread.start();
             // check for any changes in Client...when login succeed then confirmation_code will be 1
@@ -99,8 +100,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                 }
             }
             Client.confirmation_code = 0;// reset to 0 for future operations
-            serverThread.interrupt();
-
+            serverThread.interrupt();*/
         } else if (view.getId() == R.id.join_server) {
             // do some stuff
             Toast.makeText(getApplicationContext(), "Join Server is not yet implemented", Toast.LENGTH_SHORT).show();

@@ -34,11 +34,12 @@ import java.util.Set;
 
 public class Login extends AppCompatActivity implements View.OnClickListener {
 
-    String userName, password;
+    static String email = "";
+    static String userName = "";
+    static String password = "";
+    static String ip = "192.168.178.52";
+    static int port = 8080;
     EditText userNameView, passView;
-    String localhost = "10.0.2.2";
-    int port = 3001;
-    boolean suc = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,9 +69,6 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
     // their IDs we will make the correct decision
     public void onClick(View view) {
         if (view.getId() == R.id.register) {
-            // this open the Register activity in the app
-            Client.getInstance();
-            Client.context = getApplicationContext();
             startActivity(new Intent(this, Register.class));
         } else if (view.getId() == R.id.about) {
             // send the user to about us website, or pip up a new window
@@ -81,11 +79,13 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         } else if (view.getId() == R.id.login_submit) {
             // send the email + password in the server to check authorisation
             userNameView = (EditText) findViewById(R.id.email);
-            userName = userNameView.getText().toString();
             passView = (EditText) findViewById(R.id.password);
+            userName = userNameView.getText().toString();
             password = passView.getText().toString();
+            CommunicationHandling communicationHandling = new CommunicationHandling(ip,port);
+            communicationHandling.login(userName,password);
 
-            // fetch Client() data and modify them -> action=1 (login)
+/*            // fetch Client() data and modify them -> action=1 (login)
             Client.getInstance();
             Client.userName = userName;
             Client.password = password;
@@ -102,7 +102,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                 }
             }
             Client.confirmation_code = (short) 0;   // reset to 0 for future operations
-            loginThread.interrupt();
+            loginThread.interrupt();*/
         }
     }
 }
