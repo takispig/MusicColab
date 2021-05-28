@@ -1,18 +1,59 @@
 package com.example.musiccolab;
 
+
+import static xdroid.toaster.Toaster.toast;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+
+class RegisterThread extends Thread{
+    @Override
+    public void run() {
+        new CommunicationHandling().register(Register.email,Register.username,Register.password);
+    }
+}
+
+class LoginThread extends Thread{
+    @Override
+    public void run() {
+        new CommunicationHandling().login(Login.userName,Login.password);
+    }
+}
+
+class LogoutThread extends Thread{
+    @Override
+    public void run() {
+        new CommunicationHandling().logout(Login.userName,Login.password);
+    }
+}
+
+class CreateThread extends Thread{
+    @Override
+    public void run() {
+        new CommunicationHandling().createLobby(PreLobby.lobbyName);
+    }
+}
+
+class JoinThread extends Thread{
+    @Override
+    public void run() {
+        new CommunicationHandling().joinLobby(PreLobby.lobbyID);
+    }
+}
+
+class leaveThread extends Thread{
+    @Override
+    public void run() {
+        new CommunicationHandling().leaveLobby(PreLobby.lobbyID);
+    }
+}
 
 public class CommunicationHandling {
     private Charset messageCharset = null;
@@ -20,8 +61,8 @@ public class CommunicationHandling {
     private BufferedOutputStream out;
     private BufferedReader in;
 
-    private String IP;
-    private int port;
+    static String IP = "192.168.178.52"; //35.207.116.16
+    static int port = 8080;
 
 
     final private List<Short> codesList = new ArrayList<Short>();
@@ -34,6 +75,7 @@ public class CommunicationHandling {
     private boolean threadExist = false;
     private ToneListener toneThread = null;
 
+    public static int finished = 0; //1 successful, 2 error
 
     /**
      *  Please creat two a boolean, static eventChecker variable.
@@ -46,44 +88,72 @@ public class CommunicationHandling {
      */
 
 
-    public CommunicationHandling(String IP_address, int port){
-        this.IP = IP_address;
-        this.port = port;
+    public CommunicationHandling(){
+        finished = 0;
         for(short index = 1; index < 11; index++) {
             codesList.add(index);
             errorCodesList.add( (short) (index + 10));
         }
     }
 
-
-    public String register(String email, String userName, String password){
+    public void register(String email, String userName, String password){
         action = 3;
-        return loginSystem(action, email, userName, password);
+        if(loginSystem(action, email, userName, password).equals("Error")){
+            toast("Register Failed\nPlease try again");
+            finished = 2;
+        }else{
+            finished = 1;
+        }
     }
 
-    public String login(String userName, String password){
+    public void login(String userName, String password){
         action = 1;
-        return loginSystem(action, "", userName, password);
+        if(loginSystem(action, "", userName, password).equals("Error")){
+            toast("Login Failed\nPlease try again");
+            finished = 2;
+        }else {
+            finished = 1;
+        }
     }
 
-    public String logout(String userName, String password){
+    public void logout(String userName, String password){
         action = 2;
-        return loginSystem(action, "", userName, password);
+        if(loginSystem(action, "", userName, password).equals("Error")){
+            toast("Logout Failed\nPlease try again");
+            finished = 2;
+        }else {
+            finished = 1;
+        }
     }
 
-    public String createLobby(String lobbyName){
+    public void createLobby(String lobbyName){
         action = 4;
-        return lobby(action, lobbyName);
+        if(lobby(action, lobbyName).equals("Error")){
+            toast("Create Lobby Failed\nPlease try again");
+            finished = 2;
+        }else {
+            finished = 1;
+        }
     }
 
-    public String joinLobby(int lobbyId){
+    public void joinLobby(int lobbyId){
         action = 5;
-        return lobby(action, Integer.toString(lobbyId));
+        if(lobby(action,Integer.toString(lobbyId)).equals("Error")){
+            toast("Join Lobby Failed\nPlease try again");
+            finished = 2;
+        }else {
+            finished = 1;
+        }
     }
 
-    public String leaveLobby(int lobbyId){
+    public void leaveLobby(int lobbyId){
         action = 6;
-        return lobby(action, Integer.toString(lobbyId));
+        if(lobby(action,Integer.toString(lobbyId)).equals("Error")){
+            toast("Leave Lobby Failed\nPlease try again");
+            finished = 2;
+        }else {
+            finished = 1;
+        }
     }
 
     public String sendTone(String data, byte toneType, byte toneAction){
@@ -119,6 +189,7 @@ public class CommunicationHandling {
             return "Error";
         }
         String[] actionDataLength = analyseResponse(messageCharset);
+        if (Integer.parseInt(actionDataLength[0]) > 10) return "Error";
         if(!threadExist && Integer.parseInt(actionDataLength[0]) < 10 && action != 6){
             toneThread = new ToneListener(IP, port, out, in);
             toneThread.start();

@@ -4,41 +4,18 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
+import static xdroid.toaster.Toaster.toast;
 
-import java.io.BufferedReader;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.SocketChannel;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Set;
 
 public class Login extends AppCompatActivity implements View.OnClickListener {
 
     static String email = "";
     static String userName = "";
     static String password = "";
-    static String ip = "192.168.178.52";
-    static int port = 8080;
     EditText userNameView, passView;
 
     @Override
@@ -75,34 +52,27 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             startActivity(new Intent(this, About.class));
         } else if (view.getId() == R.id.forgot_password) {
             // send a reset link/code to the user
-            Toast.makeText(getApplicationContext(), "Forgot Password is not yet implemented", Toast.LENGTH_SHORT).show();
+            toast("Forgot Password is not yet implemented");
         } else if (view.getId() == R.id.login_submit) {
             // send the email + password in the server to check authorisation
-            userNameView = (EditText) findViewById(R.id.email);
-            passView = (EditText) findViewById(R.id.password);
+            userNameView = findViewById(R.id.email);
+            passView = findViewById(R.id.password);
             userName = userNameView.getText().toString();
             password = passView.getText().toString();
-/*            CommunicationHandling communicationHandling = new CommunicationHandling(ip,port);
-            communicationHandling.login(userName,password);*/
 
-            // fetch Client() data and modify them -> action=1 (login)
-            Client.getInstance();
-            Client.userName = userName;
-            Client.password = password;
-            Client.action = (short) 1;
-            Thread loginThread = new Thread(()->Client.getInstance().run());
-            loginThread.start();
-            // check for any changes in Client...when login succeed then confirmation_code will be 1
-            while (Client.confirmation_code == 0) {
-                Client.getInstance();   // retrieve latest changes in Client to check again for the confirmation
-                if (Client.confirmation_code == 1) {
-                    startActivity(new Intent(this, PreLobby.class));
-                } else if (Client.confirmation_code == 11) {
-                    Toast.makeText(getApplicationContext(), "Login Failed\nPlease try again", Toast.LENGTH_LONG).show();
-                }
+
+            new LoginThread().start();
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-            Client.confirmation_code = (short) 0;   // reset to 0 for future operations
-            loginThread.interrupt();
+            if (CommunicationHandling.finished==1){
+                startActivity(new Intent(this, PreLobby.class));
+            }else if (CommunicationHandling.finished==0){
+                toast("Connection timeout");
+            }
+
         }
     }
 }
