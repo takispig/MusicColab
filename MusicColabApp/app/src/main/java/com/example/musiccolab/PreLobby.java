@@ -16,14 +16,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.example.musiccolab.Login;
 
+import com.example.musiccolab.instruments.InstrumentType;
 import com.example.musiccolab.instruments.Piano;
 
 import java.net.Socket;
 
 public class PreLobby extends AppCompatActivity implements View.OnClickListener {
 
-    public String Instrument;
-    String [] instruments = {"Theremin", "Keyboards", "Drums"};
+    public static final String SELECTED_INSTRUMENT = "selectedInstrument";
+    private String selectedInstrument;
+    private final String[] instruments = {InstrumentType.THEREMIN, InstrumentType.DRUMS, InstrumentType.PIANO};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +59,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
 
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Instrument = instruments[position]; // set the selected Instrument to the global variable Instrument
+                selectedInstrument = instruments[position]; // set the selected Instrument to the global variable Instrument
                 Toast.makeText(getApplicationContext(), "Instrument: " + instruments[position], Toast.LENGTH_SHORT).show();
             }
 
@@ -120,19 +122,18 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             Client.confirmation_code = (short) 0;   // reset to 0 for future operations
             logoutThread.interrupt();
         } else if (view.getId() == R.id.connect) {
-            // do some stuff
-            System.out.println("Redirect to Lobby - Testing!");
-            if (Instrument == "Theremin") {
-                // redirect to the theremin activity
-                startActivity(new Intent(this, LightsensorTestActivity.class));
-            } else if (Instrument == "Drums") {
-                startActivity(new Intent(this, Lobby.class));
-            } else if (Instrument == "Keyboards") {
-                startActivity(new Intent(this, Piano.class));
+            Intent lobbyIntent = new Intent(this, Lobby.class);
+            if (selectedInstrument.equals(InstrumentType.THEREMIN)) {
+                lobbyIntent.putExtra(SELECTED_INSTRUMENT, InstrumentType.THEREMIN);
+                startActivity(lobbyIntent);
+            } else if (selectedInstrument.equals(InstrumentType.DRUMS)) {
+                lobbyIntent.putExtra(SELECTED_INSTRUMENT, InstrumentType.DRUMS);
+                startActivity(lobbyIntent);
+            } else if (selectedInstrument.equals(InstrumentType.PIANO)) {
+                lobbyIntent.putExtra(SELECTED_INSTRUMENT, InstrumentType.PIANO);
+                startActivity(lobbyIntent);
             } else {
-                // may be redundant because it can never be empty (at least at this moment)
-                startActivity(new Intent(this, Lobby.class));
-                Toast.makeText(getApplicationContext(), "Not such an Instrument. Try again.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "No such Instrument: \"" + selectedInstrument + "\". Try again.", Toast.LENGTH_SHORT).show();
             }
         }
     }
