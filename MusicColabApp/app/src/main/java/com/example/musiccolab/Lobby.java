@@ -26,6 +26,8 @@ import com.example.musiccolab.instruments.Theremin;
 import java.util.ArrayList;
 import java.util.List;
 
+import static xdroid.toaster.Toaster.toast;
+
 public class Lobby extends AppCompatActivity implements View.OnClickListener, SensorEventListener {
 
     private InstrumentType selectedInstrumentType;
@@ -118,8 +120,24 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             // do some stuff
             selectedInstrument.reCalibrate();
         } else if (view.getId() == R.id.disconnect) {
-            // redirect user to login page
-            startActivity(new Intent(this, PreLobby.class));
+            new LogoutThread().start();
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (CommunicationHandling.confirmation==2){
+                // reset the sensitive user data after logout
+                CommunicationHandling.userName = "";
+                CommunicationHandling.email = "";
+                CommunicationHandling.password = "";
+                CommunicationHandling.confirmation = 0;
+                startActivity(new Intent(this, Login.class));
+            }else if (CommunicationHandling.confirmation==0){
+                toast("Connection timeout");
+            } else if (CommunicationHandling.confirmation == 12) {
+                toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
+            }
         } else if (view.getId() == R.id.more_button) {
             ConstraintLayout info = findViewById(R.id.info);
             visible=!visible;

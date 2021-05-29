@@ -100,8 +100,7 @@ public class CommunicationHandling {
      */
 
 
-    public CommunicationHandling(){
-        finished = 0;
+    public CommunicationHandling() {
         for(short index = 1; index < 11; index++) {
             codesList.add(index);
             errorCodesList.add( (short) (index + 10));
@@ -134,7 +133,6 @@ public class CommunicationHandling {
         System.out.println("In CreateLobby");
         if(lobby(action, lobbyName).equals("Error")){
             toast("Create Lobby Failed\nPlease try again");
-            finished = 2;
         }
         System.out.println("After CreateLobby is finished: " + finished);
     }
@@ -143,9 +141,6 @@ public class CommunicationHandling {
         action = 5;
         if(lobby(action,Integer.toString(lobbyId)).equals("Error")){
             toast("Join Lobby Failed\nPlease try again");
-            finished = 2;
-        }else {
-            finished = 1;
         }
     }
 
@@ -153,9 +148,6 @@ public class CommunicationHandling {
         action = 6;
         if(lobby(action,Integer.toString(lobbyId)).equals("Error")){
             toast("Leave Lobby Failed\nPlease try again");
-            finished = 2;
-        }else {
-            finished = 1;
         }
     }
 

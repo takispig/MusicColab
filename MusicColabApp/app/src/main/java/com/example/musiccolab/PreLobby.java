@@ -40,6 +40,12 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
         logout.setOnClickListener(this);
         Button create = findViewById(R.id.create);
         create.setOnClickListener(this);
+        Button join = (Button) findViewById(R.id.join);
+        join.setOnClickListener(this);
+        Button cancel_create = (Button) findViewById(R.id.cancel_create);
+        cancel_create.setOnClickListener(this);
+        Button cancel_join = (Button) findViewById(R.id.cancel_join);
+        cancel_join.setOnClickListener(this);
 
         // Update the Username from the Client (data are stored from login)
         Client.getInstance();
@@ -75,7 +81,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
         if (view.getId() == R.id.create_server) {
             findViewById(R.id.create_server_popup).setVisibility(View.VISIBLE);
         }
-        else if (view.getId() == R.id.create) {
+        if (view.getId() == R.id.create) {
             System.out.println("Created has been pressed");
             EditText name = findViewById(R.id.servername);
             System.out.println("Servername: "+name.getText().toString());
@@ -107,11 +113,48 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                 toast("Error while Creating the Lobbt\nPlease try again");
             }
         }
-        else if (view.getId() == R.id.join_server) {
-            // do some stuff
-            toast("Join Server is not yet implemented");
+        if (view.getId() == R.id.cancel_create) {
+            findViewById(R.id.create_server_popup).setVisibility(View.GONE);
         }
-        else if (view.getId() == R.id.logout) {
+        if (view.getId() == R.id.join_server) {
+            findViewById(R.id.join_server_popup).setVisibility(View.VISIBLE);
+        }
+        if (view.getId() == R.id.join) {
+            CommunicationHandling.getInstance();
+            EditText lobbyID_text = findViewById(R.id.lobbyID);
+            lobbyID = Integer.parseInt(lobbyID_text.getText().toString());
+            System.out.println("LobbyID: " + lobbyID);
+            if (lobbyID_text.getText().toString().equals("")){
+                toast("Please enter server name");
+                return;
+            }
+            else {
+                CommunicationHandling.lobbyID = lobbyID;
+            }
+            findViewById(R.id.join_server_popup).setVisibility(View.GONE);
+            new JoinThread().start();
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("LobbyName: " + lobbyName + " with conf-code : " + CommunicationHandling.confirmation);
+            if (CommunicationHandling.confirmation==5) {
+                // this means we successfully created a lobby -> set status Connected with server #Num
+                toast("Lobby Created Successfully\n");
+                TextView lobby = findViewById(R.id.server_status);
+                lobby.setText(String.format("Connected to Lobby #%s\nLobby name: #%s", lobbyID, lobbyName));
+                CommunicationHandling.lobbyName = lobbyName;
+            } else if (CommunicationHandling.confirmation==0) {
+                toast("Connection timeout");
+            } else if (CommunicationHandling.confirmation == 15) {
+                toast("Error while Creating the Lobbt\nPlease try again");
+            }
+        }
+        if (view.getId() == R.id.cancel_join) {
+            findViewById(R.id.join_server_popup).setVisibility(View.GONE);
+        }
+        if (view.getId() == R.id.logout) {
             new LogoutThread().start();
             try {
                 Thread.sleep(100);
@@ -123,13 +166,15 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                 CommunicationHandling.userName = "";
                 CommunicationHandling.email = "";
                 CommunicationHandling.password = "";
+                CommunicationHandling.confirmation = 0;
                 startActivity(new Intent(this, Login.class));
             }else if (CommunicationHandling.confirmation==0){
                 toast("Connection timeout");
             } else if (CommunicationHandling.confirmation == 12) {
                 toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
             }
-        } else if (view.getId() == R.id.connect) {
+        }
+        if (view.getId() == R.id.connect) {
             // do some stuff
             System.out.println("Redirect to Lobby - Testing!");
             if (Instrument == "Theremin") {
