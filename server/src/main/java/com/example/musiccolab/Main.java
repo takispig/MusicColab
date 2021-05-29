@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 public class Main {
 
-    private static final String DEFAULT_ADDRESS = "192.168.178.52";
+    private static final String DEFAULT_ADDRESS = "127.0.0.1";
     private static final int DEFAULT_PORT = 8080;
 
     private static boolean exit = false;

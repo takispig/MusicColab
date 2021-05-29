@@ -44,7 +44,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
         // Update the Username from the Client (data are stored from login)
         Client.getInstance();
         TextView username = (TextView) findViewById(R.id.username);
-        username.setText(Client.userName);
+        username.setText(CommunicationHandling.userName);
 
         // Drop-Down Menu (Spinner) -> now idea what happens here, i took the pieces from some tutorials
         Spinner mySpinner = (Spinner) findViewById(R.id.spinner);
@@ -70,45 +70,64 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
     // In this function we will 'hear' for onClick events and according to
     // their IDs we will make the correct decision
     public void onClick(View view) {
+        CommunicationHandling.getInstance();
 
         if (view.getId() == R.id.create_server) {
             findViewById(R.id.create_server_popup).setVisibility(View.VISIBLE);
-        } else if (view.getId() == R.id.create) {
+        }
+        else if (view.getId() == R.id.create) {
+            System.out.println("Created has been pressed");
             EditText name = findViewById(R.id.servername);
+            System.out.println("Servername: "+name.getText().toString());
             if (name.getText().toString().equals("")){
                 toast("Please enter server name");
                 return;
             }
-            else lobbyName = name.getText().toString();
+            else {
+                lobbyName = name.getText().toString();
+                CommunicationHandling.lobbyName = lobbyName;
+            }
             findViewById(R.id.create_server_popup).setVisibility(View.GONE);
             new CreateThread().start();
             try {
-                Thread.sleep(100);
+                Thread.sleep(300);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (CommunicationHandling.finished==1){
+            System.out.println("LobbyName: " + lobbyName + " with conf-code : " + CommunicationHandling.confirmation);
+            if (CommunicationHandling.confirmation==4) {
                 // this means we successfully created a lobby -> set status Connected with server #Num
                 toast("Lobby Created Successfully\n");
                 TextView lobby = findViewById(R.id.server_status);
-                lobby.setText(String.format("Connected to Lobby #%s", lobbyID));
-            }else if (CommunicationHandling.finished==0){
+                lobby.setText(String.format("Connected to Lobby #%s\nLobby name: #%s", lobbyID, lobbyName));
+                CommunicationHandling.lobbyName = lobbyName;
+            } else if (CommunicationHandling.confirmation==0) {
                 toast("Connection timeout");
+            } else if (CommunicationHandling.confirmation == 14) {
+                toast("Error while Creating the Lobbt\nPlease try again");
             }
-        } else if (view.getId() == R.id.join_server) {
+        }
+        else if (view.getId() == R.id.join_server) {
             // do some stuff
             toast("Join Server is not yet implemented");
-        } else if (view.getId() == R.id.logout) {
+        }
+        else if (view.getId() == R.id.logout) {
             new LogoutThread().start();
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (CommunicationHandling.finished==1){
+            if (CommunicationHandling.confirmation==2){
+                // reset the sensitive user data after logout
+                CommunicationHandling.userName = "";
+                CommunicationHandling.email = "";
+                CommunicationHandling.password = "";
                 startActivity(new Intent(this, Login.class));
-            }else if (CommunicationHandling.finished==0){
+            }else if (CommunicationHandling.confirmation==0){
                 toast("Connection timeout");
+            } else if (CommunicationHandling.confirmation == 12) {
+                toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
             }
         } else if (view.getId() == R.id.connect) {
             // do some stuff

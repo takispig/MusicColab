@@ -4,6 +4,9 @@ import java.util.*;
 
 public class Client{
 
+    private static final String DEFAULT_ADDRESS = "127.0.0.1";
+    private static final int DEFAULT_PORT = 8080;
+
     private static Charset messageCharset = null;
     private static CharsetDecoder decoder = null;
     private static byte [] clientName = null;
@@ -32,7 +35,7 @@ public class Client{
 
     public static void main(String [] args) {
         Client client = new Client();
-        CommunicationHandling communicationHandling = new CommunicationHandling(args[0], Integer.parseInt(args[1]));
+        CommunicationHandling communicationHandling = new CommunicationHandling(DEFAULT_ADDRESS, DEFAULT_PORT);
         communicationHandling.register(client.email, client.userName, client.password);
         communicationHandling.login(client.userName, client.password);
         //communicationHandling.logout(client.userName, client.password);

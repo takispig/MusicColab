@@ -41,7 +41,10 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
             userView = findViewById(R.id.username);
             username = userView.getText().toString();
 
-
+            CommunicationHandling.getInstance();
+            CommunicationHandling.userName = username;
+            CommunicationHandling.password = password;
+            CommunicationHandling.email = email;
 
             new RegisterThread().start();
             try {
@@ -49,10 +52,14 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (CommunicationHandling.finished==1){
+            if (CommunicationHandling.confirmation==3) {
+                CommunicationHandling.confirmation = 0;
+                toast("Registration Successful");
                 startActivity(new Intent(this, Login.class));
-            }else if (CommunicationHandling.finished==0){
+            } else if (CommunicationHandling.confirmation==0) {
                 toast("Connection timeout");
+            } else if (CommunicationHandling.confirmation==13) {
+                toast("Registration Failed\nUsername already exists");
             }
 
         } else if (view.getId() == R.id.aboutt) {

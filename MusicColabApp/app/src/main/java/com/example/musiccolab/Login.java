@@ -60,6 +60,9 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             userName = userNameView.getText().toString();
             password = passView.getText().toString();
 
+            CommunicationHandling.getInstance();
+            CommunicationHandling.userName = userName;
+            CommunicationHandling.password = password;
 
             new LoginThread().start();
             try {
@@ -67,10 +70,15 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (CommunicationHandling.finished==1){
+            System.out.println(CommunicationHandling.confirmation);
+            if (CommunicationHandling.confirmation == 1){
+                CommunicationHandling.getInstance();
+                CommunicationHandling.confirmation = 0;
                 startActivity(new Intent(this, PreLobby.class));
-            }else if (CommunicationHandling.finished==0){
+            } else if (CommunicationHandling.confirmation == 0) {
                 toast("Connection timeout");
+            } else if (CommunicationHandling.confirmation == 11) {
+                toast("Username/password wrong\nPlease try again");
             }
 
         }
