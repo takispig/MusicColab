@@ -1,8 +1,10 @@
 package com.example.musiccolab.instruments;
 
+import android.annotation.SuppressLint;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.media.MediaPlayer;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.musiccolab.Lobby;
@@ -21,7 +23,9 @@ public class Theremin implements Instrument {
     private TextView light;
     private TextView note;
     private static final int DEFAULT_SENSOR = Sensor.TYPE_LIGHT;
+    private ImageView blackPic;
 
+    @SuppressLint("ResourceType")
     public Theremin(InstrumentGUIBox instrumentGUI, Lobby lobby) {
         this.instrumentGUI = instrumentGUI;
         this.lobby = lobby;
@@ -35,6 +39,8 @@ public class Theremin implements Instrument {
         c2 = MediaPlayer.create(lobby, R.raw.c2);
         light = (TextView) lobby.findViewById(R.id.sensor);
         note = (TextView) lobby.findViewById(R.id.note);
+
+        blackPic.setImageResource(R.id.blackPic); //VH - 31.05.2021
     }
 
     @Override
@@ -62,27 +68,34 @@ public class Theremin implements Instrument {
             if (event.values[0] < x) {
                 c.start();
                 toServer = "c Theremin";
+                blackPic.setImageAlpha(224); //value: [0-255]. Where 0 is fully transparent and 255 is fully opaque.
             } else if (event.values[0] < 2 * x) {
                 d.start();
                 toServer = "d Theremin";
             } else if (event.values[0] < 3 * x) {
                 e.start();
                 toServer = "e Theremin";
+                blackPic.setImageAlpha(193);
             } else if (event.values[0] < 4 * x) {
                 f.start();
                 toServer = "f Theremin";
+                blackPic.setImageAlpha(162);
             } else if (event.values[0] < 5 * x) {
                 g.start();
                 toServer = "g Theremin";
+                blackPic.setImageAlpha(131);
             } else if (event.values[0] < 6 * x) {
                 a.start();
                 toServer = "a Theremin";
+                blackPic.setImageAlpha(100);
             } else if (event.values[0] < 7 * x) {
                 h.start();
                 toServer = "h Theremin";
+                blackPic.setImageAlpha(69);
             } else if (event.values[0] < 8 * x) {
                 c2.start();
                 toServer = "c2 Theremin";
+                blackPic.setImageAlpha(38);
             } else {
                 toServer = "0 Theremin";
             }
