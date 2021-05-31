@@ -108,7 +108,7 @@ public class Protocol {
         loginSystemBuffer.clear();
     }
 
-    private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel) throws IOException, SQLException, ClassNotFoundException {
+    private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel) throws IOException{
 
         String username, password, email = "";
         boolean checkResponse;
@@ -135,22 +135,45 @@ public class Protocol {
         loginSystemBuffer.flip();
         password = messageCharset.decode(loginSystemBuffer).toString();
         loginSystemBuffer.clear();
+        try {
+            if (action == register) {
+                checkResponse = LoginSystem.register(username, email, password);
+                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+                Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + "REGISTERED");
+            } else if (action == login) {
+                checkResponse = LoginSystem.login(username, password, clientChannel);
+                String response = getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse);
+                sendResponseToClient(messageCharset, clientChannel, response + getAllLobbyIds(Server.lobbyMap));
+                Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + "LOGGED IN ");
 
-        if(action == register) {
-            checkResponse = LoginSystem.register(username, email, password);
-            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
-            Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + "REGISTERED" );
+            } else if (LoginSystem.getPlayerByChannel(clientChannel) != null) {
+                checkResponse = LoginSystem.logout(username, password);
+                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+                Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + "LOGGED OUT");
+            }
         }
-        else if(action == login) {
-            checkResponse = LoginSystem.login(username, password, clientChannel);
-            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
-            Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + "LOGGED IN " );
+        catch (SQLException e){
+            checkResponse = false;
+            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+            System.out.println("SQL ERROR");
+            e.printStackTrace();
         }
-        else if(LoginSystem.getPlayerByChannel(clientChannel) != null){
-            checkResponse = LoginSystem.logout(username, password);
-            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
-            Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + "LOGGED OUT" );
+        catch (ClassNotFoundException e){
+            checkResponse = false;
+            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+            System.out.println("CNF ERROR");
+            e.printStackTrace();
         }
+    }
+
+    private String getAllLobbyIds(HashMap<Integer, Lobby> lobbyMap) {
+        String res = "";
+
+        var entrySet = lobbyMap.entrySet();
+        for(var k: entrySet){
+            res = res + Integer.toString(k.getValue().getLobby_id()) + ", ";
+        }
+        return res;
     }
 
     private void parseBufferForLobbyOrGame(Charset messageCharset, SocketChannel clientChannel, int lobbyNameIsSize) throws IOException {
@@ -226,7 +249,7 @@ public class Protocol {
             sendResponseToClient(messageCharset, musicJoiner.getClientChannels().get(index), musicJoiner.getClientResponses().get(index));
     }
 
-    public void handleAction(Charset messageCharset, SocketChannel clientChannel, int bufferSize) throws SQLException, IOException, ClassNotFoundException {
+    public void handleAction(Charset messageCharset, SocketChannel clientChannel, int bufferSize) throws IOException {
         if(bufferSize != 0){
             playerAddress = clientChannel.getRemoteAddress();
 
@@ -260,7 +283,8 @@ public class Protocol {
     private String getLoginSystemResponse(int action, boolean result){
         int index = result? 0:1;
         this.responseAction = (short) action;
-        return responsesArray[action <= 10? action-1:action-11][index];
+        String response = responsesArray[action <= 10? action-1:action-11][index];
+        return response;
     }
 
     private String getLobbyResponse(boolean result, Lobby lobby, String additionPart){
@@ -279,6 +303,7 @@ public class Protocol {
     public void sendResponseToClient(Charset messageCharset, SocketChannel clientChannel, String message){
         short dataLength = (short) message.length();
         ByteBuffer messageBuffer = ByteBuffer.allocate(6 + dataLength);
+        System.out.println( "Message: " +message);
         messageBuffer.put(convertShortToByte(protocolName));
         messageBuffer.put(convertShortToByte(responseAction));
         messageBuffer.put(convertShortToByte(dataLength));

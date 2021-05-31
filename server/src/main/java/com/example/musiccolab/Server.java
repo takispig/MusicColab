@@ -34,12 +34,8 @@ public class Server {
     public static HashMap<Integer,Lobby> lobbyMap = new HashMap<>();
     public static HashMap<Integer,Player> loggedInPlayers = new HashMap<>();
 
-    public void setupServerAddress(String address, int port) throws IPAddressException {
-        try {
-            serverAddress = new InetSocketAddress(address, port);
-        } catch (IllegalArgumentException | SecurityException e) {
-            throw new IPAddressException();
-        }
+    public void setupServerAddress(String address, int port) throws IllegalArgumentException, SecurityException {
+        serverAddress = new InetSocketAddress(address, port);
     }
 
     public void defineCharType() {
@@ -58,11 +54,8 @@ public class Server {
         serverChannel.configureBlocking(false);
         serverChannel.register(selector, SelectionKey.OP_ACCEPT);
 
-        try {
-            serverChannel.socket().bind(serverAddress);
-        } catch (IOException e) {
-            throw new SocketBindException();
-        }
+        serverChannel.socket().bind(serverAddress);
+
     }
 
     //bufferHandleIsNeeded?

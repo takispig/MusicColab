@@ -12,7 +12,7 @@ import java.util.logging.*;
 
 public class Main {
 
-    private static final String DEFAULT_ADDRESS = "192.168.178.52";
+    private static final String DEFAULT_ADDRESS = "10.156.0.4";
     private static final int DEFAULT_PORT = 8080;
 
     private static boolean exit = false;
@@ -76,7 +76,7 @@ public class Main {
             return;
         while (invalidInput) {
             Main.logr.log(Level.SEVERE, "ERROR WITH IP OR PORT");
-            System.out.println("An error occurred with the specified IP address and port!\nTry a new input.");
+            System.out.println("An error occurred with the specified IP address (" + DEFAULT_ADDRESS +"and port (" + DEFAULT_PORT + "!\nTry a new input.");
             System.out.println("This server will exit after 30 seconds without further interaction.");
             System.out.print("address: ");
             long Itime = System.currentTimeMillis();
@@ -138,9 +138,10 @@ public class Main {
             currentServer.handleConnection();
 
             return;
-        } catch (IPAddressException | SocketBindException e) {
+        } catch (SecurityException | IllegalArgumentException | SocketBindException e) {
             invalidInput = true;
-        } catch (IOException | UnsupportedCharsetException | SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException | SQLException | ClassNotFoundException e) {
             System.err.println("ERROR: ----------------------------------------------------");
             e.printStackTrace();
             System.err.println("-----------------------------------------------------------");

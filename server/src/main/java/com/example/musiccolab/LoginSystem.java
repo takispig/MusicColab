@@ -29,7 +29,7 @@ public class LoginSystem {
             //add data to List
             Server.loggedInPlayers.put(res.getInt(1),player);
             return true;
-        } else throw new RuntimeException("User not registered!");
+        } else return false;
 
     }
 
@@ -48,9 +48,7 @@ public class LoginSystem {
             player = null;
             Server.loggedInPlayers.remove(getId(name, passwort));
             return true;
-            //TODO: OWN Exeption so the Server dont crash
-
-        } else throw new RuntimeException("User not logged in!");
+        } else return false;
     }
 
     /**
@@ -68,8 +66,7 @@ public class LoginSystem {
             DataBase.addUser(name, email, passwort);
             return true;
         } else {
-            //TODO: OWN Exeption so the Server dont crash
-            throw new RuntimeException("User already registered!");
+            return false;
         }
     }
 
@@ -102,13 +99,10 @@ public class LoginSystem {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    private static int getId(String name, String passwort) throws SQLException, ClassNotFoundException {
+    private static int getId(final String name, final String passwort)
+            throws SQLException, ClassNotFoundException {
         ResultSet res = DataBase.getUserlogin(name, passwort);
-        if(!res.next()){
-            //TODO: OWN Exeption so the main.java.com.example.musiccolab.Server dont crash
-            throw new RuntimeException("User not found!");
-        }
-        return res.getInt(1);
+        return res.getInt(res.next() ? res.getInt(1) : -1);
     }
 
     public static Player getPlayerByChannel(SocketChannel channel){
@@ -119,7 +113,6 @@ public class LoginSystem {
                 return entry.getValue();
             }
         }
-        //TODO: New Exeption (Own Exeption)
         return null;
     }
 }
