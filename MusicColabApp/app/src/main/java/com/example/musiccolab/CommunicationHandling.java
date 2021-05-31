@@ -240,7 +240,8 @@ public class CommunicationHandling {
                 return "Error";
             }
             String[] actionDataLength = analyseResponse(messageCharset);
-            if(Integer.parseInt(actionDataLength[1]) >= 0){
+            toast(actionDataLength[1]);
+            if(Integer.parseInt(actionDataLength[1]) >= 0 ){
                 try{ response = actionDataLength[2];
                     if(action == 3 || action == 2){
                         socket.close();

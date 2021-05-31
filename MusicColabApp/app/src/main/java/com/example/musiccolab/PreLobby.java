@@ -106,7 +106,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                 e.printStackTrace();
             }
             if (CommunicationHandling.finished==1){
-                startActivity(new Intent(this, Login.class));
+                //startActivity(new Intent(this, Login.class));
             }else if (CommunicationHandling.finished==0){
                 toast("Connection timeout");
             }
