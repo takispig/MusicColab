@@ -12,8 +12,7 @@ import static xdroid.toaster.Toaster.toast;
 
 
 public class Login extends AppCompatActivity implements View.OnClickListener {
-
-    static String email = "";
+    
     static String userName = "";
     static String password = "";
     EditText userNameView, passView;
@@ -23,10 +22,10 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
 
-        // uncomment ONLY IF NECESSARY -> eliminates ERRORS but make the App unresponsive
-//        if (android.os.Build.VERSION.SDK_INT > 9) {
-//            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-//            StrictMode.setThreadPolicy(policy);
+        // check if user is already logged in, if yes send him to PreLobby
+//        CommunicationHandling.getInstance();
+//        if (CommunicationHandling.userName != null) {
+//            startActivity(new Intent(this, PreLobby.class));
 //        }
 
         // Create Listeners for the IDs: login, about, register, forgot_password
@@ -66,13 +65,13 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
 
             new LoginThread().start();
             try {
-                Thread.sleep(100);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            CommunicationHandling.getInstance();
             System.out.println(CommunicationHandling.confirmation);
             if (CommunicationHandling.confirmation == 1){
-                CommunicationHandling.getInstance();
                 CommunicationHandling.confirmation = 0;
                 startActivity(new Intent(this, PreLobby.class));
             } else if (CommunicationHandling.confirmation == 0) {

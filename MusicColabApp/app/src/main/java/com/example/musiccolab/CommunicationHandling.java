@@ -68,6 +68,7 @@ public class CommunicationHandling {
     private static BufferedReader in;
 
     static String IP = "10.0.2.2"; //35.207.116.16
+    //static String IP = "35.207.116.16";
     static int port = 8080;
 
 
@@ -86,8 +87,6 @@ public class CommunicationHandling {
     public static boolean ToneDataEventChecker = false;//set false when tone list is empty.
     private static boolean threadExist = false;
     private static ToneListener toneThread = null;
-
-    public static int finished = 0; //1 successful, 2 error
 
     /**
      *  Please creat two a boolean, static eventChecker variable.
@@ -134,7 +133,7 @@ public class CommunicationHandling {
         if(lobby(action, lobbyName).equals("Error")){
             toast("Create Lobby Failed\nPlease try again");
         }
-        System.out.println("After CreateLobby is finished: " + finished);
+        System.out.println("After CreateLobby is finished conf-code: " + confirmation);
     }
 
     public void joinLobby(int lobbyId){

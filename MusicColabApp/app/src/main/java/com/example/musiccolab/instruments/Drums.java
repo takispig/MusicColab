@@ -16,10 +16,10 @@ public class Drums implements Instrument {
     public static final double TOLERANCE = 0.5;
     public static final double MAX_SENSOR_INTENSITY = 5.0;
     private static final String INSTRUMENT_NAME = "Drums";
-    private static final InstrumentType INSTRUMENT_TYPE = InstrumentType.DRUMS;
-    private InstrumentGUIBox instrumentGUI;
+    private static final String INSTRUMENT_TYPE = InstrumentType.DRUMS;
+    private final InstrumentGUIBox instrumentGUI;
     private static final int DEFAULT_SENSOR = Sensor.TYPE_ACCELEROMETER;
-    private float[] lastKnownSensorValues = new float[3];
+    private final float[] lastKnownSensorValues = new float[3];
     private static final String TAG = "Drums";
     private Optional<Axis> axisPointingToGround = Optional.empty();
     private final MediaPlayer drum_a, drum_b;
@@ -49,11 +49,7 @@ public class Drums implements Instrument {
         if (value < 0) {
             value = value * (-1);
         }
-        if (value > GRAVITY - TOLERANCE && value < GRAVITY + TOLERANCE) {
-            return true;
-        } else {
-            return false;
-        }
+        return value > GRAVITY - TOLERANCE && value < GRAVITY + TOLERANCE;
     }
 
     @Override
@@ -88,8 +84,10 @@ public class Drums implements Instrument {
 
     private void checkAndHandleTwoValues(double force_1, double force_2) {
         if (!forceWithinLimits(force_1)) {
+            instrumentGUI.setTextInCenter("DRUM_A");
             drum_a.start();
         } else if (!forceWithinLimits(force_2)) {
+            instrumentGUI.setTextInCenter("DRUM_B");
             drum_b.start();
         }
     }
@@ -110,7 +108,7 @@ public class Drums implements Instrument {
     }
 
     @Override
-    public InstrumentType getInstrumentType() {
+    public String getInstrumentType() {
         return INSTRUMENT_TYPE;
     }
 

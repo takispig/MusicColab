@@ -25,14 +25,14 @@
         android:src="@drawable/ic_baseline_more_vert_24"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
     <FrameLayout
-        android:id="@+id/frameLayout"
+        android:id="@+id/iva"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="50dp"
         android:layout_marginBottom="70dp"
         android:layout_marginHorizontal="20dp"
-        android:background="@color/grey"
         app:layout_constraintBottom_toTopOf="@id/loop"
         app:layout_constraintHorizontal_bias="0.44"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -40,11 +40,127 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
+            android:id="@+id/iva_text_1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:text="Here is gonna be the Instrument Visualisation Area"
+            android:text="@string/iva_center_text_default"
             android:textSize="25sp" />
+
+        <LinearLayout
+            android:id="@+id/piano_keys_container"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="bottom"
+            android:orientation="horizontal"
+            android:weightSum="8">
+
+            <Button
+                android:id="@+id/btnC"
+                android:layout_width="wrap_content"
+                android:layout_height="186dp"
+                android:layout_weight="1"
+                android:background="#FDF0EC"
+                android:backgroundTint="#FDF0EC"
+                android:text="@string/piano_c_keyLabel"
+                android:textColor="@android:color/black"
+                app:strokeColor="@android:color/black"
+                app:strokeWidth="2dp">
+            </Button>
+
+            <Button
+                android:id="@+id/btnD"
+                android:layout_width="wrap_content"
+                android:layout_height="186dp"
+                android:layout_weight="1"
+                android:background="#EDCFC7"
+                android:textColor="@android:color/black"
+                android:backgroundTint="#FDF0EC"
+                android:text="@string/piano_d_keyLabel"
+                app:strokeColor="@android:color/black"
+                app:strokeWidth="2dp">
+            </Button>
+
+            <Button
+                android:id="@+id/btnE"
+                android:layout_width="wrap_content"
+                android:layout_height="186dp"
+                android:layout_weight="1"
+                android:background="#EDCFC7"
+                android:textColor="@android:color/black"
+                android:backgroundTint="#FDF0EC"
+                android:text="@string/piano_e_keyLabel"
+                app:strokeColor="@android:color/black"
+                app:strokeWidth="2dp">
+            </Button>
+
+            <Button
+                android:id="@+id/btnF"
+                android:layout_width="wrap_content"
+                android:layout_height="186dp"
+                android:layout_weight="1"
+                android:background="#EDCFC7"
+                android:textColor="@android:color/black"
+                android:backgroundTint="#FDF0EC"
+                android:text="@string/piano_f_keyLabel"
+                app:strokeColor="@android:color/black"
+                app:strokeWidth="2dp">
+            </Button>
+
+            <Button
+                android:id="@+id/btnG"
+                android:layout_width="wrap_content"
+                android:layout_height="186dp"
+                android:layout_weight="1"
+                android:background="#EDCFC7"
+                android:textColor="@android:color/black"
+                android:backgroundTint="#FDF0EC"
+                android:text="@string/piano_g_keyLabel"
+                app:strokeColor="@android:color/black"
+                app:strokeWidth="2dp">
+            </Button>
+
+            <Button
+                android:id="@+id/btnA"
+                android:layout_width="wrap_content"
+                android:layout_height="186dp"
+                android:layout_weight="1"
+                android:background="#EDCFC7"
+                android:textColor="@android:color/black"
+                android:backgroundTint="#FDF0EC"
+                android:text="@string/piano_a_keyLabel"
+                app:strokeColor="@android:color/black"
+                app:strokeWidth="2dp">
+            </Button>
+
+            <Button
+                android:id="@+id/btnH"
+                android:layout_width="wrap_content"
+                android:layout_height="186dp"
+                android:layout_weight="1"
+                android:background="#EDCFC7"
+                android:textColor="@android:color/black"
+                android:backgroundTint="#FDF0EC"
+                android:text="@string/piano_h_keyLabel"
+                app:strokeColor="@android:color/black"
+                app:strokeWidth="2dp">
+            </Button>
+
+            <Button
+                android:id="@+id/btnC2"
+                android:layout_width="wrap_content"
+                android:layout_height="186dp"
+                android:layout_weight="1"
+                android:background="#EDCFC7"
+                android:textColor="@android:color/black"
+                android:backgroundTint="#FDF0EC"
+                android:text="@string/piano_c2_keyLabel"
+                app:strokeColor="@android:color/black"
+                app:strokeWidth="2dp">
+            </Button>
+
+        </LinearLayout>
+
 
     </FrameLayout>
 

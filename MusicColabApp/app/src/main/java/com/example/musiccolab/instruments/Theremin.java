@@ -13,8 +13,8 @@ public class Theremin implements Instrument {
     private float lastSensorValue = 0;
     private float max = 0;
     private static final String INSTRUMENT_NAME = "Theremin";
-    private static final InstrumentType INSTRUMENT_TYPE = InstrumentType.THEREMIN;
-    private InstrumentGUIBox instrumentGUI;
+    private static final String INSTRUMENT_TYPE = InstrumentType.THEREMIN;
+    private final InstrumentGUIBox instrumentGUI;
     private MediaPlayer c, d, e, f, g, a, h, c2;
     private Lobby lobby;
     private String toServer = "0 Theremin";
@@ -52,12 +52,7 @@ public class Theremin implements Instrument {
         if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
             lastSensorValue = event.values[0];
 
-            // TODO implement into instrumentGUIbox
-            System.out.println("Light intensity:" + event.values[0] + " (" + max + ")");
-            System.out.println("Current Note: " + toServer);
-//            light.setText("Light intensity:" + event.values[0] + " (" + max + ")");
-            //          note.setText("Current Note: " + toServer);
-
+            StringBuilder sb = new StringBuilder();
             float x = (max - 5) / 8;
             if (event.values[0] < x) {
                 c.start();
@@ -86,8 +81,9 @@ public class Theremin implements Instrument {
             } else {
                 toServer = "0 Theremin";
             }
-            // TODO Remove later, for test purposes only
-            System.out.println(toServer);
+            sb.append("Light intensity:" + event.values[0] + " (" + max + ")\n");
+            sb.append("Current Note: " + toServer);
+            instrumentGUI.setTextInCenter(toServer);
         }
     }
 
@@ -97,7 +93,7 @@ public class Theremin implements Instrument {
     }
 
     @Override
-    public InstrumentType getInstrumentType() {
+    public String getInstrumentType() {
         return INSTRUMENT_TYPE;
     }
 
