@@ -11,7 +11,7 @@ import java.util.Scanner;
 public class Main {
 
     private static final String DEFAULT_ADDRESS = "localhost";
-    private static final int DEFAULT_PORT = 8080;
+    private static final int DEFAULT_PORT = 1200;
 
     private static boolean exit = false;
     private static boolean finish = false;

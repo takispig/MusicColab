@@ -171,4 +171,39 @@ public class Server {
     public void setFinishedTrue() {
         finished = true;
     }
+
+//_____________________________________________________________________________________________________________________
+//                                                 For testing                                                       //
+//_____________________________________________________________________________________________________________________
+    public InetSocketAddress getServerAddressForTesting(){
+        return serverAddress;
+    }
+
+    public Selector getSelectorForTesting(){
+        return selector;
+    }
+
+    public ServerSocketChannel getServerChannelForTesting(){
+        return serverChannel;
+    }
+
+    public Charset getMessageCharsetForTesting(){
+        return messageCharset;
+    }
+
+    public CharsetDecoder getDecoderForTesting(){
+        return decoder;
+    }
+
+    public CharsetEncoder getEncoderForTesting(){
+        return encoder;
+    }
+
+    public boolean isRunningForTesting(){
+        return running;
+    }
+
+    public boolean isFinishedForTesting(){
+        return finished;
+    }
 }

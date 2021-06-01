@@ -124,6 +124,10 @@ public class CommunicationHandling {
                 toneThread.start();
                 threadExist = true;
             }
+            else if(threadExist && Integer.parseInt(actionDataLength[0]) < 10 && action == 6){
+                toneThread.stop();
+                threadExist = false;
+            }
             if(Integer.parseInt(actionDataLength[1]) >= 0){
                 System.out.println(actionDataLength[2]);
                 return actionDataLength[2];

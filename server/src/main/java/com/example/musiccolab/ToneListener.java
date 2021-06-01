@@ -97,6 +97,10 @@ public class ToneListener implements Runnable{
         thread.start();
     }
 
+    public void stop(){
+        thread.stop();
+    }
+
 
     private void waitForTone(short action) {
         short dataLength = 0;
