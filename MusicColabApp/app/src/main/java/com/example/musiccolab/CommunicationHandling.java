@@ -1,6 +1,5 @@
 package com.example.musiccolab;
 
-
 import static xdroid.toaster.Toaster.toast;
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -16,66 +15,78 @@ import java.util.List;
 class RegisterThread extends Thread{
     @Override
     public void run() {
-        new CommunicationHandling().register(Register.email,Register.username,Register.password);
+        CommunicationHandling.getInstance().register(CommunicationHandling.email,CommunicationHandling.userName,CommunicationHandling.password);
     }
 }
 
 class LoginThread extends Thread{
     @Override
     public void run() {
-        new CommunicationHandling().login(Login.userName,Login.password);
+        CommunicationHandling.getInstance().login(CommunicationHandling.userName,CommunicationHandling.password);
     }
 }
 
 class LogoutThread extends Thread{
     @Override
     public void run() {
-        new CommunicationHandling().logout(Login.userName,Login.password);
+        CommunicationHandling.getInstance().logout(CommunicationHandling.userName,CommunicationHandling.password);
     }
 }
 
 class CreateThread extends Thread{
     @Override
     public void run() {
-        new CommunicationHandling().createLobby(PreLobby.lobbyName);
+        CommunicationHandling.getInstance().createLobby(CommunicationHandling.lobbyName);
     }
 }
 
 class JoinThread extends Thread{
     @Override
     public void run() {
-        new CommunicationHandling().joinLobby(PreLobby.lobbyID);
+        CommunicationHandling.getInstance().joinLobby(CommunicationHandling.lobbyID);
     }
 }
 
 class leaveThread extends Thread{
     @Override
     public void run() {
-        new CommunicationHandling().leaveLobby(PreLobby.lobbyID);
+        CommunicationHandling.getInstance().leaveLobby(CommunicationHandling.lobbyID);
     }
 }
 
 public class CommunicationHandling {
-    private Charset messageCharset = null;
-    private Socket socket = null;
-    private BufferedOutputStream out;
-    private BufferedReader in;
 
-    static String IP = "192.168.178.52"; //35.207.116.16
+    private static CommunicationHandling communicationHandling = null;
+    public static synchronized CommunicationHandling getInstance() {
+        if (communicationHandling == null) communicationHandling = new CommunicationHandling();
+        return communicationHandling;
+    }
+
+    private static Charset messageCharset = null;
+    private static Socket socket = null;
+    private static BufferedOutputStream out;
+    private static BufferedReader in;
+
+    static String IP = "10.0.2.2"; //35.207.116.16
+    //static String IP = "35.207.116.16";
     static int port = 8080;
 
 
-    final private List<Short> codesList = new ArrayList<Short>();
-    final private List<Short> errorCodesList = new ArrayList<Short>();
-    final private short protocolName = 12845;
-    private short action;
+    final private static List<Short> codesList = new ArrayList<Short>();
+    final private static List<Short> errorCodesList = new ArrayList<Short>();
+    final private static short protocolName = 12845;
+    private static short action;
+    public static String password;
+    public static String userName;
+    public static String email;
+    public static int lobbyID;
+    public static String lobbyName;
+    public static int confirmation;
 
     public static List<String> toneList = new LinkedList<>();
     public static boolean ToneDataEventChecker = false;//set false when tone list is empty.
-    private boolean threadExist = false;
-    private ToneListener toneThread = null;
-
-    public static int finished = 0; //1 successful, 2 error
+    private static boolean threadExist = false;
+    private static ToneListener toneThread = null;
 
     /**
      *  Please creat two a boolean, static eventChecker variable.
@@ -88,8 +99,7 @@ public class CommunicationHandling {
      */
 
 
-    public CommunicationHandling(){
-        finished = 0;
+    public CommunicationHandling() {
         for(short index = 1; index < 11; index++) {
             codesList.add(index);
             errorCodesList.add( (short) (index + 10));
@@ -100,9 +110,6 @@ public class CommunicationHandling {
         action = 3;
         if(loginSystem(action, email, userName, password).equals("Error")){
             toast("Register Failed\nPlease try again");
-            finished = 2;
-        }else{
-            finished = 1;
         }
     }
 
@@ -110,9 +117,6 @@ public class CommunicationHandling {
         action = 1;
         if(loginSystem(action, "", userName, password).equals("Error")){
             toast("Login Failed\nPlease try again");
-            finished = 2;
-        }else {
-            finished = 1;
         }
     }
 
@@ -120,29 +124,22 @@ public class CommunicationHandling {
         action = 2;
         if(loginSystem(action, "", userName, password).equals("Error")){
             toast("Logout Failed\nPlease try again");
-            finished = 2;
-        }else {
-            finished = 1;
         }
     }
 
     public void createLobby(String lobbyName){
         action = 4;
+        System.out.println("In CreateLobby");
         if(lobby(action, lobbyName).equals("Error")){
             toast("Create Lobby Failed\nPlease try again");
-            finished = 2;
-        }else {
-            finished = 1;
         }
+        System.out.println("After CreateLobby is finished conf-code: " + confirmation);
     }
 
     public void joinLobby(int lobbyId){
         action = 5;
         if(lobby(action,Integer.toString(lobbyId)).equals("Error")){
             toast("Join Lobby Failed\nPlease try again");
-            finished = 2;
-        }else {
-            finished = 1;
         }
     }
 
@@ -150,9 +147,6 @@ public class CommunicationHandling {
         action = 6;
         if(lobby(action,Integer.toString(lobbyId)).equals("Error")){
             toast("Leave Lobby Failed\nPlease try again");
-            finished = 2;
-        }else {
-            finished = 1;
         }
     }
 
@@ -181,7 +175,7 @@ public class CommunicationHandling {
     //______________________________________________________________________________________________________________________
 /////////////////////////                              Lobby functions                         /////////////////////////
 //______________________________________________________________________________________________________________________
-    private String lobby(short action, String lobbyNameOrID){
+    private static String lobby(short action, String lobbyNameOrID){
         ByteBuffer buffer = null;
         try{sendLobbyMessage(action, lobbyNameOrID);}
         catch (IOException e){
@@ -189,6 +183,7 @@ public class CommunicationHandling {
             return "Error";
         }
         String[] actionDataLength = analyseResponse(messageCharset);
+        confirmation = Integer.parseInt(actionDataLength[0]);
         if (Integer.parseInt(actionDataLength[0]) > 10) return "Error";
         if(!threadExist && Integer.parseInt(actionDataLength[0]) < 10 && action != 6){
             toneThread = new ToneListener(IP, port, out, in);
@@ -206,7 +201,7 @@ public class CommunicationHandling {
         else{return "Error";}
     }
 
-    private void sendLobbyMessage(short action, String lobbyNameOrID) throws IOException {
+    private static void sendLobbyMessage(short action, String lobbyNameOrID) throws IOException {
         short dataLength;
         ByteBuffer buffer = null;
 
@@ -240,9 +235,11 @@ public class CommunicationHandling {
                 return "Error";
             }
             String[] actionDataLength = analyseResponse(messageCharset);
-            toast(actionDataLength[1]);
-            if(Integer.parseInt(actionDataLength[1]) >= 0 ){
-                try{ response = actionDataLength[2];
+            confirmation = Integer.parseInt(actionDataLength[0]);
+            System.out.println("Response: " + actionDataLength[0]);
+            if(Integer.parseInt(actionDataLength[1]) >= 0){
+                try {
+                    response = actionDataLength[2];
                     if(action == 3 || action == 2){
                         socket.close();
                         in.close();
@@ -299,7 +296,7 @@ public class CommunicationHandling {
     //______________________________________________________________________________________________________________________
 /////////////////////////                             read header function                     /////////////////////////
 //______________________________________________________________________________________________________________________
-    private String[] analyseResponse(Charset messageCharset) {
+    private static String[] analyseResponse(Charset messageCharset) {
         String[] temp;
 
         try {
@@ -372,7 +369,7 @@ public class CommunicationHandling {
 /////////////////////////                             side functions                           /////////////////////////
 //______________________________________________________________________________________________________________________
 
-    private byte[] convertShortToByte(short value){
+    private static byte[] convertShortToByte(short value){
         byte[] temp = new byte[2];
         temp[0] = (byte)(value & 0xff);
         temp[1] = (byte)((value >> 8) & 0xff);

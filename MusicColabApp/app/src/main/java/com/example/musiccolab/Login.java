@@ -12,8 +12,7 @@ import static xdroid.toaster.Toaster.toast;
 
 
 public class Login extends AppCompatActivity implements View.OnClickListener {
-
-    static String email = "";
+    
     static String userName = "";
     static String password = "";
     EditText userNameView, passView;
@@ -23,10 +22,10 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
 
-        // uncomment ONLY IF NECESSARY -> eliminates ERRORS but make the App unresponsive
-//        if (android.os.Build.VERSION.SDK_INT > 9) {
-//            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-//            StrictMode.setThreadPolicy(policy);
+        // check if user is already logged in, if yes send him to PreLobby
+//        CommunicationHandling.getInstance();
+//        if (CommunicationHandling.userName != null) {
+//            startActivity(new Intent(this, PreLobby.class));
 //        }
 
         // Create Listeners for the IDs: login, about, register, forgot_password
@@ -60,17 +59,25 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             userName = userNameView.getText().toString();
             password = passView.getText().toString();
 
+            CommunicationHandling.getInstance();
+            CommunicationHandling.userName = userName;
+            CommunicationHandling.password = password;
 
             new LoginThread().start();
             try {
-                Thread.sleep(100);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (CommunicationHandling.finished==1){
+            CommunicationHandling.getInstance();
+            System.out.println(CommunicationHandling.confirmation);
+            if (CommunicationHandling.confirmation == 1){
+                CommunicationHandling.confirmation = 0;
                 startActivity(new Intent(this, PreLobby.class));
-            }else if (CommunicationHandling.finished==0){
+            } else if (CommunicationHandling.confirmation == 0) {
                 toast("Connection timeout");
+            } else if (CommunicationHandling.confirmation == 11) {
+                toast("Username/password wrong\nPlease try again");
             }
 
         }
