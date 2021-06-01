@@ -38,7 +38,7 @@ public class Client extends AppCompatActivity implements Runnable{
 
     private static Client client = null;
 
-    public static String localhost = "35.207.116.16";           // localhost for android devices (finally)
+    public static String localhost = "192.168.178.52";           // localhost for android devices (finally)
     public static int port = 8080;                         // 3001, 8080, 1201, etc...
     public static Context context;
 

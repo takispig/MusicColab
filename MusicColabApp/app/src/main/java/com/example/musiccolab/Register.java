@@ -8,24 +8,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.util.concurrent.TimeUnit;
+import static xdroid.toaster.Toaster.toast;
 
 public class Register extends AppCompatActivity implements View.OnClickListener {
 
-    String email, password, username;
+    public static String email, password, username;
     EditText emailView, passView, userView;
-    String localhost = "10.0.2.2";
-    int port = 3001;
-    boolean suc = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,33 +34,33 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
     public void onClick(View view) {
         if (view.getId() == R.id.registerr) {
             // get variable inputs from the app
-            emailView = (EditText) findViewById(R.id.email);
+            emailView = findViewById(R.id.email);
             email = emailView.getText().toString();
-            passView = (EditText) findViewById(R.id.password);
+            passView = findViewById(R.id.password);
             password = passView.getText().toString();
-            userView = (EditText) findViewById(R.id.username);
+            userView = findViewById(R.id.username);
             username = userView.getText().toString();
 
-            // fetch Client data  -> action=2 (register)
-            Client.getInstance();
-            Client.email = email;
-            Client.userName = username;
-            Client.password = password;
-            Client.action = (short) 3;
-            Thread registerThread = new Thread(()->Client.getInstance().run());
-            registerThread.start();
-            // check for any changes in Client...when login succeed then confirmation_code will be 1
-            while (Client.confirmation_code == 0) {
-                Client.getInstance();   // retrieve latest changes in Client to check again for the confirmation
-                if (Client.confirmation_code == 3) {
-                    Toast.makeText(getApplicationContext(), "Registration Successful\nRedirecting to Login page...", Toast.LENGTH_LONG).show();
-                    startActivity(new Intent(this, Login.class));
-                } else if (Client.confirmation_code == 13) {
-                    Toast.makeText(getApplicationContext(), "Registration Failed\nPlease try again", Toast.LENGTH_LONG).show();
-                }
+            CommunicationHandling.getInstance();
+            CommunicationHandling.userName = username;
+            CommunicationHandling.password = password;
+            CommunicationHandling.email = email;
+
+            new RegisterThread().start();
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-            Client.confirmation_code = 0;   // reset to 0 for future operations
-            registerThread.interrupt();
+            if (CommunicationHandling.confirmation==3) {
+                CommunicationHandling.confirmation = 0;
+                toast("Registration Successful");
+                startActivity(new Intent(this, Login.class));
+            } else if (CommunicationHandling.confirmation==0) {
+                toast("Connection timeout");
+            } else if (CommunicationHandling.confirmation==13) {
+                toast("Registration Failed\nUsername already exists");
+            }
 
         } else if (view.getId() == R.id.aboutt) {
             // send the user to about us website, or pip up a new window
