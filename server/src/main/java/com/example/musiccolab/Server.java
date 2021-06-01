@@ -13,19 +13,20 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.*;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.logging.Level;
 
 import static java.lang.System.exit;
 
 public class Server {
-    private static Charset messageCharset = null;
-    private static CharsetDecoder decoder = null;//Network order = Byte --> Characters = Host order
-    private static CharsetEncoder encoder = null;//Characters = Host order -->  Network order = Byte
+    private Charset messageCharset = null;
+    private CharsetDecoder decoder = null;//Network order = Byte --> Characters = Host order
+    private CharsetEncoder encoder = null;//Characters = Host order -->  Network order = Byte
     private ServerSocketChannel serverChannel = null;
     private InetSocketAddress serverAddress = null;
     private Selector selector = null;
 
-    private static boolean running = true;
-    private static boolean finished = false;
+    private boolean running = true;
+    private boolean finished = false;
 
     private static int noOfLobbies = -1;
     private static int noOfPlayers = -1;
@@ -33,12 +34,8 @@ public class Server {
     public static HashMap<Integer,Lobby> lobbyMap = new HashMap<>();
     public static HashMap<Integer,Player> loggedInPlayers = new HashMap<>();
 
-    public void setupServerAddress(String address, int port) throws IPAddressException {
-        try {
-            serverAddress = new InetSocketAddress(address, port);
-        } catch (IllegalArgumentException | SecurityException e) {
-            throw new IPAddressException();
-        }
+    public void setupServerAddress(String address, int port) throws IllegalArgumentException, SecurityException {
+        serverAddress = new InetSocketAddress(address, port);
     }
 
     public void defineCharType() {
@@ -57,11 +54,8 @@ public class Server {
         serverChannel.configureBlocking(false);
         serverChannel.register(selector, SelectionKey.OP_ACCEPT);
 
-        try {
-            serverChannel.socket().bind(serverAddress);
-        } catch (IOException e) {
-            throw new SocketBindException();
-        }
+        serverChannel.socket().bind(serverAddress);
+
     }
 
     //bufferHandleIsNeeded?
@@ -72,7 +66,7 @@ public class Server {
         channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE); //AddState as third parameter.
 
 
-        String message = "Welcome in MusicCoLab Server.\r\n";
+        String message = "Welcome in MusicCoLab Server.";
         ByteBuffer tempBuffer = ByteBuffer.allocate(message.length());
         tempBuffer.put(message.getBytes(messageCharset));
         tempBuffer.flip();
@@ -84,7 +78,7 @@ public class Server {
      * According to the return value of function "analyseMainBuffer" send an error message or
      * handle the received action.
      */
-    private void handleConnectionWhenReadable(SelectionKey key) throws IOException {
+    private void handleConnectionWhenReadable(SelectionKey key) throws IOException, SQLException, ClassNotFoundException {
         //int state = (Integer) key.attachment(); //To save the state of all clients. Integer --> Class
 
         SocketChannel clientChannel = (SocketChannel) key.channel();
@@ -94,25 +88,19 @@ public class Server {
 
         short[] result = protocol.analyseMainBuffer(messageCharset, clientChannel);
         if(result[1] == -1) {
-            protocol.sendResponseToClient(messageCharset, clientChannel, "You are not our customer.\r\n");
+            protocol.sendResponseToClient(messageCharset, clientChannel, "You are not our customer.");
             clientChannel.close();
         }
         else if(result[1] == -2) {
-            if(result[0] != 0) {
-                protocol.sendResponseToClient(messageCharset, clientChannel, "Action is not known.\r\n");
-                clientChannel.close();
-            }
-        }
-        else if(result[1] == -3) {
-            System.out.println("main.java.com.example.musiccolab.Client is disconnected.");
+            protocol.sendResponseToClient(messageCharset, clientChannel, "Action is not known.");
             clientChannel.close();
         }
-        else if(result[1] != 0)
+        else
             protocol.handleAction(messageCharset, clientChannel, result[1]);
     }
 
-    public void handleConnection() throws IOException {
-        System.out.println("Waiting for connection: ");
+    public void handleConnection() throws IOException, SQLException, ClassNotFoundException {
+        Main.logr.log(Level.INFO, "WAITING FOR CONNECTION");
 
         while (running) {
             selector.select();
