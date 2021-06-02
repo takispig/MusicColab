@@ -3,12 +3,11 @@ package main.java.com.example.musiccolab;
 import main.java.com.example.musiccolab.exceptions.IPAddressException;
 import main.java.com.example.musiccolab.exceptions.SocketBindException;
 
-import java.io.Console;
 import java.io.IOException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.sql.SQLException;
 import java.util.Scanner;
-import java.util.logging.*;
+import java.util.logging.Logger;
 
 public class Main {
 
@@ -32,14 +31,14 @@ public class Main {
 
     public static Logger logr = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
+
     public static void main(String[] args) {
-
         ActionLog.initLogger(logr);
-
 
         init(args);
 
         while (!exit && !error()) {
+
             input();
 
             serverThread = new Thread(Main::runServer, "server-" + serverNumber++);
@@ -51,8 +50,6 @@ public class Main {
         exit();
 
     }
-
-
 
     private static void init(String[] args) {
         if (args.length == 0) {
@@ -75,8 +72,7 @@ public class Main {
         if (!invalidInput)
             return;
         while (invalidInput) {
-            Main.logr.log(Level.SEVERE, "ERROR WITH IP OR PORT");
-            System.out.println("An error occurred with the specified IP address (" + DEFAULT_ADDRESS +"and port (" + DEFAULT_PORT + "!\nTry a new input.");
+            System.out.println("An error occurred with the specified IP address and port!\nTry a new input.");
             System.out.println("This server will exit after 30 seconds without further interaction.");
             System.out.print("address: ");
             long Itime = System.currentTimeMillis();
@@ -124,7 +120,7 @@ public class Main {
     }
 
     private static void runServer() {
-        logr.log(Level.INFO, "SERVER STARTING");
+        System.out.println("Creating new server...");
         currentServer = new Server();
 
         try {
@@ -132,16 +128,15 @@ public class Main {
 
             currentServer.defineCharType();
 
-            logr.log(Level.INFO, "SERVER SETTING UP");
+            System.out.println("Setting up new server...");
             currentServer.OpenSelectorAndSetupSocket();
 
             currentServer.handleConnection();
 
             return;
-        } catch (SecurityException | IllegalArgumentException | SocketBindException e) {
+        } catch (IPAddressException | SocketBindException e) {
             invalidInput = true;
-            e.printStackTrace();
-        } catch (IOException | SQLException | ClassNotFoundException e) {
+        } catch (IOException | UnsupportedCharsetException e) {
             System.err.println("ERROR: ----------------------------------------------------");
             e.printStackTrace();
             System.err.println("-----------------------------------------------------------");
@@ -198,7 +193,7 @@ public class Main {
     }
 
     private static void closeServer() {
-        logr.log(Level.INFO, "SERVER SHUTDOWN");
+        System.out.println("Closing Server...");
         currentServer.finishServer();
         boolean closed = false;
         while (!closed) {
