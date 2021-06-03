@@ -1,6 +1,8 @@
 package com.example.musiccolab;
 
 import androidx.appcompat.app.AppCompatActivity;
+import static xdroid.toaster.Toaster.toast;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.app.Service;
 import android.content.Intent;
@@ -11,33 +13,28 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.musiccolab.instruments.Drums;
 import com.example.musiccolab.instruments.Instrument;
 import com.example.musiccolab.instruments.InstrumentGUIBox;
 import com.example.musiccolab.instruments.InstrumentType;
+import com.example.musiccolab.instruments.Piano;
 import com.example.musiccolab.instruments.Theremin;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Lobby extends AppCompatActivity implements View.OnClickListener, SensorEventListener {
+public class Lobby extends AppCompatActivity implements View.OnClickListener, SensorEventListener, Serializable {
 
-    private InstrumentType selectedInstrumentType;
-    private Instrument selectedInstrument;
-
-    /*
-        TODO this is a placeholder for the GUI / box for every instrument in the "green box" in the Lobby
-     */
-    private InstrumentGUIBox instrumentGUI;
-
-    private Instrument drums;
-    private Instrument theremin;
-    private List<Instrument> instrumentList = new ArrayList<Instrument>();
+    private Instrument selectedInstrument = null;
     private SensorManager sensorManager;
     private Sensor sensor;
+    private Boolean visible = false;
+    private Boolean loop = false;
+    private InstrumentGUIBox instrumentGUI;
 
 
     @Override
@@ -45,47 +42,60 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         super.onCreate(savedInstanceState);
         setContentView(R.layout.lobby);
 
+        // update 'more' text field in Lobby
+        TextView lobby_nr = findViewById(R.id.server_number);
+        lobby_nr.setText(String.format("%s", CommunicationHandling.lobbyID));
+        TextView instr = findViewById(R.id.instrument);
+        instr.setText(String.format("%s", getIntent().getSerializableExtra(PreLobby.SELECTED_INSTRUMENT)));
+
         // Create Listeners for the IDs: about, register
-
-        Button loop = (Button) findViewById(R.id.loop);
+        Button loop = findViewById(R.id.loop);
         loop.setOnClickListener(this);
-        TextView cancel_loop = (TextView) findViewById(R.id.cancel_loop);
-        cancel_loop.setOnClickListener(this);
-        TextView replay = (TextView) findViewById(R.id.replay);
-        replay.setOnClickListener(this);
-        TextView disconnect = (TextView) findViewById(R.id.disconnect);
+        Button calibrate = findViewById(R.id.calibrate);
+        calibrate.setOnClickListener(this);
+        ImageButton disconnect = findViewById(R.id.disconnect);
         disconnect.setOnClickListener(this);
-
-        // TODO we should receive the selected instrument through the dropdown
+        ImageButton more = findViewById(R.id.more_button);
+        more.setOnClickListener(this);
 
         sensorManager = (SensorManager) getSystemService(Service.SENSOR_SERVICE);
 
-        instrumentGUI = new InstrumentGUIBox();
+        createInstrumentGUIBox();
 
-        drums = new Drums(instrumentGUI);
-        instrumentList.add(drums);
+        String selectedInstrumentFromPreLobby = (String) getIntent().getSerializableExtra(PreLobby.SELECTED_INSTRUMENT);
 
-        theremin = new Theremin(instrumentGUI, this);
-        instrumentList.add(theremin);
+        switch (selectedInstrumentFromPreLobby) {
+            case InstrumentType.THEREMIN:
+                selectedInstrument = new Theremin(instrumentGUI, this);
+                InstrumentGUIBox.instrumentType = 2;
+                break;
+            case InstrumentType.DRUMS:
+                selectedInstrument = new Drums(instrumentGUI, this);
+                InstrumentGUIBox.instrumentType = 1;
+                break;
+            case InstrumentType.PIANO:
+                selectedInstrument = new Piano(instrumentGUI, this);
+                InstrumentGUIBox.instrumentType = 1;
+                break;
+        }
 
-        // Theremin is set as default instrument:
-        selectedInstrument = theremin;
         selectedInstrument.reCalibrate();
-        selectedInstrumentType = selectedInstrument.getInstrumentType();
         sensor = sensorManager.getDefaultSensor(selectedInstrument.getSensorType());
         sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
-    // TODO shall be triggered in the moment the user changes the selection in the drop down
-    public void userSelectedInstrument(InstrumentType newSelectedInstrumentType) {
-        selectedInstrumentType = newSelectedInstrumentType;
-        for (Instrument instrument : instrumentList) {
-            if (instrument.getInstrumentType().equals(selectedInstrumentType)) {
-                selectedInstrument = instrument;
-                selectedInstrument.reCalibrate();
-                sensor = sensorManager.getDefaultSensor(selectedInstrument.getSensorType());
-            }
-        }
+    private void createInstrumentGUIBox() {
+        List<Integer> pianoKeys = new ArrayList<>();
+        pianoKeys.add(R.id.btnC);
+        pianoKeys.add(R.id.btnD);
+        pianoKeys.add(R.id.btnE);
+        pianoKeys.add(R.id.btnF);
+        pianoKeys.add(R.id.btnG);
+        pianoKeys.add(R.id.btnA);
+        pianoKeys.add(R.id.btnH);
+        pianoKeys.add(R.id.btnC2);
+        instrumentGUI = new InstrumentGUIBox(this, R.id.iva_text_1, pianoKeys);
+       //instrumentGUI = new InstrumentGUIBox(this, R.id.iva_text_1, 0);
     }
 
     @Override
@@ -104,36 +114,52 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
     // In this function we will 'hear' for onClick events and according to
     // their IDs we will make the correct decision
     public void onClick(View view) {
+        CommunicationHandling.getInstance();
+
         if (view.getId() == R.id.loop) {
-            // do some stuff
-            Toast.makeText(getApplicationContext(), "Create Loop is not yet implemented", Toast.LENGTH_SHORT).show();
+            Button x = findViewById(R.id.loop);
+            loop = !loop;
+            x.setText(loop ? "Stop  Loop" : "Start Loop");
+        }
 
-            // TODO Create and implement a "ReCalibrate" button and move this method to it
+        if (view.getId() == R.id.calibrate) {
             selectedInstrument.reCalibrate();
+        }
 
-        } else if (view.getId() == R.id.cancel_loop) {
-            // do some stuff
-            Toast.makeText(getApplicationContext(), "Cancel Loop is not yet implemented", Toast.LENGTH_SHORT).show();
-        } else if (view.getId() == R.id.replay) {
-            // do some stuff
-            Toast.makeText(getApplicationContext(), "Replay is not yet implemented", Toast.LENGTH_SHORT).show();
-        } else if (view.getId() == R.id.disconnect) {
-            // do some stuff
-            Toast.makeText(getApplicationContext(), "Disconnect is not yet implemented", Toast.LENGTH_SHORT).show();
-            // redirect user after logout to the main app screen
-            startActivity(new Intent(this, Login.class));
+        if (view.getId() == R.id.disconnect) {
+            new LogoutThread().start();
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (CommunicationHandling.confirmation==2){
+                // reset the sensitive user data after logout
+                CommunicationHandling.userName = null;
+                CommunicationHandling.email = null;
+                CommunicationHandling.password = null;
+                CommunicationHandling.confirmation = 0;
+                startActivity(new Intent(this, Login.class));
+            }else if (CommunicationHandling.confirmation==0){
+                toast("Connection timeout");
+            } else if (CommunicationHandling.confirmation == 12) {
+                toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
+            }
+        }
+
+        if (view.getId() == R.id.more_button) {
+            ConstraintLayout info = findViewById(R.id.info);
+            visible = !visible;
+            info.setVisibility(visible ? View.VISIBLE : View.GONE);
         }
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        // TODO does this work for Touch as well?
-        // TODO only if user is "recording" etc
         selectedInstrument.action(event);
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
     }
 }
