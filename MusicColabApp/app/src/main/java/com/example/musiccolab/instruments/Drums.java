@@ -2,65 +2,97 @@ package com.example.musiccolab.instruments;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
+import android.media.MediaPlayer;
+import android.util.Log;
+
+import java.util.Optional;
+
+import com.example.musiccolab.Lobby;
+import com.example.musiccolab.R;
 
 public class Drums implements Instrument {
 
     public static final double GRAVITY = 9.81;
     public static final double TOLERANCE = 0.5;
-    public static final double MIN_SENSOR_INTENSITY = TOLERANCE;
     public static final double MAX_SENSOR_INTENSITY = 5.0;
-    private Axis axisPointingToGround = Axis.Y;
     private static final String INSTRUMENT_NAME = "Drums";
-    private static final InstrumentType INSTRUMENT_TYPE = InstrumentType.DRUMS;
-    private InstrumentGUIBox instrumentGUI;
+    private static final String INSTRUMENT_TYPE = InstrumentType.DRUMS;
+    private final InstrumentGUIBox instrumentGUI;
     private static final int DEFAULT_SENSOR = Sensor.TYPE_ACCELEROMETER;
-    private double lastSensorXValue = 0;
-    private double lastSensorYValue = 0;
-    private double lastSensorZValue = 0;
+    private final float[] lastKnownSensorValues = new float[3];
+    private static final String TAG = "Drums";
+    private Optional<Axis> axisPointingToGround = Optional.empty();
+    private final MediaPlayer drum_a, drum_b;
 
-    public Drums(InstrumentGUIBox instrumentGUI) {
+    public Drums(InstrumentGUIBox instrumentGUI, Lobby lobby) {
         this.instrumentGUI = instrumentGUI;
+        drum_a = MediaPlayer.create(lobby, R.raw.drum_a);
+        drum_b = MediaPlayer.create(lobby, R.raw.drum_b);
+        instrumentGUI.setDrumsVisible();
     }
 
     @Override
     public void reCalibrate(SensorEvent event) {
-        // TODO get the axis with gravitational force and set it as the axisPointingToGround
-        axisPointingToGround = Axis.Y;
+        axisPointingToGround = Optional.of(getAxisWithGravity(event.values));
+    }
+
+    private Axis getAxisWithGravity(float[] values) {
+        if (isForceWithinGravityRange(values[0])) {
+            return Axis.X;
+        } else if (isForceWithinGravityRange(values[1])) {
+            return Axis.Y;
+        } else {
+            return Axis.Z;
+        }
+    }
+
+    private boolean isForceWithinGravityRange(Float value) {
+        if (value < 0) {
+            value = value * (-1);
+        }
+        return value > GRAVITY - TOLERANCE && value < GRAVITY + TOLERANCE;
     }
 
     @Override
     public void reCalibrate() {
-        // TODO recalibrate with last known values
+        axisPointingToGround = Optional.of(getAxisWithGravity(lastKnownSensorValues));
     }
 
     @Override
     public void action(SensorEvent event) {
         if (event.sensor.getType() != Sensor.TYPE_ACCELEROMETER) {
-            // TODO error handling
+            Log.e(TAG, "Instrument DRUMS need Sensor of type " + Sensor.TYPE_ACCELEROMETER + " but received sensor of type " + event.sensor.getType() + "!");
         } else {
             checkAndHandleAllValues(event);
         }
     }
 
     private void checkAndHandleAllValues(SensorEvent event) {
-        lastSensorXValue = event.values[0];
-        lastSensorYValue = event.values[1];
-        lastSensorZValue = event.values[2];
-        if (axisPointingToGround.equals(Axis.X)) {
-            checkAndHandleTwoValues(lastSensorYValue, lastSensorZValue);
-        } else if (axisPointingToGround.equals(Axis.Y)) {
-            checkAndHandleTwoValues(lastSensorXValue, lastSensorZValue);
+        if (!axisPointingToGround.isPresent()) {
+            reCalibrate(event);
+        }
+        lastKnownSensorValues[0] = event.values[0];
+        lastKnownSensorValues[1] = event.values[1];
+        lastKnownSensorValues[2] = event.values[2];
+        if (axisPointingToGround.get().equals(Axis.X)) {
+            checkAndHandleTwoValues(lastKnownSensorValues[1], lastKnownSensorValues[2]);
+
+        } else if (axisPointingToGround.get().equals(Axis.Y)) {
+            checkAndHandleTwoValues(lastKnownSensorValues[0], lastKnownSensorValues[2]);
         } else {
-            checkAndHandleTwoValues(lastSensorXValue, lastSensorYValue);
+            checkAndHandleTwoValues(lastKnownSensorValues[0], lastKnownSensorValues[1]);
         }
     }
 
     private void checkAndHandleTwoValues(double force_1, double force_2) {
-        // TODO es fehlt noch: note 1 und 2 sind ja festgelegt für ganz bestimmte Achsen
-        if (forceWithinLimits(force_1)) {
-            // TODO play note 1
-        } else if (forceWithinLimits(force_2)) {
-            // TODO play note 2
+        if (!forceWithinLimits(force_1)) {
+            instrumentGUI.setTextInCenter("DRUM_A");
+            drum_a.start();
+            instrumentGUI.setDrumsRotateLeft();
+        } else if (!forceWithinLimits(force_2)) {
+            instrumentGUI.setTextInCenter("DRUM_B");
+            drum_b.start();
+            instrumentGUI.setDrumsRotateRight();
         }
     }
 
@@ -80,7 +112,7 @@ public class Drums implements Instrument {
     }
 
     @Override
-    public InstrumentType getInstrumentType() {
+    public String getInstrumentType() {
         return INSTRUMENT_TYPE;
     }
 
