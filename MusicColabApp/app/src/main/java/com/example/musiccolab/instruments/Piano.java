@@ -1,227 +1,115 @@
-package instruments;
+package com.example.musiccolab.instruments;
 
 import android.annotation.SuppressLint;
-import android.media.AudioManager;
+import android.hardware.SensorEvent;
 import android.media.SoundPool;
-import android.os.Build;
-import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
+import com.example.musiccolab.Lobby;
 import com.example.musiccolab.R;
 
-public class Piano extends AppCompatActivity implements View.OnClickListener{
+import java.util.ArrayList;
+import java.util.List;
 
-    Button a, b, c, d, e, f, g, h;
+public class Piano implements Instrument, View.OnClickListener {
 
-    private SoundPool soundPool;
-    private int sound_a, sound_b, sound_c, sound_d, sound_e, sound_f, sound_g, sound_h;
-
-    //handles the screen rotation
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
+    private final Animation scaleDown;
+    private final SoundPool soundPool;
+    private List<Integer> soundIDs;
+    private static final String INSTRUMENT_NAME = "Piano";
+    private static final int FREEZE_DURATION_IN_MS = 300;
 
     @SuppressLint("ClickableViewAccessibility")
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.piano);
+    public Piano(InstrumentGUIBox instrumentGUI, Lobby lobby) {
+        List<Button> pianoKeys = instrumentGUI.getPianoKeys();
 
-        a = (Button) findViewById(R.id.btnA);
-        b = (Button) findViewById(R.id.btnB);
-        c = (Button) findViewById(R.id.btnC);
-        d = (Button) findViewById(R.id.btnD);
-        e = (Button) findViewById(R.id.btnE);
-        f = (Button) findViewById(R.id.btnF);
-        g = (Button) findViewById(R.id.btnG);
-        h = (Button) findViewById(R.id.btnH);
+        scaleDown = AnimationUtils.loadAnimation(lobby, R.anim.scale_down);
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            soundPool = new SoundPool.Builder().setMaxStreams(5).build();
-        }else {
-            soundPool = new SoundPool(5, AudioManager.STREAM_MUSIC, 0);
+        soundPool = new SoundPool.Builder().setMaxStreams(5).build();
+
+        createSoundIDsList();
+        for (int i = 0; i < pianoKeys.size(); i++) {
+            Button btn = pianoKeys.get(i);
+            int soundPoolID = soundPool.load(lobby, soundIDs.get(i), 1);
+            btn.setOnTouchListener((v, event) -> {
+                switch (event.getActionMasked()) {
+                    case MotionEvent.ACTION_DOWN:
+                        btn.startAnimation(scaleDown);
+                        soundPool.play(soundPoolID, 1, 1, 0, 0, 1);
+                        instrumentGUI.setTextInCenter(btn.getText() + " pressed");
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        freeze();
+                        btn.clearAnimation();
+                        soundPool.pause(soundPoolID);
+                        instrumentGUI.setTextInCenter(btn.getText() + " released");
+                        break;
+                    default:
+                        // instrumentGUI.setTextInCenter("no key pressed");
+                        break;
+                }
+                return true;
+            });
         }
-
-        //match sound to the buttons
-        sound_a = soundPool.load(this, R.raw.a, 1);
-        sound_b = soundPool.load(this, R.raw.b, 1);
-        sound_c = soundPool.load(this, R.raw.c, 1);
-        sound_d = soundPool.load(this, R.raw.d, 1);
-        sound_e = soundPool.load(this, R.raw.e, 1);
-        sound_f = soundPool.load(this, R.raw.f, 1);
-        sound_g = soundPool.load(this, R.raw.g, 1);
-        sound_h = soundPool.load(this, R.raw.g2, 1);
-
-        a.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getActionMasked()){
-                    case MotionEvent.ACTION_DOWN:
-                        soundPool.play(sound_a, 1, 1, 0, 0, 1);
-                        System.out.println("a pressed");
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        soundPool.pause(sound_a);
-                        System.out.println("a released");
-                        break;
-                    default:
-                        System.out.println("no key pressed");
-                        break;
-                }
-                return true;
-            }
-        });
-
-        b.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getActionMasked()){
-                    case MotionEvent.ACTION_DOWN:
-                        soundPool.play(sound_b, 1, 1, 0, 0, 1);
-                        System.out.println("b pressed");
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        soundPool.pause(sound_b);
-                        System.out.println("b released");
-                        break;
-                    default:
-                        System.out.println("no key pressed");
-                        break;
-                }
-                return true;
-            }
-        });
-
-        c.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getActionMasked()){
-                    case MotionEvent.ACTION_DOWN:
-                        soundPool.play(sound_c, 1, 1, 0, 0, 1);
-                        System.out.println("c pressed");
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        soundPool.pause(sound_c);
-                        System.out.println("c released");
-                        break;
-                    default:
-                        System.out.println("no key pressed");
-                        break;
-                }
-                return true;
-            }
-        });
-
-        d.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getActionMasked()){
-                    case MotionEvent.ACTION_DOWN:
-                        soundPool.play(sound_d, 1, 1, 0, 0, 1);
-                        System.out.println("d pressed");
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        soundPool.pause(sound_d);
-                        System.out.println("d released");
-                        break;
-                    default:
-                        System.out.println("no key pressed");
-                        break;
-                }
-                return true;
-            }
-        });
-
-        e.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getActionMasked()){
-                    case MotionEvent.ACTION_DOWN:
-                        soundPool.play(sound_e, 1, 1, 0, 0, 1);
-                        System.out.println("e pressed");
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        soundPool.pause(sound_e);
-                        System.out.println("e released");
-                        break;
-                    default:
-                        System.out.println("no key pressed");
-                        break;
-                }
-                return true;
-            }
-        });
-
-        f.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getActionMasked()){
-                    case MotionEvent.ACTION_DOWN:
-                        soundPool.play(sound_f, 1, 1, 0, 0, 1);
-                        System.out.println("f pressed");
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        soundPool.pause(sound_f);
-                        System.out.println("f released");
-                        break;
-                    default:
-                        System.out.println("no key pressed");
-                        break;
-                }
-                return true;
-            }
-        });
-
-        g.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getActionMasked()){
-                    case MotionEvent.ACTION_DOWN:
-                        soundPool.play(sound_g, 1, 1, 0, 0, 1);
-                        System.out.println("g pressed");
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        soundPool.pause(sound_g);
-                        System.out.println("g released");
-                        break;
-                    default:
-                        System.out.println("no key pressed");
-                        break;
-                }
-                return true;
-            }
-        });
-
-        h.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getActionMasked()){
-                    case MotionEvent.ACTION_DOWN:
-                        soundPool.play(sound_h, 1, 1, 0, 0, 1);
-                        System.out.println("h pressed");
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        soundPool.pause(sound_h);
-                        System.out.println("h released");
-                        break;
-                    default:
-                        System.out.println("no key pressed");
-                        break;
-                }
-                return true;
-            }
-        });
+        instrumentGUI.setPianoKeysVisible();
     }
-    @Override
-    // In this function we will 'hear' for onClick events and according to
-    // their IDs we will make the correct decision
-    public void onClick(View view) {
 
+    private void freeze() {
+        try {
+            Thread.sleep(FREEZE_DURATION_IN_MS);
+        } catch (InterruptedException e) {
+            // TODO log error
+        }
+    }
+
+    private void createSoundIDsList() {
+        soundIDs = new ArrayList<>();
+        soundIDs.add(R.raw.p_c);
+        soundIDs.add(R.raw.p_d);
+        soundIDs.add(R.raw.p_e);
+        soundIDs.add(R.raw.p_f);
+        soundIDs.add(R.raw.p_g);
+        soundIDs.add(R.raw.p_a);
+        soundIDs.add(R.raw.p_h);
+        soundIDs.add(R.raw.p_c2);
+    }
+
+    @Override
+    public void reCalibrate(SensorEvent event) {
+        // do nothing, or maybe changing landscape from vertical to horizontal?
+    }
+
+    @Override
+    public void reCalibrate() {
+        // do nothing, or maybe changing landscape from vertical to horizontal?
+    }
+
+    @Override
+    public void action(SensorEvent event) {
+        // do nothing
+    }
+
+    @Override
+    public String getInstrumentName() {
+        return INSTRUMENT_NAME;
+    }
+
+    @Override
+    public String getInstrumentType() {
+        return InstrumentType.PIANO;
+    }
+
+    @Override
+    public int getSensorType() {
+        return 0;
+    }
+
+    @Override
+    public void onClick(View v) {
+        // do nothing
     }
 }
