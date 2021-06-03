@@ -142,18 +142,18 @@ public class Protocol {
             if (action == register) {
                 checkResponse = LoginSystem.register(username, email, password);
                 sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-                Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + "REGISTERED");
+                Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " REGISTERED");
 
             } else if (action == login) {
                 checkResponse = LoginSystem.login(username, password, clientChannel);
                 String response = getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse);
                 sendResponseToClient(messageCharset, clientChannel, response + getAllLobbyIds(Server.lobbyMap));
-                Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + "LOGGED IN ");
+                Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " LOGGED IN ");
 
             } else if (action == logout) {
                 checkResponse = LoginSystem.logout(username, password);
                 sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-                Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + "LOGGED OUT");
+                Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " LOGGED OUT");
             }
         } catch (SQLException e) {
             checkResponse = false;
@@ -169,7 +169,7 @@ public class Protocol {
     }
 
     private String getAllLobbyIds(HashMap<Integer, Lobby> lobbyMap) {
-        String res = "";
+        String res = ",";
 
         var entrySet = lobbyMap.entrySet();
         for(var k: entrySet){
@@ -192,7 +192,8 @@ public class Protocol {
             Lobby lobby = new Lobby(player, lobbyName, id);
             Server.lobbyMap.put(id,lobby);
             sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(true, lobby, " created by client."));
-            System.out.println("main.java.com.example.musiccolab.Lobby with ID " + lobby.getLobby_id() + " is for main.java.com.example.musiccolab.Client " + player.getId() + " created");
+            //System.out.println("Lobby with ID " + lobby.getLobby_id() + " is for Client " + player.getId() + " created");
+            Main.logr.log(Level.INFO, "LOBBY " + lobby.getLobby_id() + " CREATED BY CLIENT " + playerAddress.toString());
         }
         else if((action == joinLobby || action == leaveLobby) && player != null){
             int lobbyID = Integer.parseInt(messageCharset.decode(lobbyBuffer).toString());
@@ -202,13 +203,16 @@ public class Protocol {
                 if(checkResponse)
                     checkResponse = currentLobby.addPlayer(player);
                 sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " --> you are in."));
-                System.out.println("main.java.com.example.musiccolab.Client with ID " + player.getId() + " is now in lobby: " + currentLobby.getLobby_id());
+                //System.out.println("Client with ID " + player.getId() + " is now in lobby: " + currentLobby.getLobby_id());
+                Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " JOINED LOBBY " + currentLobby.getLobby_id());
+
             } else if(action == leaveLobby){
                 boolean checkResponse = (currentLobby != null);
                 if(checkResponse)
                     currentLobby.removePlayer(player);
                 sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " you are out."));
-                System.out.println("main.java.com.example.musiccolab.Client with ID " + player.getId() + " is now out from lobby: " + currentLobby.getLobby_id());
+                //System.out.println("Client with ID " + player.getId() + " is now out from lobby: " + currentLobby.getLobby_id());
+                Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " LEFT LOBBY " + currentLobby.getLobby_id());
             }
 
         }
@@ -294,7 +298,7 @@ public class Protocol {
     private String getLobbyResponse(boolean result, Lobby lobby, String additionPart){
         String message;
         if(result){
-            message = "main.java.com.example.musiccolab.Lobby "+ lobby.getLobby_id() + additionPart;
+            message = "Lobby "+ lobby.getLobby_id() + additionPart;
             responseAction = action;
         }
         else{
