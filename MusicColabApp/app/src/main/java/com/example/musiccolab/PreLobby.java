@@ -28,6 +28,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
     private final String[] instruments = {InstrumentType.THEREMIN, InstrumentType.DRUMS, InstrumentType.PIANO};
     public static String lobbyName = "";
     public static int lobbyID = 0;
+    private int counter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +86,11 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
         CommunicationHandling.getInstance();
 
         if (view.getId() == R.id.create_server) {
+            if ((CommunicationHandling.lobbyName != null) || (CommunicationHandling.lobbyID != -1)) {
+                System.out.println(CommunicationHandling.lobbyName + "  " + CommunicationHandling.lobbyID);
+                toast("You are already connected with a Lobby");
+                return;
+            }
             findViewById(R.id.create_server_popup).setVisibility(View.VISIBLE);
         }
 
@@ -104,22 +110,22 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             new CreateThread().start();
             try {
                 Thread.sleep(300);
+                System.out.println("LobbyName: " + lobbyName + " with conf-code : " + CommunicationHandling.confirmation);
+                if (CommunicationHandling.confirmation==4) {
+                    // this means we successfully created a lobby -> set status Connected with server #Num
+                    toast("Lobby Created Successfully\n");
+                    TextView status_text = findViewById(R.id.server_status);
+                    CommunicationHandling.lobbyName = lobbyName;
+                    status_text.setText(String.format("Connected to Lobby #%s\nLobby name: %s", CommunicationHandling.lobbyID, lobbyName));
+                } else if (CommunicationHandling.confirmation==0) {
+                    toast("Connection timeout");
+                } else if (CommunicationHandling.confirmation == 14) {
+                    toast("Error while Creating the Lobby\nPlease try again");
+                }
+                CommunicationHandling.confirmation = 0;
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            System.out.println("LobbyName: " + lobbyName + " with conf-code : " + CommunicationHandling.confirmation);
-            if (CommunicationHandling.confirmation==4) {
-                // this means we successfully created a lobby -> set status Connected with server #Num
-                toast("Lobby Created Successfully\n");
-                TextView status_text = findViewById(R.id.server_status);
-                CommunicationHandling.lobbyName = lobbyName;
-                status_text.setText(String.format("Connected to Lobby #%s\nLobby name: %s", lobbyID, lobbyName));
-            } else if (CommunicationHandling.confirmation==0) {
-                toast("Connection timeout");
-            } else if (CommunicationHandling.confirmation == 14) {
-                toast("Error while Creating the Lobby\nPlease try again");
-            }
-            CommunicationHandling.confirmation = 0;
         }
 
         if (view.getId() == R.id.cancel_create) {
@@ -127,6 +133,11 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
         }
 
         if (view.getId() == R.id.join_server) {
+            if ((CommunicationHandling.lobbyName != null) || (CommunicationHandling.lobbyID != -1)) {
+                System.out.println(CommunicationHandling.lobbyName + "  " + CommunicationHandling.lobbyID);
+                toast("You are already connected with a Lobby");
+                return;
+            }
             findViewById(R.id.join_server_popup).setVisibility(View.VISIBLE);
         }
 
@@ -146,22 +157,22 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             new JoinThread().start();
             try {
                 Thread.sleep(300);
+                System.out.println("LobbyID " + CommunicationHandling.lobbyID + " with conf-code: " + CommunicationHandling.confirmation);
+                CommunicationHandling.getInstance();
+                if (CommunicationHandling.confirmation==5) {
+                    // this means we successfully created a lobby -> set status Connected with server #Num
+                    toast("You joined Lobby #" + CommunicationHandling.lobbyID);
+                    TextView lobby = findViewById(R.id.server_status);
+                    lobby.setText(String.format("Connected to Lobby #%s", lobbyID));
+                } else if (CommunicationHandling.confirmation==0) {
+                    toast("Connection timeout");
+                } else if (CommunicationHandling.confirmation == 15) {
+                    toast("Error while Joining the Lobby\nIs the ID correct?");
+                }
+                CommunicationHandling.confirmation = 0;
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            System.out.println("LobbyID " + CommunicationHandling.lobbyID + " with conf-code: " + CommunicationHandling.confirmation);
-            CommunicationHandling.getInstance();
-            if (CommunicationHandling.confirmation==5) {
-                // this means we successfully created a lobby -> set status Connected with server #Num
-                toast("You joined Lobby #" + CommunicationHandling.lobbyID);
-                TextView lobby = findViewById(R.id.server_status);
-                lobby.setText(String.format("Connected to Lobby #%s", lobbyID));
-            } else if (CommunicationHandling.confirmation==0) {
-                toast("Connection timeout");
-            } else if (CommunicationHandling.confirmation == 15) {
-                toast("Error while Joining the Lobby\nPlease try again");
-            }
-            CommunicationHandling.confirmation = 0;
         }
 
         if (view.getId() == R.id.cancel_join) {
@@ -172,23 +183,24 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             new LogoutThread().start();
             try {
                 Thread.sleep(300);
+                CommunicationHandling.getInstance();
+                if (CommunicationHandling.confirmation==2){
+                    // reset the sensitive user data after logout
+                    CommunicationHandling.userName = null;
+                    CommunicationHandling.email = null;
+                    CommunicationHandling.password = null;
+                    CommunicationHandling.lobbyID = -1;
+                    CommunicationHandling.lobbyName = null;
+                    CommunicationHandling.confirmation = 0;
+                    startActivity(new Intent(this, Login.class));
+                }else if (CommunicationHandling.confirmation == 0){
+                    toast("Connection timeout - no response");
+                } else if (CommunicationHandling.confirmation == 12) {
+                    toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
+                    CommunicationHandling.confirmation = 0;
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
-            CommunicationHandling.getInstance();
-            System.out.println(CommunicationHandling.confirmation);
-            if (CommunicationHandling.confirmation==2){
-                // reset the sensitive user data after logout
-                CommunicationHandling.userName = null;
-                CommunicationHandling.email = null;
-                CommunicationHandling.password = null;
-                CommunicationHandling.confirmation = 0;
-                startActivity(new Intent(this, Login.class));
-            }else if (CommunicationHandling.confirmation == 0){
-                toast("Connection timeout - no response");
-            } else if (CommunicationHandling.confirmation == 12) {
-                toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
-                CommunicationHandling.confirmation = 0;
             }
         }
 
@@ -205,6 +217,38 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                 startActivity(lobbyIntent);
             } else {
                 Toast.makeText(getApplicationContext(), "No such Instrument: \"" + selectedInstrument + "\". Try again.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (++counter == 1) {
+            toast("Press again to Disconnect");
+        }
+        else {
+            // else disconnect the user
+            new LogoutThread().start();
+            try {
+                Thread.sleep(300);
+                CommunicationHandling.getInstance();
+                if (CommunicationHandling.confirmation==2){
+                    // reset the sensitive user data after logout
+                    CommunicationHandling.userName = null;
+                    CommunicationHandling.email = null;
+                    CommunicationHandling.password = null;
+                    CommunicationHandling.lobbyID = -1;
+                    CommunicationHandling.lobbyName = null;
+                    CommunicationHandling.confirmation = 0;
+                    startActivity(new Intent(this, Login.class));
+                }else if (CommunicationHandling.confirmation == 0){
+                    toast("Connection timeout - no response");
+                } else if (CommunicationHandling.confirmation == 12) {
+                    toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
+                    CommunicationHandling.confirmation = 0;
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }

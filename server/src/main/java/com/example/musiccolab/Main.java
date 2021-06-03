@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.sql.SQLException;
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 public class Main {
 
@@ -28,7 +29,11 @@ public class Main {
     private static long time = 0;
     private static int restart = 0;
 
+    public static Logger logr = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
+
     public static void main(String[] args) {
+        ActionLog.initLogger(logr);
 
         init(args);
 

@@ -48,18 +48,20 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
 
             new RegisterThread().start();
             try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if (CommunicationHandling.confirmation==3) {
+                Thread.sleep(300);
+                System.out.println("Confirmation-code after in Register.java is: " + CommunicationHandling.confirmation);
+                if (CommunicationHandling.confirmation==3) {
+                    toast("Registration Successful");
+                    startActivity(new Intent(this, Login.class));
+                } else if (CommunicationHandling.confirmation==0) {
+                    toast("Connection timeout");
+                } else if (CommunicationHandling.confirmation==13) {
+                    toast("Registration Failed\nUsername already exists");
+                }
                 CommunicationHandling.confirmation = 0;
-                toast("Registration Successful");
-                startActivity(new Intent(this, Login.class));
-            } else if (CommunicationHandling.confirmation==0) {
-                toast("Connection timeout");
-            } else if (CommunicationHandling.confirmation==13) {
-                toast("Registration Failed\nUsername already exists");
+            } catch (InterruptedException e) {
+                toast("Error\nConnection with Server can't established");
+                e.printStackTrace();
             }
 
         } else if (view.getId() == R.id.aboutt) {

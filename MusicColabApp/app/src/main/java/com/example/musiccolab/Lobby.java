@@ -35,6 +35,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
     private Boolean visible = false;
     private Boolean loop = false;
     private InstrumentGUIBox instrumentGUI;
+    private int counter = 0;
 
 
     @Override
@@ -122,24 +123,26 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             selectedInstrument.reCalibrate();
         }
 
+        // this is the Leave Lobby function and not a Disconnect
         if (view.getId() == R.id.disconnect) {
-            new LogoutThread().start();
+            new leaveThread().start();
             try {
-                Thread.sleep(300);
+                Thread.sleep(600);
+                System.out.println("LeaveLobby conf-code: " + CommunicationHandling.confirmation);
+                if (CommunicationHandling.confirmation==6){
+                    // reset the sensitive user data after logout
+                    CommunicationHandling.confirmation = 0;
+                    CommunicationHandling.lobbyID = -1;
+                    CommunicationHandling.lobbyName = null;
+                    toast("Logged out successfully");
+                    startActivity(new Intent(this, PreLobby.class));
+                }else if (CommunicationHandling.confirmation==0){
+                    toast("Connection timeout");
+                } else if (CommunicationHandling.confirmation == 16) {
+                    toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
-            if (CommunicationHandling.confirmation==2){
-                // reset the sensitive user data after logout
-                CommunicationHandling.userName = null;
-                CommunicationHandling.email = null;
-                CommunicationHandling.password = null;
-                CommunicationHandling.confirmation = 0;
-                startActivity(new Intent(this, Login.class));
-            }else if (CommunicationHandling.confirmation==0){
-                toast("Connection timeout");
-            } else if (CommunicationHandling.confirmation == 12) {
-                toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
             }
         }
 
@@ -157,5 +160,34 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (++counter == 1) {
+            toast("Press again to Exit Lobby");
+        }
+        else {
+            // else remove the user from lobby
+            new leaveThread().start();
+            try {
+                Thread.sleep(600);
+                System.out.println("LeaveLobby conf-code: " + CommunicationHandling.confirmation);
+                if (CommunicationHandling.confirmation==6){
+                    // reset the sensitive user data after logout
+                    CommunicationHandling.confirmation = 0;
+                    CommunicationHandling.lobbyID = -1;
+                    CommunicationHandling.lobbyName = null;
+                    toast("Logged out successfully");
+                    startActivity(new Intent(this, PreLobby.class));
+                }else if (CommunicationHandling.confirmation==0){
+                    toast("Connection timeout");
+                } else if (CommunicationHandling.confirmation == 16) {
+                    toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

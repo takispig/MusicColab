@@ -8,6 +8,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.logging.Level;
 
 public class Protocol {
     final private short protocolName = 12845;
@@ -108,7 +109,8 @@ public class Protocol {
         loginSystemBuffer.clear();
     }
 
-    private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel) throws IOException {
+    private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel)
+            throws IOException {
 
         String username, password, email = "";
         boolean checkResponse = false;
@@ -139,24 +141,41 @@ public class Protocol {
         try {
             if (action == register) {
                 checkResponse = LoginSystem.register(username, email, password);
-                System.out.println("main.java.com.example.musiccolab.Client is registered.");
+                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+                Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + "REGISTERED");
 
             } else if (action == login) {
                 checkResponse = LoginSystem.login(username, password, clientChannel);
-                System.out.println("main.java.com.example.musiccolab.Client is logged in.");
+                String response = getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse);
+                sendResponseToClient(messageCharset, clientChannel, response + getAllLobbyIds(Server.lobbyMap));
+                Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + "LOGGED IN ");
 
             } else if (action == logout) {
-                checkResponse = LoginSystem.getPlayerByChannel(clientChannel) != null && LoginSystem.logout(username, password);
-                System.out.println("main.java.com.example.musiccolab.Client is logged out.");
+                checkResponse = LoginSystem.logout(username, password);
+                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+                Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + "LOGGED OUT");
             }
-            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-            return;
         } catch (SQLException e) {
-            System.out.println("ERROR: SQL");
+            checkResponse = false;
+            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+            System.out.println("SQL ERROR");
+            e.printStackTrace();
         } catch (ClassNotFoundException e) {
-            System.out.println("ERROR: ClassNotFound");
+            checkResponse = false;
+            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+            System.out.println("CNF ERROR");
+            e.printStackTrace();
         }
-        sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+    }
+
+    private String getAllLobbyIds(HashMap<Integer, Lobby> lobbyMap) {
+        String res = "";
+
+        var entrySet = lobbyMap.entrySet();
+        for(var k: entrySet){
+            res = res + Integer.toString(k.getValue().getLobby_id()) + ", ";
+        }
+        return res;
     }
 
     private void parseBufferForLobbyOrGame(Charset messageCharset, SocketChannel clientChannel, int lobbyNameIsSize) throws IOException {

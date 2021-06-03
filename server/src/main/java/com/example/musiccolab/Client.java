@@ -31,8 +31,9 @@ public class Client{
     }
 
     public static void main(String [] args) {
+        
         Client client = new Client();
-        CommunicationHandling communicationHandling = new CommunicationHandling(args[0], Integer.parseInt(args[1]));
+        CommunicationHandling communicationHandling = new CommunicationHandling("127.0.0.1", 8080);
         communicationHandling.register(client.email, client.userName, client.password);
         communicationHandling.login(client.userName, client.password);
         //communicationHandling.logout(client.userName, client.password);

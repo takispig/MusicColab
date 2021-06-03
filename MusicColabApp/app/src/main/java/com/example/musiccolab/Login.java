@@ -16,17 +16,12 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
     static String userName = "";
     static String password = "";
     EditText userNameView, passView;
+    private int counter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
-
-        // check if user is already logged in, if yes send him to PreLobby
-//        CommunicationHandling.getInstance();
-//        if (CommunicationHandling.userName != null) {
-//            startActivity(new Intent(this, PreLobby.class));
-//        }
 
         // Create Listeners for the IDs: login, about, register, forgot_password
         TextView register = (TextView) findViewById(R.id.register);
@@ -66,20 +61,25 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             new LoginThread().start();
             try {
                 Thread.sleep(1000);
+                CommunicationHandling.getInstance();
+                System.out.println(CommunicationHandling.confirmation);
+                if (CommunicationHandling.confirmation == 1){
+                    CommunicationHandling.confirmation = 0;
+                    startActivity(new Intent(this, PreLobby.class));
+                } else if (CommunicationHandling.confirmation == 0) {
+                    toast("Connection timeout");
+                } else if (CommunicationHandling.confirmation == 11) {
+                    toast("Username/password wrong\nPlease try again");
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            CommunicationHandling.getInstance();
-            System.out.println(CommunicationHandling.confirmation);
-            if (CommunicationHandling.confirmation == 1){
-                CommunicationHandling.confirmation = 0;
-                startActivity(new Intent(this, PreLobby.class));
-            } else if (CommunicationHandling.confirmation == 0) {
-                toast("Connection timeout");
-            } else if (CommunicationHandling.confirmation == 11) {
-                toast("Username/password wrong\nPlease try again");
-            }
-
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (++counter == 1) toast("Press again to Exit");
+        else finish();
     }
 }
