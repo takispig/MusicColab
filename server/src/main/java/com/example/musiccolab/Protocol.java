@@ -156,7 +156,7 @@ public class Protocol {
         } catch (ClassNotFoundException e) {
             System.out.println("ERROR: ClassNotFound");
         }
-        sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+        sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(action + 10, false));
     }
 
     private void parseBufferForLobbyOrGame(Charset messageCharset, SocketChannel clientChannel, int lobbyNameIsSize) throws IOException {
@@ -261,8 +261,10 @@ public class Protocol {
     }
 
     private static short getShort(byte[] b) {
-        if(b.length > 0)
-            return (short) (((b[1] << 8) | b[0] & 0xff));
+        if(b.length > 0) {
+            short value = (short) (((b[1] << 8) | b[0] & 0xff));
+            return value;
+        }
         else return -3;
     }
 
@@ -288,10 +290,12 @@ public class Protocol {
     public void sendResponseToClient(Charset messageCharset, SocketChannel clientChannel, String message){
         message += "\r\n";
         short dataLength = (short) message.length();
-        String tempString = "" + protocolName + "," + responseAction + "," + dataLength + ",";
-        tempString += message;
-        ByteBuffer messageBuffer = ByteBuffer.allocate(tempString.length());
-        messageBuffer.put(tempString.getBytes(messageCharset));
+        ByteBuffer messageBuffer = ByteBuffer.allocate(6 + dataLength);
+
+        messageBuffer.put(convertShortToByte(protocolName));
+        messageBuffer.put(convertShortToByte(responseAction));
+        messageBuffer.put(convertShortToByte(dataLength));
+        messageBuffer.put(message.getBytes(messageCharset));
         messageBuffer.flip();
         try {
             clientChannel.write(messageBuffer);

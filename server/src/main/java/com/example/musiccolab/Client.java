@@ -1,6 +1,7 @@
 package main.java.com.example.musiccolab;
 import java.nio.charset.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class Client{
 
@@ -8,9 +9,6 @@ public class Client{
     private static CharsetDecoder decoder = null;
     private static byte [] clientName = null;
 
-
-    final private List<Short> codesList = new ArrayList<Short>();
-    final private List<Short> errorCodesList = new ArrayList<Short>();
     private boolean neededAction = false;
     final private short protocolName = 12845;
     private short action = 4;
@@ -21,27 +19,29 @@ public class Client{
     private byte toneType = 1;
     private String toneData = "dataExample2";
     private String lobbyName = "example";
-    private String lobbyID = "0";
+    private int lobbyID = 0;
 
-    public Client(){
-        for(short index = 1; index < 11; index++) {
-            codesList.add(index);
-            errorCodesList.add( (short) (index + 10));
-        }
-    }
 
-    public static void main(String [] args) {
-        
+    public static void main(String [] args) throws InterruptedException {
         Client client = new Client();
-        CommunicationHandling communicationHandling = new CommunicationHandling(args[0], Integer.parseInt(args[1]));
-        communicationHandling.register(client.email, client.userName, client.password);
-        communicationHandling.login(client.userName, client.password);
-        //communicationHandling.logout(client.userName, client.password);
-        communicationHandling.createLobby("0");
-        //communicationHandling.joinLobby(0);
-        //communicationHandling.leaveLobby(0);
-        //communicationHandling.logout(client.userName, client.password);
-        //communicationHandling.sendTone(client.toneData, client.toneType, client.toneAction);
+
+        CommunicationHandling communicationHandling = new CommunicationHandling(Thread.currentThread(), args[0], Integer.parseInt(args[1]));
+
+        communicationHandling.email = client.email;
+        communicationHandling.username = client.userName;
+        communicationHandling.password = client.password;
+        communicationHandling.action = 3;
+        communicationHandling.start();
+        TimeUnit.SECONDS.sleep(60);
+        communicationHandling.action = 1;
+        TimeUnit.SECONDS.sleep(60);
+        communicationHandling.lobbyNameOrID = client.lobbyName;
+        communicationHandling.action = 4;
+        TimeUnit.SECONDS.sleep(60);
+        communicationHandling.toneType = client.toneType;
+        communicationHandling.toneAction = client.toneAction;
+        communicationHandling.data = client.toneData;
+        communicationHandling.action = 7;
 
         Scanner getInput = new Scanner(System.in);
         short input = getInput.nextShort();
