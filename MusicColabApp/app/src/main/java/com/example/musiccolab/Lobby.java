@@ -45,10 +45,10 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
 
         // update 'more' text field in Lobby
         TextView lobby_nr = findViewById(R.id.server_number);
-        lobby_nr.setText(String.format("%s", CommunicationHandling.lobbyID));
+        lobby_nr.setText(String.format("%s", Login.networkThread.lobbyID));
         TextView instr = findViewById(R.id.instrument);
         instr.setText(String.format("%s", getIntent().getSerializableExtra(PreLobby.SELECTED_INSTRUMENT)));
-        if (CommunicationHandling.admin) {
+        if (Login.networkThread.admin) {
             TextView admin_text = findViewById(R.id.admin_boolean);
             admin_text.setText(" true");
         }
@@ -115,7 +115,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
     // In this function we will 'hear' for onClick events and according to
     // their IDs we will make the correct decision
     public void onClick(View view) {
-        CommunicationHandling.getInstance();
+        CommunicationHandling networkThread = Login.networkThread;
 
         if (view.getId() == R.id.loop) {
             Button x = findViewById(R.id.loop);
@@ -129,24 +129,29 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
 
         // this is the Leave Lobby function and not a Disconnect
         if (view.getId() == R.id.disconnect) {
-            new leaveThread().start();
+            networkThread.action = 6;
+            networkThread.lobbyID = PreLobby.lobbyID;
             try {
-                Thread.sleep(600);
-                System.out.println("LeaveLobby conf-code: " + CommunicationHandling.confirmation);
-                if (CommunicationHandling.confirmation==6){
-                    // reset the sensitive user data after logout
-                    CommunicationHandling.confirmation = 0;
-                    CommunicationHandling.lobbyID = -1;
-                    CommunicationHandling.lobbyName = null;
-                    toast("Logged out successfully");
-                    startActivity(new Intent(this, PreLobby.class));
-                }else if (CommunicationHandling.confirmation==0){
-                    toast("Connection timeout");
-                } else if (CommunicationHandling.confirmation == 16) {
-                    toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
+                synchronized (Thread.currentThread()) {
+                    Thread.currentThread().wait();
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                System.out.println("Error with waiting of main thread.");
+            }
+            String output = networkThread.result;
+
+            System.out.println("LeaveLobby conf-code: " + networkThread.confirmation);
+            if (networkThread.confirmation==6){
+                // reset the sensitive user data after logout
+                networkThread.confirmation = 0;
+                networkThread.lobbyID = -1;
+                networkThread.lobbyName = null;
+                toast("Logged out successfully");
+                startActivity(new Intent(this, PreLobby.class));
+            }else if (networkThread.confirmation==0){
+                toast("Connection timeout");
+            } else if (networkThread.confirmation == 16) {
+                toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
             }
         }
 
@@ -168,30 +173,36 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
 
     @Override
     public void onBackPressed() {
+        CommunicationHandling networkThread = Login.networkThread;
         if (++counter == 1) {
             toast("Press again to Exit Lobby");
         }
         else {
             // else remove the user from lobby
-            new leaveThread().start();
+            // else remove the user from lobby
+            networkThread.action = 6;
             try {
-                Thread.sleep(600);
-                System.out.println("LeaveLobby conf-code: " + CommunicationHandling.confirmation);
-                if (CommunicationHandling.confirmation==6){
-                    // reset the sensitive user data after logout
-                    CommunicationHandling.confirmation = 0;
-                    CommunicationHandling.lobbyID = -1;
-                    CommunicationHandling.lobbyName = null;
-                    toast("Logged out successfully");
-                    startActivity(new Intent(this, PreLobby.class));
-                }else if (CommunicationHandling.confirmation==0){
-                    toast("Connection timeout");
-                } else if (CommunicationHandling.confirmation == 16) {
-                    toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
+                synchronized (Thread.currentThread()) {
+                    Thread.currentThread().wait();
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                System.out.println("Error with waiting of main thread.");
             }
+            String output = networkThread.result;
+
+            System.out.println("LeaveLobby conf-code: " + networkThread.confirmation);
+            if (networkThread.confirmation==6){
+                // reset the sensitive user data after logout
+                networkThread.lobbyID = -1;
+                networkThread.lobbyName = null;
+                toast("Logged out successfully");
+                startActivity(new Intent(this, PreLobby.class));
+            }else if (networkThread.confirmation==0){
+                toast("Connection timeout");
+            } else if (networkThread.confirmation == 16) {
+                toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
+            }
+
         }
     }
 }

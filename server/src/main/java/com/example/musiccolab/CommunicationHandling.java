@@ -2,23 +2,23 @@ package main.java.com.example.musiccolab;
 
 import java.io.*;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.UnsupportedCharsetException;
+import java.nio.charset.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class CommunicationHandling {
-    private Charset messageCharset = null;
-    private Socket socket = null;
-    private BufferedOutputStream out;
-    private BufferedReader in;
+public class CommunicationHandling implements Runnable{
+    private static Charset messageCharset = null;
+    private static CharsetDecoder decoder = null;//Network order = Byte --> Characters = Host order
+    private static CharsetEncoder encoder = null;//Characters = Host order -->  Network order = Byte
+    private SocketChannel clientChannel = null;
+    private InetSocketAddress remoteAddress = null;
+    private Selector selector = null;
 
     private String IP;
     private int port;
@@ -27,26 +27,27 @@ public class CommunicationHandling {
     final private List<Short> codesList = new ArrayList<Short>();
     final private List<Short> errorCodesList = new ArrayList<Short>();
     final private short protocolName = 12845;
-    private short action;
 
-    public static List<String> toneList = new LinkedList<>();
-    public static boolean ToneDataEventChecker = false;//set false when tone list is empty.
-    private boolean threadExist = false;
-    private ToneListener toneThread = null;
+    public short action = 0;
+
+    public String email;
+    public String username;
+    public String password;
+
+    public String lobbyNameOrID;
+    public List<Integer> IdList = new LinkedList<>();
+
+    public byte toneAction;
+    public byte toneType;
+    public String data;
+
+    public Thread communicationThread = null;
+    private Thread mainThread = null;
+    public static String result = "";
 
 
-    /**
-     *  Please creat two a boolean, static eventChecker variable.
-     *      boolean : ToneDataEventChecker
-     *      boolean : eventChecker
-     *  You should check these variables temporary to know if there are a message received fro  Server.
-     *
-     *
-     *  I did that locally. But it shouldn't be so.
-     */
-
-
-    public CommunicationHandling(String IP_address, int port){
+    public CommunicationHandling(Thread thread, String IP_address, int port){
+        mainThread = thread;
         this.IP = IP_address;
         this.port = port;
         for(short index = 1; index < 11; index++) {
@@ -56,39 +57,120 @@ public class CommunicationHandling {
     }
 
 
-    public String register(String email, String userName, String password){
-        action = 3;
-        return loginSystem(action, email, userName, password);
+    @Override
+    public void run(){
+        buildConnection();
+        connectToServer();
+        while (true) {
+            try{
+                selector.select();
+            }catch (IOException e) {
+                System.out.println("Problem with selector");
+            }
+
+            Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
+
+            while (selectedKeys.hasNext()) {
+                SelectionKey key = (SelectionKey) selectedKeys.next();
+                clientChannel = (SocketChannel) key.channel();
+                ByteBuffer buffer;
+                if (key.isConnectable()) {
+                    buffer = ByteBuffer.allocate(100);
+                    try {
+
+                        clientChannel.finishConnect();
+                        clientChannel.read(buffer);
+                        buffer.flip();
+                        System.out.println(messageCharset.decode(buffer));
+                    }catch (IOException e){
+                        System.out.println("Problem with finishConnect");
+                    }
+                }
+                else if (key.isReadable()) {
+                    short[] actionAndDataLength = analyseMainBuffer(messageCharset, clientChannel);
+                    if(actionAndDataLength[1] > 0) {
+                        handleAction(actionAndDataLength[0], actionAndDataLength[1]);
+                    }
+                    else{
+                        try{
+                            clientChannel.read(ByteBuffer.allocate(1000));
+                        }catch (IOException e){
+                            System.err.println("Error with empty channel.");
+                        }
+                    }
+
+                }
+                selectedKeys.remove();
+            }
+            if(codesList.contains(action)){
+                sendMessageByAction(action);
+                action = 0;
+            }
+        }
     }
 
-    public String login(String userName, String password){
-        action = 1;
-        return loginSystem(action, "", userName, password);
+    public void start() throws InterruptedException {
+        communicationThread = new Thread(this, "secondaryThread");
+        communicationThread.start();
     }
 
-    public String logout(String userName, String password){
-        action = 2;
-        return loginSystem(action, "", userName, password);
+    private void sendMessageByAction(short action){
+        if(action == 1 || action == 2 || action == 3){
+            try{sendLoginSystemMessage(action, email, username, password);}
+            catch (IOException e){
+                System.err.println("Can not write in buffer.");
+            }
+        }
+        else if(action == 4 || action == 5 || action == 6){
+            try{sendLobbyMessage(action, lobbyNameOrID);}
+            catch (IOException e){
+                System.err.println("Can not write in buffer.");
+            }
+        }
+        else if(action == 7){
+            try{sendTone(action);}
+            catch (IOException e){
+                System.err.println("Can not write in buffer.");
+            }
+        }
     }
 
-    public String createLobby(String lobbyName){
-        action = 4;
-        return lobby(action, lobbyName);
+    private void handleAction(short action, short messageLength){
+        if(action == 1 || action == 2 || action == 3 || action == 11 || action == 12 || action == 13){
+            loginSystem(action, messageLength);
+        }
+        else if(action == 4 || action == 5 || action == 6 || action == 14 || action == 15 || action == 16){
+            lobby(action, messageLength);
+        }
+        else if(action == 7 || action == 17){
+            getData(messageLength);
+        }
     }
 
-    public String joinLobby(int lobbyId){
-        action = 5;
-        return lobby(action, Integer.toString(lobbyId));
+
+//______________________________________________________________________________________________________________________
+/////////////////////////                              Lobby functions                         /////////////////////////
+//______________________________________________________________________________________________________________________
+    private void music(){
+        System.out.println("Do you hear our music?");
     }
 
-    public String leaveLobby(int lobbyId){
-        action = 6;
-        return lobby(action, Integer.toString(lobbyId));
+    private void getData(short dataLength) {
+        if (dataLength >= 0) {
+            ByteBuffer buffer = ByteBuffer.allocate(dataLength);
+            try{
+                clientChannel.read(buffer);
+                buffer.flip();
+                result = messageCharset.decode(buffer).toString();
+                music();
+            }catch (IOException e){
+                System.err.println("Can not read from buffer.");
+            }
+        }
     }
 
-    public String sendTone(String data, byte toneType, byte toneAction){
-        action = 7;
-        short dataLength = (short) (data.length() + 2);
+    private void sendTone(short action) throws IOException {
+        short dataLength = (short) (data.length());
         ByteBuffer buffer = ByteBuffer.allocate(6 + 2 + dataLength);
 
         buffer.put(convertShortToByte(protocolName));
@@ -97,42 +179,27 @@ public class CommunicationHandling {
         buffer.put(toneAction);
         buffer.put(toneType);
         buffer.put(data.getBytes(messageCharset));
-        buffer.flip();
-        try {
-            out.write(buffer.array());
-            out.flush();
-        }catch (IOException e){
-            System.out.println("Error");
-        }
-        buffer.clear();
-        return "";
-    }
 
+        buffer.flip();
+        clientChannel.write(buffer);
+        buffer.clear();
+    }
 //______________________________________________________________________________________________________________________
 /////////////////////////                              Lobby functions                         /////////////////////////
 //______________________________________________________________________________________________________________________
-    private String lobby(short action, String lobbyNameOrID){
-        ByteBuffer buffer = null;
-            try{sendLobbyMessage(action, lobbyNameOrID);}
+    private void lobby(short action, short dataLength){
+        if(dataLength >= 0){
+            ByteBuffer buffer = ByteBuffer.allocate(dataLength);
+            try{
+                clientChannel.read(buffer);
+                buffer.flip();
+                result = messageCharset.decode(buffer).toString();
+            }
             catch (IOException e){
-                System.err.println("Can not write in buffer.");
-                return "Error";
+                System.err.println("Can not read from buffer.");
             }
-            String[] actionDataLength = analyseResponse(messageCharset);
-            if(!threadExist && Integer.parseInt(actionDataLength[0]) < 10 && action != 6){
-                toneThread = new ToneListener(IP, port, out, in);
-                toneThread.start();
-                threadExist = true;
-            }
-            else if(threadExist && Integer.parseInt(actionDataLength[0]) < 10 && action == 6){
-                toneThread.stop();
-                threadExist = false;
-            }
-            if(Integer.parseInt(actionDataLength[1]) >= 0){
-                System.out.println(actionDataLength[2]);
-                return actionDataLength[2];
-            }
-            else{return "Error";}
+        } else{result = "There are no data."; mainThread.notify();}
+
     }
 
     private void sendLobbyMessage(short action, String lobbyNameOrID) throws IOException {
@@ -148,43 +215,46 @@ public class CommunicationHandling {
         buffer.put(lobbyNameOrID.getBytes(messageCharset));
 
         buffer.flip();
-        out.write(buffer.array());
-        out.flush();
+        clientChannel.write(buffer);
         buffer.clear();
     }
 
 //______________________________________________________________________________________________________________________
 /////////////////////////                           Login System functions                     /////////////////////////
 //______________________________________________________________________________________________________________________
-    private String loginSystem(short action, String email, String userName, String password){
-        String response;
-        ByteBuffer buffer = null;
-        boolean NoConnection = false;
-        if(action != 2)
-            NoConnection = buildConnection() == 0 && connectToServer() == 0;
-        if(NoConnection || action == 2){
-            try{sendLoginSystemMessage(action, email, userName, password);}
-            catch (IOException e){
-                System.err.println("Can not write in buffer.");
-                return "Error";
-            }
-            String[] actionDataLength = analyseResponse(messageCharset);
-            if(Integer.parseInt(actionDataLength[1]) >= 0){
-                try{ response = actionDataLength[2];
-                    if(action == 3 || action == 2){
-                        socket.close();
-                        in.close();
-                        out.close();
+    private void loginSystem(short action, short dataLength){
+        if(dataLength >= 0){
+            ByteBuffer buffer = ByteBuffer.allocate(dataLength);
+            String[] response;
+            try{
+                clientChannel.read(buffer);
+                buffer.flip();
+                if(action == 3 || action == 2 || action == 13 || action == 12){
+                    result = messageCharset.decode(buffer).toString();
+                    clientChannel.close();
+                    if(action == 3 || action == 13) {
+                        buildConnection();
+                        connectToServer();
                     }
+                    if(action == 2)
+                        Thread.currentThread().stop();
                 }
-                catch (IOException e){
-                    System.err.println("Can not read from buffer.");
-                    return "Error";
+                else if(action == 1){
+                    response = messageCharset.decode(buffer).toString().split(",");
+                    for(byte index = 0; index < response.length; index++){
+                        if(index == 0)
+                            result = response[index];
+                        else
+                            IdList.add(Integer.parseInt(response[index]));
+                    }
+                }else{
+                    result = messageCharset.decode(buffer).toString();
                 }
-                System.out.println(response);
-                return response;
-            } else{return "Error";}
-        }else {return "Error";}
+            }
+            catch (IOException e){
+                System.err.println("Can not read from buffer.");
+            }
+        } else{result = "There are no data.";}
 
     }
 
@@ -215,86 +285,90 @@ public class CommunicationHandling {
         buffer.put(passwordLength);
         buffer.put(message.getBytes(messageCharset));
 
-        try {
-            out.write(buffer.array());
-            out.flush();
-        }catch (IOException e){
-            System.out.println("Error");
-        }
+        buffer.flip();
+        clientChannel.write(buffer);
         buffer.clear();
     }
 
 //______________________________________________________________________________________________________________________
 /////////////////////////                             read header function                     /////////////////////////
 //______________________________________________________________________________________________________________________
-    private String[] analyseResponse(Charset messageCharset) {
-        String[] temp;
+    private short[] analyseMainBuffer(Charset messageCharset, SocketChannel clientChannel) {
+        short[] temp;
+        ByteBuffer mainBuffer;
+        short action = 0;
 
         try {
-            String message = in.readLine();
-            String[] parsedMessage = message.split(",");
-            //
-            short action = 0;
-            if (protocolName == Integer.parseInt(parsedMessage[0])) {
-                action = (short) Integer.parseInt(parsedMessage[1]);
+            mainBuffer = ByteBuffer.allocate(2);
+            clientChannel.read(mainBuffer);
+            mainBuffer.flip();
+
+            short nameOfProtocol = getShort(messageCharset.decode(mainBuffer).toString().getBytes(messageCharset));
+            if (protocolName == nameOfProtocol) {
+                mainBuffer.clear();
+
+                clientChannel.read(mainBuffer);
+                mainBuffer.flip();
+                action = getShort(messageCharset.decode(mainBuffer).toString().getBytes(messageCharset));
                 if (codesList.contains(action) || errorCodesList.contains(action)) {
-                    temp = new String[]{Integer.toString(action), parsedMessage[2], parsedMessage[3]};
+                    mainBuffer.clear();
+                    clientChannel.read(mainBuffer);
+                    mainBuffer.flip();
+                    temp = new short[]{action, getShort(messageCharset.decode(mainBuffer).toString().getBytes(messageCharset))};
                     return temp;
 
                 } else {
-                    System.err.println("Server sent unknown action");
-                    return new String[]{Integer.toString(action), "-2"};
+                    System.err.println("Server sent unknown action.");
+                    return new short[]{action, 0};
                 }
-            } else {
-                System.err.println("Message from foreign device.");
-                return new String[]{Integer.toString(action), "-1"};
+            }else{
+                System.err.println("Response is not from Server.");
+                return new short[]{action, 0};
             }
         }
         catch (IOException e){
-            System.err.println("Can not read buffer.");
-            return new String[]{Integer.toString(action), "-3"};
+            System.err.println("Error with reading buffer in analyseMainBuffer.");
+            return new short[]{action, 0};
         }
     }
 //______________________________________________________________________________________________________________________
 /////////////////////////                             connection functions                     /////////////////////////
 //______________________________________________________________________________________________________________________
-    private byte buildConnection(){
-        InetSocketAddress remoteAddress = null;
+    private void buildConnection(){
 
         try {
-            messageCharset = Charset.forName("US-ASCII");
+            messageCharset = StandardCharsets.US_ASCII;
         } catch(UnsupportedCharsetException uce) {
             System.err.println("Cannot create charset for this application. Exiting...");
-            return -1;
+            return;
         }
 
         try {
             remoteAddress = new InetSocketAddress(IP, port);
         } catch(IllegalArgumentException | SecurityException e) {
             System.err.println("Can not connect to Server.");
-            return -1;
+            return;
         }
-        System.out.println("Connecting to server " + IP + ":" + port);
+        decoder = messageCharset.newDecoder();
 
         try {
-            socket = new Socket();
-            socket.connect(remoteAddress);
-            out = new BufferedOutputStream(socket.getOutputStream());
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            selector = Selector.open();
         } catch(IOException e) {
             System.err.println("Connecting to Server failed.");
-            return -1;
+            return;
         }
-        return 0;
+        System.out.println("Connecting to server " + IP + ":" + port);
     }
 
-    private byte connectToServer() {
+    private void connectToServer() {
         try {
-            System.out.println(in.readLine());
+            clientChannel = SocketChannel.open();
+            clientChannel.configureBlocking(false);
+            clientChannel.register(selector, SelectionKey.OP_CONNECT | SelectionKey.OP_READ);
+            clientChannel.connect(remoteAddress);
         }catch (IOException e){
             System.out.println("error");
         }
-        return 0;
     }
 //______________________________________________________________________________________________________________________
 /////////////////////////                             side functions                           /////////////////////////

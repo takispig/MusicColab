@@ -10,7 +10,7 @@ public class Player {
     private String passwort;
     private String email;
     private int id;
-    private int lobbyId;
+    private int lobbyId = -1;
     private boolean loggedIn = false;
     private boolean admin = true;
     private SocketAddress address;

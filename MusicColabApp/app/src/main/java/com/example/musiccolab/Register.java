@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import static xdroid.toaster.Toaster.toast;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Register extends AppCompatActivity implements View.OnClickListener {
 
@@ -41,28 +42,39 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
             userView = findViewById(R.id.username);
             username = userView.getText().toString();
 
-            CommunicationHandling.getInstance();
-            CommunicationHandling.userName = username;
-            CommunicationHandling.password = password;
-            CommunicationHandling.email = email;
+            CommunicationHandling networkThread = new CommunicationHandling(Thread.currentThread());
+            networkThread.username = username;
+            networkThread.password = password;
+            networkThread.email = email;
+            networkThread.action = 3;
 
-            new RegisterThread().start();
-            try {
-                Thread.sleep(300);
-                System.out.println("Confirmation-code after in Register.java is: " + CommunicationHandling.confirmation);
-                if (CommunicationHandling.confirmation==3) {
-                    toast("Registration Successful");
-                    startActivity(new Intent(this, Login.class));
-                } else if (CommunicationHandling.confirmation==0) {
-                    toast("Connection timeout");
-                } else if (CommunicationHandling.confirmation==13) {
-                    toast("Registration Failed\nUsername already exists");
-                }
-                CommunicationHandling.confirmation = 0;
-            } catch (InterruptedException e) {
-                toast("Error\nConnection with Server can't established");
-                e.printStackTrace();
+            if (networkThread.threadExist) {
+                networkThread.communicationThread.notify();
+            } else {
+                networkThread.start();
             }
+
+            try {
+                synchronized (Thread.currentThread()) {
+                    Thread.currentThread().wait();
+                }
+            } catch (InterruptedException e) {
+                System.out.println("Error with waiting of main thread.");
+            }
+
+            String output = networkThread.result;
+
+            System.out.println("Confirmation-code after in Register.java is: " + networkThread.confirmation);
+            if (networkThread.confirmation==3) {
+                toast("Registration Successful");
+                startActivity(new Intent(this, Login.class));
+            } else if (networkThread.confirmation==0) {
+                toast("Connection timeout");
+            } else if (networkThread.confirmation==13) {
+                toast("Registration Failed\nUsername already exists");
+            }
+            networkThread.confirmation = 0;
+
 
         } else if (view.getId() == R.id.aboutt) {
             // send the user to about us website, or pip up a new window

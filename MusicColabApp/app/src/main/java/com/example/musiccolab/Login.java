@@ -16,6 +16,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
     static String userName = "";
     static String password = "";
     EditText userNameView, passView;
+    public static CommunicationHandling networkThread = null;
     private int counter = 0;
 
     @Override
@@ -54,27 +55,41 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             userName = userNameView.getText().toString();
             password = passView.getText().toString();
 
-            CommunicationHandling.getInstance();
-            CommunicationHandling.userName = userName;
-            CommunicationHandling.password = password;
+            networkThread = new CommunicationHandling(Thread.currentThread());
+            networkThread.username = userName;
+            networkThread.password = password;
+            networkThread.action = 1;
 
-            new LoginThread().start();
+            System.out.println(networkThread.username);
+
+            if (networkThread.threadExist) {
+                networkThread.communicationThread.notify();
+            } else {
+                networkThread.start();
+            }
+
             try {
-                Thread.sleep(1000);
-                CommunicationHandling.getInstance();
-                System.out.println(CommunicationHandling.confirmation);
-                if (CommunicationHandling.confirmation == 1){
-                    CommunicationHandling.confirmation = 0;
-                    startActivity(new Intent(this, PreLobby.class));
-                } else if (CommunicationHandling.confirmation == 0) {
-                    toast("Connection timeout");
-                } else if (CommunicationHandling.confirmation == 11) {
-                    toast("Username/password wrong\nPlease try again");
+                synchronized (Thread.currentThread()) {
+                    Thread.currentThread().wait();
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                System.out.println("Error with waiting of main thread.");
+            }
+
+            String output = networkThread.result;
+            //networkThread.IdList;
+
+            System.out.println(networkThread.confirmation);
+            if (networkThread.confirmation == 1){
+                networkThread.confirmation = 0;
+                startActivity(new Intent(this, PreLobby.class));
+            } else if (networkThread.confirmation == 0) {
+                toast("Connection timeout");
+            } else if (networkThread.confirmation == 11) {
+                toast("Username/password wrong\nPlease try again");
             }
         }
+
     }
 
     @Override

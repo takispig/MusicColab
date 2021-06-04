@@ -70,6 +70,10 @@ public final class LoginSystem {
                 & Server.loggedInPlayers.get(getId(name, passwort)) != null) {
             //del player from list
             Player player = Server.loggedInPlayers.get(getId(name, passwort));
+
+            int lobbyId = player.getLobbyId();
+            if(lobbyId != -1)
+                Server.lobbyMap.get(lobbyId).removePlayer(player);
             player = null;
             Server.loggedInPlayers.remove(getId(name, passwort));
             return true;
