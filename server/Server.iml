@@ -13,7 +13,7 @@
     </content>
     <orderEntry type="jdk" jdkName="jbr-11" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library" exported="">
+    <orderEntry type="module-library">
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/src/main/res/jar/sqlite-jdbc-3.34.0.jar!/" />
@@ -22,7 +22,7 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library" exported="">
+    <orderEntry type="module-library">
       <library name="JUnit5.7.0">
         <CLASSES>
           <root url="jar://$MAVEN_REPOSITORY$/org/junit/jupiter/junit-jupiter/5.7.0/junit-jupiter-5.7.0.jar!/" />

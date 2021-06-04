@@ -142,7 +142,9 @@ public final class LoginSystem {
     private static int getId(final String name, final String passwort)
             throws SQLException, ClassNotFoundException {
         ResultSet res = DataBase.getUserlogin(name, passwort);
-        return res.getInt(res.next() ? res.getInt(COL_INT_ID) : -1);
+        if (res.next()) {
+            return res.getInt(COL_INT_ID);
+        } else return -1;
     }
 
     /**

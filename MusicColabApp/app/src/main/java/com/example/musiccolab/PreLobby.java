@@ -115,11 +115,12 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                     // this means we successfully created a lobby -> set status Connected with server #Num
                     toast("Lobby Created Successfully\n");
                     TextView status_text = findViewById(R.id.server_status);
-                    CommunicationHandling.lobbyName = lobbyName;
-                    status_text.setText(String.format("Connected to Lobby #%s\nLobby name: %s", CommunicationHandling.lobbyID, lobbyName));
+                    status_text.setText(String.format("Connected to Lobby #%s\nLobby name: %s", CommunicationHandling.lobbyID, CommunicationHandling.lobbyName));
                 } else if (CommunicationHandling.confirmation==0) {
+                    CommunicationHandling.lobbyName = null;
                     toast("Connection timeout");
                 } else if (CommunicationHandling.confirmation == 14) {
+                    CommunicationHandling.lobbyName = null;
                     toast("Error while Creating the Lobby\nPlease try again");
                 }
                 CommunicationHandling.confirmation = 0;
@@ -138,6 +139,12 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                 toast("You are already connected with a Lobby");
                 return;
             }
+            if (CommunicationHandling.lobbyIDs.isEmpty()) {
+                toast("There are no active Lobbies to join\nCreate one to start rocking");
+                return;
+            }
+            TextView available_lobbies = findViewById(R.id.available_lobbyids);
+            available_lobbies.setText(String.format("Available Lobby IDs to join:\n %s", CommunicationHandling.lobbyIDs));
             findViewById(R.id.join_server_popup).setVisibility(View.VISIBLE);
         }
 
@@ -165,8 +172,10 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                     TextView lobby = findViewById(R.id.server_status);
                     lobby.setText(String.format("Connected to Lobby #%s", lobbyID));
                 } else if (CommunicationHandling.confirmation==0) {
+                    CommunicationHandling.lobbyID = -1;
                     toast("Connection timeout");
                 } else if (CommunicationHandling.confirmation == 15) {
+                    CommunicationHandling.lobbyID = -1;
                     toast("Error while Joining the Lobby\nIs the ID correct?");
                 }
                 CommunicationHandling.confirmation = 0;
@@ -205,6 +214,10 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
         }
 
         if (view.getId() == R.id.connect) {
+            if (CommunicationHandling.lobbyID < 0) {
+                toast("You should create or join a server first");
+                return;
+            }
             Intent lobbyIntent = new Intent(this, Lobby.class);
             if (selectedInstrument.equals(InstrumentType.THEREMIN)) {
                 lobbyIntent.putExtra(SELECTED_INSTRUMENT, InstrumentType.THEREMIN);

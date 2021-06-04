@@ -82,6 +82,7 @@ public class CommunicationHandling {
     public static int lobbyID = -1;
     public static String lobbyName = null;
     public static int confirmation = 0;
+    public static List<Integer> lobbyIDs = new ArrayList<>();
 
     public static List<String> toneList = new LinkedList<>();
     public static boolean ToneDataEventChecker = false;//set false when tone list is empty.
@@ -186,6 +187,14 @@ public class CommunicationHandling {
         confirmation = Integer.parseInt(actionDataLength[0]);
         System.out.println("confirmation-code: " + confirmation + " (actionDataLength[0])");
         System.out.println("Server's response: " + actionDataLength[2]);
+        if (action == 6) {
+            // if leaveLobby then get things done manually :'( (please server-team don't change your responses)
+            System.out.println(actionDataLength.length + "  " + actionDataLength[2].split(" ")[4]);
+            if (actionDataLength.length == 5)
+                if (actionDataLength[2].split(" ")[4].equals("out.")) {
+                confirmation = 6;
+            }
+        }
         if (confirmation == 4) {
             // if join lobby successful, then parse the lobbyID from the response
             lobbyID = Integer.parseInt(actionDataLength[2].split(" ")[1]);
@@ -201,7 +210,9 @@ public class CommunicationHandling {
             threadExist = false;
         }
         if(Integer.parseInt(actionDataLength[1]) >= 0){
-            return actionDataLength[2];
+            System.out.println("confirmation-code: " + confirmation + " (actionDataLength[0])");
+            System.out.println("Server's response: " + actionDataLength[2]);
+            return actionDataLength[2] + actionDataLength[0];
         }
         else {
             return "Error";
@@ -259,7 +270,7 @@ public class CommunicationHandling {
                     System.err.println("Can not read from buffer.");
                     return "Error";
                 }
-                System.out.println("Server's response: " + response);
+                System.out.println("Server's response: " + actionDataLength.length);
                 return response;
             } else{return "Error";}
         }else {return "Error";}
@@ -310,18 +321,25 @@ public class CommunicationHandling {
 
         try {
             String message = in.readLine();
+            System.out.println("Message: " + message);
             String[] parsedMessage = message.split(",");
-            // I am desperate...i try to make LeaveLobby work
-            if (action == 6) {
-                try {
-                    if (Integer.parseInt(message.split(" ")[1]) == lobbyID) {
-                        CommunicationHandling.confirmation = 6;
-                    }
-                } catch (ArrayIndexOutOfBoundsException e){
-                    e.printStackTrace();
-                    System.out.println("Leave Lobby didn't work well");
-                }
+
+            if (action == 1) {
+                // get lobbyids after login
+                CommunicationHandling.getInstance().getLobbyIds(parsedMessage);
+                System.out.println("LobbyIDs: " + lobbyIDs);
             }
+            // I am desperate...i try to make LeaveLobby work
+//            if (action == 6) {
+//                try {
+//                    if (Integer.parseInt(message.split(" ")[1]) == lobbyID) {
+//                        CommunicationHandling.confirmation = 6;
+//                    }
+//                } catch (ArrayIndexOutOfBoundsException e){
+//                    e.printStackTrace();
+//                    System.out.println("Leave Lobby didn't work well");
+//                }
+//            }
             //
             short action = 0;
             if (protocolName == Integer.parseInt(parsedMessage[0])) {
@@ -342,6 +360,14 @@ public class CommunicationHandling {
         catch (IOException e){
             System.err.println("Can not read buffer.");
             return new String[]{Integer.toString(action), "-3"};
+        }
+    }
+
+    private void getLobbyIds(String[] response) {
+        if (response.length > 4) {
+            for (int i=0; i<response.length-5; i++) {
+                lobbyIDs.add(Integer.parseInt(response[i+4].replaceAll("\\s","")));
+            }
         }
     }
     //______________________________________________________________________________________________________________________
