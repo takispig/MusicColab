@@ -1,4 +1,4 @@
-package main.java.com.example.musiccolab;
+package com.example.musiccolab;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -13,15 +13,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class CommunicationHandling implements Runnable{
-    private static Charset messageCharset = null;
-    private static CharsetDecoder decoder = null;//Network order = Byte --> Characters = Host order
-    private static CharsetEncoder encoder = null;//Characters = Host order -->  Network order = Byte
+    private Charset messageCharset = null;
+    private CharsetDecoder decoder = null;//Network order = Byte --> Characters = Host order
+    private CharsetEncoder encoder = null;//Characters = Host order -->  Network order = Byte
     private SocketChannel clientChannel = null;
     private InetSocketAddress remoteAddress = null;
     private Selector selector = null;
-
-    private String IP;
-    private int port;
 
 
     final private List<Short> codesList = new ArrayList<Short>();
@@ -29,12 +26,12 @@ public class CommunicationHandling implements Runnable{
     final private short protocolName = 12845;
 
     public short action = 0;
-
-    public String email;
-    public String username;
-    public String password;
-
-    public String lobbyNameOrID;
+    public String email = null;
+    public String username = null;
+    public String password = null;
+    public String lobbyName = null;
+    public int lobbyID = -1;
+    public boolean admin = false;
     public List<Integer> IdList = new LinkedList<>();
 
     public byte toneAction;
@@ -43,13 +40,13 @@ public class CommunicationHandling implements Runnable{
 
     public Thread communicationThread = null;
     private Thread mainThread = null;
-    public static String result = "";
+    public String result = "";
+    public int confirmation;
+    public boolean threadExist = false;
 
 
-    public CommunicationHandling(Thread thread, String IP_address, int port){
+    public CommunicationHandling(Thread thread) {
         mainThread = thread;
-        this.IP = IP_address;
-        this.port = port;
         for(short index = 1; index < 11; index++) {
             codesList.add(index);
             errorCodesList.add( (short) (index + 10));
@@ -59,8 +56,10 @@ public class CommunicationHandling implements Runnable{
 
     @Override
     public void run(){
-        buildConnection();
-        connectToServer();
+        if(action == 3 || action == 1){
+            buildConnection();
+            connectToServer();
+        }
         while (true) {
             try{
                 selector.select();
@@ -89,6 +88,7 @@ public class CommunicationHandling implements Runnable{
                 else if (key.isReadable()) {
                     short[] actionAndDataLength = analyseMainBuffer(messageCharset, clientChannel);
                     if(actionAndDataLength[1] > 0) {
+                        confirmation = actionAndDataLength[0];
                         handleAction(actionAndDataLength[0], actionAndDataLength[1]);
                     }
                     else{
@@ -109,9 +109,14 @@ public class CommunicationHandling implements Runnable{
         }
     }
 
-    public void start() throws InterruptedException {
+    public void start() {
         communicationThread = new Thread(this, "secondaryThread");
-        communicationThread.start();
+        try{
+            communicationThread.start();
+            threadExist = true;
+        }catch (Exception e){
+            System.out.println("Error with starting network thread.");
+        }
     }
 
     private void sendMessageByAction(short action){
@@ -122,7 +127,12 @@ public class CommunicationHandling implements Runnable{
             }
         }
         else if(action == 4 || action == 5 || action == 6){
-            try{sendLobbyMessage(action, lobbyNameOrID);}
+            try{
+                if(action == 4)
+                    sendLobbyMessage(action, lobbyName);
+                else
+                    sendLobbyMessage(action, Integer.toString(lobbyID));
+            }
             catch (IOException e){
                 System.err.println("Can not write in buffer.");
             }
@@ -138,9 +148,27 @@ public class CommunicationHandling implements Runnable{
     private void handleAction(short action, short messageLength){
         if(action == 1 || action == 2 || action == 3 || action == 11 || action == 12 || action == 13){
             loginSystem(action, messageLength);
+            synchronized (mainThread) {
+                mainThread.notify();
+            }
+            if(confirmation == 2) {
+                System.out.println(confirmation);
+                try {
+                    synchronized (Thread.currentThread()) {
+                        Thread.currentThread().wait();
+                    }
+                } catch (InterruptedException e) {
+                    System.out.println("Error with waiting of main thread.");
+                }
+
+            }
+
         }
         else if(action == 4 || action == 5 || action == 6 || action == 14 || action == 15 || action == 16){
             lobby(action, messageLength);
+            synchronized (mainThread) {
+                mainThread.notify();
+            }
         }
         else if(action == 7 || action == 17){
             getData(messageLength);
@@ -148,7 +176,7 @@ public class CommunicationHandling implements Runnable{
     }
 
 
-//______________________________________________________________________________________________________________________
+    //______________________________________________________________________________________________________________________
 /////////////////////////                              Lobby functions                         /////////////////////////
 //______________________________________________________________________________________________________________________
     private void music(){
@@ -184,7 +212,7 @@ public class CommunicationHandling implements Runnable{
         clientChannel.write(buffer);
         buffer.clear();
     }
-//______________________________________________________________________________________________________________________
+    //______________________________________________________________________________________________________________________
 /////////////////////////                              Lobby functions                         /////////////////////////
 //______________________________________________________________________________________________________________________
     private void lobby(short action, short dataLength){
@@ -194,6 +222,10 @@ public class CommunicationHandling implements Runnable{
                 clientChannel.read(buffer);
                 buffer.flip();
                 result = messageCharset.decode(buffer).toString();
+                if(action == 4) {
+                    int a = result.indexOf(" ");
+                    lobbyID = Integer.parseInt(result.substring(a + 1, a + 2));
+                }
             }
             catch (IOException e){
                 System.err.println("Can not read from buffer.");
@@ -219,7 +251,7 @@ public class CommunicationHandling implements Runnable{
         buffer.clear();
     }
 
-//______________________________________________________________________________________________________________________
+    //______________________________________________________________________________________________________________________
 /////////////////////////                           Login System functions                     /////////////////////////
 //______________________________________________________________________________________________________________________
     private void loginSystem(short action, short dataLength){
@@ -232,12 +264,6 @@ public class CommunicationHandling implements Runnable{
                 if(action == 3 || action == 2 || action == 13 || action == 12){
                     result = messageCharset.decode(buffer).toString();
                     clientChannel.close();
-                    if(action == 3 || action == 13) {
-                        buildConnection();
-                        connectToServer();
-                    }
-                    if(action == 2)
-                        Thread.currentThread().stop();
                 }
                 else if(action == 1){
                     response = messageCharset.decode(buffer).toString().split(",");
@@ -290,7 +316,7 @@ public class CommunicationHandling implements Runnable{
         buffer.clear();
     }
 
-//______________________________________________________________________________________________________________________
+    //______________________________________________________________________________________________________________________
 /////////////////////////                             read header function                     /////////////////////////
 //______________________________________________________________________________________________________________________
     private short[] analyseMainBuffer(Charset messageCharset, SocketChannel clientChannel) {
@@ -331,7 +357,7 @@ public class CommunicationHandling implements Runnable{
             return new short[]{action, 0};
         }
     }
-//______________________________________________________________________________________________________________________
+    //______________________________________________________________________________________________________________________
 /////////////////////////                             connection functions                     /////////////////////////
 //______________________________________________________________________________________________________________________
     private void buildConnection(){
@@ -343,6 +369,8 @@ public class CommunicationHandling implements Runnable{
             return;
         }
 
+        String IP = "";
+        int port = 0;
         try {
             remoteAddress = new InetSocketAddress(IP, port);
         } catch(IllegalArgumentException | SecurityException e) {
@@ -354,7 +382,7 @@ public class CommunicationHandling implements Runnable{
         try {
             selector = Selector.open();
         } catch(IOException e) {
-            System.err.println("Connecting to Server failed.");
+            System.err.println("Error with selector.");
             return;
         }
         System.out.println("Connecting to server " + IP + ":" + port);
@@ -367,7 +395,7 @@ public class CommunicationHandling implements Runnable{
             clientChannel.register(selector, SelectionKey.OP_CONNECT | SelectionKey.OP_READ);
             clientChannel.connect(remoteAddress);
         }catch (IOException e){
-            System.out.println("error");
+            System.err.println("Connecting to Server failed.");
         }
     }
 //______________________________________________________________________________________________________________________

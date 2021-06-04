@@ -29,7 +29,6 @@ import java.util.List;
 
 public class Lobby extends AppCompatActivity implements View.OnClickListener, SensorEventListener, Serializable {
 
-
     private Instrument selectedInstrument = null;
     private SensorManager sensorManager;
     private Sensor sensor;
@@ -49,6 +48,10 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         lobby_nr.setText(String.format("%s", Login.networkThread.lobbyID));
         TextView instr = findViewById(R.id.instrument);
         instr.setText(String.format("%s", getIntent().getSerializableExtra(PreLobby.SELECTED_INSTRUMENT)));
+        if (Login.networkThread.admin) {
+            TextView admin_text = findViewById(R.id.admin_boolean);
+            admin_text.setText(" true");
+        }
 
         // Create Listeners for the IDs: about, register
         Button loop = findViewById(R.id.loop);
@@ -176,6 +179,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         }
         else {
             // else remove the user from lobby
+            // else remove the user from lobby
             networkThread.action = 6;
             try {
                 synchronized (Thread.currentThread()) {
@@ -198,6 +202,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             } else if (networkThread.confirmation == 16) {
                 toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
             }
+
         }
     }
 }

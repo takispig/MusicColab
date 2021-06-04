@@ -20,22 +20,18 @@ public class CommunicationHandling implements Runnable{
     private InetSocketAddress remoteAddress = null;
     private Selector selector = null;
 
-    private String IP;
-    private int port;
-
 
     final private List<Short> codesList = new ArrayList<Short>();
     final private List<Short> errorCodesList = new ArrayList<Short>();
     final private short protocolName = 12845;
 
     public short action = 0;
-
-    public String email;
-    public String username;
-    public String password;
-
-    public String lobbyName;
+    public String email = null;
+    public String username = null;
+    public String password = null;
+    public String lobbyName = null;
     public int lobbyID = -1;
+    public boolean admin = false;
     public List<Integer> IdList = new LinkedList<>();
 
     public byte toneAction;
@@ -46,12 +42,11 @@ public class CommunicationHandling implements Runnable{
     private Thread mainThread = null;
     public String result = "";
     public int confirmation;
+    public boolean threadExist = false;
 
 
-    public CommunicationHandling(Thread thread, String IP_address, int port){
+    public CommunicationHandling(Thread thread) {
         mainThread = thread;
-        this.IP = IP_address;
-        this.port = port;
         for(short index = 1; index < 11; index++) {
             codesList.add(index);
             errorCodesList.add( (short) (index + 10));
@@ -118,6 +113,7 @@ public class CommunicationHandling implements Runnable{
         communicationThread = new Thread(this, "secondaryThread");
         try{
             communicationThread.start();
+            threadExist = true;
         }catch (Exception e){
             System.out.println("Error with starting network thread.");
         }
@@ -135,7 +131,7 @@ public class CommunicationHandling implements Runnable{
                 if(action == 4)
                     sendLobbyMessage(action, lobbyName);
                 else
-                    sendLobbyMessage(action, Integer.toBinaryString(lobbyID));
+                    sendLobbyMessage(action, Integer.toString(lobbyID));
             }
             catch (IOException e){
                 System.err.println("Can not write in buffer.");
@@ -155,8 +151,18 @@ public class CommunicationHandling implements Runnable{
             synchronized (mainThread) {
                 mainThread.notify();
             }
-            if(confirmation == 2)
-                Thread.currentThread().stop();
+            if(confirmation == 2) {
+                System.out.println(confirmation);
+                try {
+                    synchronized (Thread.currentThread()) {
+                        Thread.currentThread().wait();
+                    }
+                } catch (InterruptedException e) {
+                    System.out.println("Error with waiting of main thread.");
+                }
+
+            }
+
         }
         else if(action == 4 || action == 5 || action == 6 || action == 14 || action == 15 || action == 16){
             lobby(action, messageLength);
@@ -363,6 +369,8 @@ public class CommunicationHandling implements Runnable{
             return;
         }
 
+        String IP = "192.168.178.42";
+        int port = 1201;
         try {
             remoteAddress = new InetSocketAddress(IP, port);
         } catch(IllegalArgumentException | SecurityException e) {

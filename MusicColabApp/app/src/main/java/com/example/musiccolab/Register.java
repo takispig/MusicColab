@@ -8,10 +8,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
-import java.util.concurrent.ThreadLocalRandom;
-
 import static xdroid.toaster.Toaster.toast;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Register extends AppCompatActivity implements View.OnClickListener {
 
@@ -44,12 +42,17 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
             userView = findViewById(R.id.username);
             username = userView.getText().toString();
 
-            CommunicationHandling networkThread = new CommunicationHandling(Thread.currentThread(), "192.168.178.42", 1200);
+            CommunicationHandling networkThread = new CommunicationHandling(Thread.currentThread());
             networkThread.username = username;
             networkThread.password = password;
             networkThread.email = email;
             networkThread.action = 3;
-            networkThread.start();
+
+            if (networkThread.threadExist) {
+                networkThread.communicationThread.notify();
+            } else {
+                networkThread.start();
+            }
 
             try {
                 synchronized (Thread.currentThread()) {
@@ -71,6 +74,7 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
                 toast("Registration Failed\nUsername already exists");
             }
             networkThread.confirmation = 0;
+
 
         } else if (view.getId() == R.id.aboutt) {
             // send the user to about us website, or pip up a new window

@@ -155,6 +155,16 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <TextView
+            android:id="@+id/available_lobbyids"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Available Lobby IDs to join:\n"
+            android:textSize="20sp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/choose_server_name_2" />
+
         <EditText
             android:id="@+id/lobbyID"
             android:layout_width="300dp"
@@ -165,7 +175,7 @@
             android:layout_marginTop="5dp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/choose_server_name_2" />
+            app:layout_constraintTop_toBottomOf="@id/available_lobbyids" />
 
         <Button
             android:id="@+id/join"

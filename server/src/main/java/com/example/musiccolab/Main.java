@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 public class Main {
 
     private static final String DEFAULT_ADDRESS = "192.168.178.42";
-    private static final int DEFAULT_PORT = 1200;
+    private static final int DEFAULT_PORT = 1201;
 
     private static boolean exit = false;
     private static boolean finish = false;

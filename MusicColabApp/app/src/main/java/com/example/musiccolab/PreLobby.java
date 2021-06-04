@@ -23,13 +23,13 @@ import java.net.Socket;
 
 public class PreLobby extends AppCompatActivity implements View.OnClickListener {
 
-    CommunicationHandling networkThread;
     public static final String SELECTED_INSTRUMENT = "selectedInstrument";
     private String selectedInstrument;
     private final String[] instruments = {InstrumentType.THEREMIN, InstrumentType.DRUMS, InstrumentType.PIANO};
     public static String lobbyName = null;
     public static int lobbyID = 0;
     private int counter = 0;
+    CommunicationHandling networkThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +94,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             findViewById(R.id.create_server_popup).setVisibility(View.VISIBLE);
         }
 
+
         if (view.getId() == R.id.create) {
             System.out.println("Created has been pressed");
             EditText name = findViewById(R.id.servername);
@@ -124,28 +125,37 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                 // this means we successfully created a lobby -> set status Connected with server #Num
                 toast("Lobby Created Successfully\n");
                 TextView status_text = findViewById(R.id.server_status);
-                networkThread.lobbyName = lobbyName;
-                networkThread.confirmation = 0;
-                networkThread.lobbyID = -1;
                 status_text.setText(String.format("Connected to Lobby #%s\nLobby name: %s", networkThread.lobbyID, lobbyName));
+                networkThread.confirmation = 0;
+                networkThread.admin = true;
+                networkThread.IdList.add(networkThread.lobbyID);    // add the lobby to the lobbies list
             } else if (networkThread.confirmation==0) {
+                networkThread.lobbyName = null;
                 toast("Connection timeout");
             } else if (networkThread.confirmation == 14) {
+                networkThread.lobbyName = null;
                 toast("Error while Creating the Lobby\nPlease try again");
             }
             networkThread.confirmation = 0;
         }
+
 
         if (view.getId() == R.id.cancel_create) {
             findViewById(R.id.create_server_popup).setVisibility(View.GONE);
         }
 
         if (view.getId() == R.id.join_server) {
-            if ((networkThread.lobbyName == null) || (networkThread.lobbyID != -1)) {
+            if ((networkThread.lobbyName != null) || (networkThread.lobbyID != -1)) {
                 System.out.println(networkThread.lobbyName + "  " + networkThread.lobbyID);
                 toast("You are already connected with a Lobby");
                 return;
             }
+            if (networkThread.IdList.isEmpty()) {
+                toast("There are no active Lobbies to join\nCreate one to start rocking");
+                return;
+            }
+            TextView available_lobbies = findViewById(R.id.available_lobbyids);
+            available_lobbies.setText(String.format("Available Lobby IDs to join:\n %s", networkThread.IdList));
             findViewById(R.id.join_server_popup).setVisibility(View.VISIBLE);
         }
 
@@ -160,31 +170,24 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             else {
                 networkThread.lobbyID = lobbyID;
                 networkThread.action = 5;
-
             }
             findViewById(R.id.join_server_popup).setVisibility(View.GONE);
-            try {
-                synchronized (Thread.currentThread()) {
-                    Thread.currentThread().wait();
-                }
-            } catch (InterruptedException e) {
-                System.out.println("Error with waiting of main thread.");
-            }
-
-            String output = networkThread.result;
 
             System.out.println("LobbyID " + networkThread.lobbyID + " with conf-code: " + networkThread.confirmation);
             if (networkThread.confirmation==5) {
                 // this means we successfully created a lobby -> set status Connected with server #Num
                 toast("You joined Lobby #" + networkThread.lobbyID);
                 TextView lobby = findViewById(R.id.server_status);
-                lobby.setText(String.format("Connected to Lobby #%s", lobbyID));
+                lobby.setText(String.format("Connected to Lobby #%s", networkThread.lobbyID));
             } else if (networkThread.confirmation==0) {
+                networkThread.lobbyID = -1;
                 toast("Connection timeout");
             } else if (networkThread.confirmation == 15) {
+                networkThread.lobbyID = -1;
                 toast("Error while Joining the Lobby\nIs the ID correct?");
             }
             networkThread.confirmation = 0;
+
         }
 
         if (view.getId() == R.id.cancel_join) {
@@ -210,6 +213,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                 networkThread.password = null;
                 networkThread.lobbyID = -1;
                 networkThread.lobbyName = null;
+                networkThread.admin = false;
                 networkThread.confirmation = 0;
                 startActivity(new Intent(this, Login.class));
             }else if (networkThread.confirmation == 0){
@@ -220,7 +224,12 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             }
         }
 
+
         if (view.getId() == R.id.connect) {
+            if (networkThread.lobbyID < 0) {
+                toast("You should create or join a server first");
+                return;
+            }
             Intent lobbyIntent = new Intent(this, Lobby.class);
             if (selectedInstrument.equals(InstrumentType.THEREMIN)) {
                 lobbyIntent.putExtra(SELECTED_INSTRUMENT, InstrumentType.THEREMIN);
@@ -243,6 +252,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             toast("Press again to Disconnect");
         }
         else {
+            // else disconnect the user
             networkThread.action = 2;
             try {
                 synchronized (Thread.currentThread()) {
@@ -251,6 +261,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             } catch (InterruptedException e) {
                 System.out.println("Error with waiting of main thread.");
             }
+
             String output = networkThread.result;
 
             if (networkThread.confirmation==2){
@@ -260,6 +271,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                 networkThread.password = null;
                 networkThread.lobbyID = -1;
                 networkThread.lobbyName = null;
+                networkThread.admin = false;
                 networkThread.confirmation = 0;
                 startActivity(new Intent(this, Login.class));
             }else if (networkThread.confirmation == 0){
