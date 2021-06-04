@@ -8,12 +8,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
+import static xdroid.toaster.Toaster.toast;
+
 
 public class Login extends AppCompatActivity implements View.OnClickListener {
-
-    String email, password;
-    EditText emailView, passView;
+    public static CommunicationHandling networkThread = null;
+    static String userName = "";
+    static String password = "";
+    EditText userNameView, passView;
+    private int counter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,7 +24,6 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         setContentView(R.layout.login);
 
         // Create Listeners for the IDs: login, about, register, forgot_password
-
         TextView register = (TextView) findViewById(R.id.register);
         register.setOnClickListener(this);
         TextView about = (TextView) findViewById(R.id.about);
@@ -33,35 +35,57 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
 
     }
 
-
     @Override
     // In this function we will 'hear' for onClick events and according to
     // their IDs we will make the correct decision
     public void onClick(View view) {
         if (view.getId() == R.id.register) {
-            // this open the Register activity in the app
             startActivity(new Intent(this, Register.class));
         } else if (view.getId() == R.id.about) {
             // send the user to about us website, or pip up a new window
-            Toast.makeText(getApplicationContext(), "About is not yet implemented", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, About.class));
         } else if (view.getId() == R.id.forgot_password) {
             // send a reset link/code to the user
-            Toast.makeText(getApplicationContext(), "Forgot Password is not yet implemented", Toast.LENGTH_SHORT).show();
+            toast("Forgot Password is not yet implemented");
         } else if (view.getId() == R.id.login_submit) {
             // send the email + password in the server to check authorisation
-            emailView = (EditText) findViewById(R.id.email);
-            email = emailView.getText().toString();
-
-            passView = (EditText) findViewById(R.id.password);
+            userNameView = findViewById(R.id.email);
+            passView = findViewById(R.id.password);
+            userName = userNameView.getText().toString();
             password = passView.getText().toString();
 
-            if (email.contentEquals("a") && password.contentEquals("a")) {
-                // send the user to the PreLobby activity
+            networkThread = new CommunicationHandling(Thread.currentThread(), "192.168.178.42", 1200);
+            networkThread.username = userName;
+            networkThread.password = password;
+            networkThread.action = 1;
+            networkThread.start();
+
+            try {
+                synchronized (Thread.currentThread()) {
+                    Thread.currentThread().wait();
+                }
+            } catch (InterruptedException e) {
+                System.out.println("Error with waiting of main thread.");
+            }
+
+            String output = networkThread.result;
+            //networkThread.IdList;
+
+            System.out.println(networkThread.confirmation);
+            if (networkThread.confirmation == 1){
+                networkThread.confirmation = 0;
                 startActivity(new Intent(this, PreLobby.class));
-            } else {
-                // show a message that password or username is incorrect
-                Toast.makeText(getApplicationContext(), "Username or Password incorrect", Toast.LENGTH_LONG).show();
+            } else if (networkThread.confirmation == 0) {
+                toast("Connection timeout");
+            } else if (networkThread.confirmation == 11) {
+                toast("Username/password wrong\nPlease try again");
             }
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (++counter == 1) toast("Press again to Exit");
+        else finish();
     }
 }

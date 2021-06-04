@@ -105,6 +105,13 @@ public class Server {
         }
         else if(result[1] == -3) {
             System.out.println("main.java.com.example.musiccolab.Client is disconnected.");
+            Player disconnectedPlayer = LoginSystem.getPlayerByChannel(clientChannel);
+            Lobby lobbyOfDisconnectedPlayer = lobbyMap.get(disconnectedPlayer.getLobbyId());
+
+            loggedInPlayers.remove(disconnectedPlayer.getId());
+            lobbyOfDisconnectedPlayer.removePlayer(disconnectedPlayer);
+            if(lobbyOfDisconnectedPlayer.isEmpty()) lobbyOfDisconnectedPlayer = null;
+
             clientChannel.close();
         }
         else if(result[1] != 0)

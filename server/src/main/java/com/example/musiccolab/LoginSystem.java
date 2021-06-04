@@ -70,7 +70,10 @@ public final class LoginSystem {
                 & Server.loggedInPlayers.get(getId(name, passwort)) != null) {
             //del player from list
             Player player = Server.loggedInPlayers.get(getId(name, passwort));
-            Server.lobbyMap.get(player.getLobbyId()).removePlayer(player);
+
+            int lobbyId = player.getLobbyId();
+            if(lobbyId != -1)
+                Server.lobbyMap.get(lobbyId).removePlayer(player);
             player = null;
             Server.loggedInPlayers.remove(getId(name, passwort));
             return true;
@@ -143,7 +146,9 @@ public final class LoginSystem {
     private static int getId(final String name, final String passwort)
             throws SQLException, ClassNotFoundException {
         ResultSet res = DataBase.getUserlogin(name, passwort);
-        return res.getInt(res.next() ? res.getInt(COL_INT_ID) : -1);
+        if (res.next()) {
+            return res.getInt(COL_INT_ID);
+        } else return -1;
     }
 
     /**

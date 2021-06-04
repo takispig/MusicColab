@@ -7,10 +7,12 @@ import java.io.IOException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.sql.SQLException;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main {
 
-    private static final String DEFAULT_ADDRESS = "localhost";
+    private static final String DEFAULT_ADDRESS = "192.168.178.42";
     private static final int DEFAULT_PORT = 1200;
 
     private static boolean exit = false;
@@ -28,7 +30,11 @@ public class Main {
     private static long time = 0;
     private static int restart = 0;
 
+    public static Logger logr = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
+
     public static void main(String[] args) {
+        ActionLog.initLogger(logr);
 
         init(args);
 
@@ -115,7 +121,8 @@ public class Main {
     }
 
     private static void runServer() {
-        System.out.println("Creating new server...");
+        //System.out.println("Creating new server...");
+        logr.log(Level.INFO,"CREATING NEW SERVER");
         currentServer = new Server();
 
         try {
@@ -123,7 +130,8 @@ public class Main {
 
             currentServer.defineCharType();
 
-            System.out.println("Setting up new server...");
+            //System.out.println("Setting up new server...");
+            logr.log(Level.INFO,"SETTING UP SERVER: IP = " + address.toString() + " PORT = " + port);
             currentServer.OpenSelectorAndSetupSocket();
 
             currentServer.handleConnection();
@@ -132,10 +140,12 @@ public class Main {
         } catch (IPAddressException | SocketBindException e) {
             invalidInput = true;
         } catch (IOException | UnsupportedCharsetException e) {
+            logr.log(Level.SEVERE, e.getMessage());
             System.err.println("ERROR: ----------------------------------------------------");
             e.printStackTrace();
             System.err.println("-----------------------------------------------------------");
         } catch (Exception e) {
+            logr.log(Level.SEVERE, e.getMessage());
             System.err.println("UNEXPECTED ERROR: -----------------------------------------");
             e.printStackTrace();
             System.err.println("-----------------------------------------------------------");
@@ -182,13 +192,15 @@ public class Main {
         time = System.currentTimeMillis();
         if (restart > 3) {
             error = true;
-            System.out.println("An error has occurred!");
+            //System.out.println("An error has occurred!");
+            logr.log(Level.SEVERE,"ERROR");
         }
         return restart >= 4;
     }
 
     private static void closeServer() {
-        System.out.println("Closing Server...");
+        //System.out.println("Closing Server...");
+        logr.log(Level.INFO, "CLOSING SERVER");
         currentServer.finishServer();
         boolean closed = false;
         while (!closed) {
@@ -206,7 +218,8 @@ public class Main {
 
     private static void exit() {
         input.close();
-        System.out.println("Exiting...");
+        logr.log(Level.INFO,"EXIT");
+        //System.out.println("Exiting...");
         if (!error)
             System.exit(0);
         else

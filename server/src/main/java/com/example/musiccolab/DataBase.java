@@ -28,7 +28,7 @@ public final class DataBase {
      * .
      */
     private static final String PATH_TO_DB =
-            "jdbc:sqlite:database/identifier.sqlite";
+            "jdbc:sqlite:src/main/res/database/identifier.sqlite";
     /**
      * .
      */
@@ -86,7 +86,7 @@ public final class DataBase {
         }
         Statement state = null;
         state = con.createStatement();
-        ResultSet res = state.executeQuery("SELECT * FROM" + TABLE_NAME);
+        ResultSet res = state.executeQuery("SELECT * FROM " + TABLE_NAME);
         return res;
     }
 
@@ -123,7 +123,7 @@ public final class DataBase {
                         + " varchar (60)," + PASSWORD_COL_NAME
                         + " varchar (60)," + "primary key(id));");
                 PreparedStatement prep =
-                        con.prepareStatement("INSERT INTO User"
+                        con.prepareStatement("INSERT INTO User "
                                 + "values(?, ?, ?, ?); ");
                 prep.setString(COL_INT_NAME, "Max Mustermann");
                 prep.setString(COL_INT_EMAIL, "maxmustermann@mail.de");
