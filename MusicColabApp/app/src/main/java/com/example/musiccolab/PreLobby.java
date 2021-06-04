@@ -114,6 +114,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                 if (CommunicationHandling.confirmation==4) {
                     // this means we successfully created a lobby -> set status Connected with server #Num
                     toast("Lobby Created Successfully\n");
+                    CommunicationHandling.admin = true; // user is admin now
                     TextView status_text = findViewById(R.id.server_status);
                     status_text.setText(String.format("Connected to Lobby #%s\nLobby name: %s", CommunicationHandling.lobbyID, CommunicationHandling.lobbyName));
                 } else if (CommunicationHandling.confirmation==0) {

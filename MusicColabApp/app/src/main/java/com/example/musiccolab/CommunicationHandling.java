@@ -82,6 +82,7 @@ public class CommunicationHandling {
     public static int lobbyID = -1;
     public static String lobbyName = null;
     public static int confirmation = 0;
+    public static boolean admin = false;
     public static List<Integer> lobbyIDs = new ArrayList<>();
 
     public static List<String> toneList = new LinkedList<>();

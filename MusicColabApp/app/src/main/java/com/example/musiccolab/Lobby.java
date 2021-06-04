@@ -48,6 +48,10 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         lobby_nr.setText(String.format("%s", CommunicationHandling.lobbyID));
         TextView instr = findViewById(R.id.instrument);
         instr.setText(String.format("%s", getIntent().getSerializableExtra(PreLobby.SELECTED_INSTRUMENT)));
+        if (CommunicationHandling.admin) {
+            TextView admin_text = findViewById(R.id.admin_boolean);
+            admin_text.setText(" true");
+        }
 
         // Create Listeners for the IDs: about, register
         Button loop = findViewById(R.id.loop);
