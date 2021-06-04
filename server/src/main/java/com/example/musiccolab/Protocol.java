@@ -35,9 +35,9 @@ public class Protocol {
 
 
 
-    final private String[][] responsesArray = { {"main.java.com.example.musiccolab.Client logged in", "error with login"},
-                                          {"main.java.com.example.musiccolab.Client logged out", "error with logout"},
-                                          {"main.java.com.example.musiccolab.Client registered", "Client is already registered."},};
+    final private String[][] responsesArray = { {"Client logged in", "error with login"},
+                                          {"Client logged out", "error with logout"},
+                                          {"Client registered", "Client is already registered."},};
 
     public Protocol(){
         for(short index = 0; index < 11; index++)
@@ -141,16 +141,14 @@ public class Protocol {
         try {
             if (action == register) {
                 checkResponse = LoginSystem.register(username, email, password);
-                Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " REGISTERED");
 
             } else if (action == login) {
                 checkResponse = LoginSystem.login(username, password, clientChannel);
-                Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " LOGGED IN ");
 
             } else if (action == logout) {
                 checkResponse = LoginSystem.getPlayerByChannel(clientChannel) != null && LoginSystem.logout(username, password);
-                Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " LOGGED OUT");
             }
+            Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
             sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
             return;
         } catch (SQLException e) {
@@ -158,6 +156,7 @@ public class Protocol {
         } catch (ClassNotFoundException e) {
             System.out.println("ERROR: ClassNotFound");
         }
+        Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(action + 10, false));
         sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(action + 10, false));
     }
 
@@ -194,7 +193,7 @@ public class Protocol {
                     Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " LEFT LOBBY " + currentLobby.getLobby_id());
                 }
                 sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " you are out."));
-                if(checkResponse) if(currentLobby.isEmpty()) currentLobby = null;
+                if(checkResponse && currentLobby.isEmpty()) { Server.lobbyMap.remove(currentLobby.getLobby_id()); currentLobby = null; }
             }
 
         }

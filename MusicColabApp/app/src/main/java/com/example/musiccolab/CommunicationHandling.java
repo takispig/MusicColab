@@ -23,7 +23,6 @@ public class CommunicationHandling implements Runnable{
     private final String IP = "10.0.2.2";
     private int port = 8080;
 
-
     final private List<Short> codesList = new ArrayList<Short>();
     final private List<Short> errorCodesList = new ArrayList<Short>();
     final private short protocolName = 12845;
@@ -79,7 +78,6 @@ public class CommunicationHandling implements Runnable{
                 if (key.isConnectable()) {
                     buffer = ByteBuffer.allocate(100);
                     try {
-
                         clientChannel.finishConnect();
                         clientChannel.read(buffer);
                         buffer.flip();
@@ -134,7 +132,7 @@ public class CommunicationHandling implements Runnable{
                 if(action == 4)
                     sendLobbyMessage(action, lobbyName);
                 else
-                    sendLobbyMessage(action, Integer.toBinaryString(lobbyID));
+                    sendLobbyMessage(action, Integer.toString(lobbyID));
             }
             catch (IOException e){
                 System.err.println("Can not write in buffer.");
@@ -160,10 +158,10 @@ public class CommunicationHandling implements Runnable{
                     synchronized (Thread.currentThread()) {
                         Thread.currentThread().wait();
                     }
-                } catch (InterruptedException e){
+                } catch (InterruptedException e) {
+                    System.out.println("Error with waiting of main thread.");
                     e.printStackTrace();
                 }
-
             }
 
         }
@@ -270,11 +268,11 @@ public class CommunicationHandling implements Runnable{
                 }
                 else if(action == 1){
                     response = messageCharset.decode(buffer).toString().split(",");
-                    for(byte index = 0; index < response.length; index++){
+                    for(int index = 0; index < response.length; index++){
                         if(index == 0)
                             result = response[index];
                         else
-                            IdList.add(Integer.parseInt(response[index]));
+                            IdList.add(Character.getNumericValue(response[index].charAt(0)));
                     }
                 }else{
                     result = messageCharset.decode(buffer).toString();
