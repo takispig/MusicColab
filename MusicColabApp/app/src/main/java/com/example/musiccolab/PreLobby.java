@@ -94,7 +94,6 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             findViewById(R.id.create_server_popup).setVisibility(View.VISIBLE);
         }
 
-
         if (view.getId() == R.id.create) {
             System.out.println("Created has been pressed");
             EditText name = findViewById(R.id.servername);
@@ -128,7 +127,8 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                 status_text.setText(String.format("Connected to Lobby #%s\nLobby name: %s", networkThread.lobbyID, lobbyName));
                 networkThread.confirmation = 0;
                 networkThread.admin = true;
-                networkThread.IdList.add(networkThread.lobbyID);    // add the lobby to the lobbies list
+                // uncomment the following line when we can keep track of the number of users
+                // networkThread.IdList.add(networkThread.lobbyID);    // add the lobby to the lobbies list
             } else if (networkThread.confirmation==0) {
                 networkThread.lobbyName = null;
                 toast("Connection timeout");
