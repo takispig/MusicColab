@@ -223,7 +223,7 @@ public class CommunicationHandling implements Runnable{
                 clientChannel.read(buffer);
                 buffer.flip();
                 result = messageCharset.decode(buffer).toString();
-                if(action == 4) {
+                if(action == 4 || action == 5) {
                     int a = result.indexOf(" ");
                     lobbyID = Integer.parseInt(result.substring(a + 1, a + 2));
                 }
