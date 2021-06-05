@@ -285,7 +285,9 @@ public class Protocol {
     private String getLoginSystemResponse(int action, boolean result){
         int index = result? 0:1;
         this.responseAction = (short) action;
-        return responsesArray[action <= 10? action-1:action-11][index] + getAllLobbyIds(Server.lobbyMap);
+        String IDs = "";
+        if(action == 1) IDs = getAllLobbyIds(Server.lobbyMap);
+        return responsesArray[action <= 10? action-1:action-11][index] + IDs;
     }
 
     private String getLobbyResponse(boolean result, Lobby lobby, String additionPart){
