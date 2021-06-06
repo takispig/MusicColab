@@ -34,6 +34,7 @@ public class CommunicationHandling implements Runnable{
     public String lobbyName = null;
     public int lobbyID = -1;
     public boolean admin = false;
+    public int users = 0;
     public List<Integer> IdList = new LinkedList<>();
 
     public byte toneAction;
@@ -223,9 +224,16 @@ public class CommunicationHandling implements Runnable{
                 clientChannel.read(buffer);
                 buffer.flip();
                 result = messageCharset.decode(buffer).toString();
+                System.out.println("Result in lobby: " + result);
                 if(action == 4 || action == 5) {
-                    int a = result.indexOf(" ");
-                    lobbyID = Integer.parseInt(result.substring(a + 1, a + 2));
+                    String[] a = result.split(" ");
+                    lobbyID = Integer.parseInt(a[1]);
+                    if (action == 5) {
+                        users = Integer.parseInt(a[5].split(",")[1]);
+                    }
+                    System.out.println("LobbyID: " + lobbyID + " and #users: " + users);
+//                    if (action == 4) confirmation = 4;
+//                    if (action == 5) confirmation = 5;
                 }
             }
             catch (IOException e){
@@ -272,7 +280,8 @@ public class CommunicationHandling implements Runnable{
                         if(index == 0)
                             result = response[index];
                         else
-                            IdList.add(Character.getNumericValue(response[index].charAt(0)));
+                            //IdList.add(Character.getNumericValue(response[index].charAt(0)));
+                        IdList.add(Integer.parseInt(response[index]));
                     }
                 }else{
                     result = messageCharset.decode(buffer).toString();

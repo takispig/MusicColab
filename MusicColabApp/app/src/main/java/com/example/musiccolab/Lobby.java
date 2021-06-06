@@ -52,6 +52,8 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             TextView admin_text = findViewById(R.id.admin_boolean);
             admin_text.setText(" true");
         }
+        TextView usersInLobby = findViewById(R.id.members_number);
+        usersInLobby.setText(String.format("%s", Login.networkThread.users));
 
         // Create Listeners for the IDs: about, register
         Button loop = findViewById(R.id.loop);
