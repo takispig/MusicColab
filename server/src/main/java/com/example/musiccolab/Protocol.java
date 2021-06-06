@@ -183,7 +183,7 @@ public class Protocol {
                 boolean checkResponse = (currentLobby != null);
                 if(checkResponse)
                     checkResponse = currentLobby.addPlayer(player);
-                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " --> you are in."));
+                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " --> you are in.," + currentLobby.getUsersNumber()));
                 if(checkResponse) Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " JOINED LOBBY " + currentLobby.getLobby_id());
 
             } else if(action == leaveLobby){
