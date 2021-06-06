@@ -28,6 +28,7 @@ public class SoundPlayer {
     public void generateToneList() {
         soundPool = new SoundPool.Builder().setMaxStreams(5).build();
         soundIDS = new HashMap<>();
+        soundIDS.put("piano0", R.raw.p_c);
         soundIDS.put("piano1", R.raw.p_d);
         soundIDS.put("piano2", R.raw.p_e);
         soundIDS.put("piano3", R.raw.p_f);
