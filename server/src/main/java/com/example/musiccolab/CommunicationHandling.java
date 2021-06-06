@@ -29,8 +29,10 @@ public class CommunicationHandling implements Runnable{
     public String email = null;
     public String username = null;
     public String password = null;
+    
     public String lobbyName = null;
     public int lobbyID = -1;
+    public int participants = 0;
     public boolean admin = false;
     public List<Integer> IdList = new LinkedList<>();
 
@@ -222,9 +224,12 @@ public class CommunicationHandling implements Runnable{
                 clientChannel.read(buffer);
                 buffer.flip();
                 result = messageCharset.decode(buffer).toString();
-                if(action == 4) {
+                String[] resultArray = result.split(",");
+                result = resultArray[0];
+                if(action == 4 || action == 5) {
                     int a = result.indexOf(" ");
                     lobbyID = Integer.parseInt(result.substring(a + 1, a + 2));
+                    if(action == 5) participants = Integer.parseInt(resultArray[1]);
                 }
             }
             catch (IOException e){
