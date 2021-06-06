@@ -42,7 +42,7 @@ public class Piano implements Instrument, View.OnClickListener {
                         instrumentGUI.setTextInCenter(btn.getText() + " released");
                         break;
                     default:
-                        instrumentGUI.setTextInCenter("no key pressed");
+                        //      instrumentGUI.setTextInCenter("no key pressed");
                         break;
                 }
                 return true;
