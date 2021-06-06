@@ -232,8 +232,6 @@ public class CommunicationHandling implements Runnable{
                         users = Integer.parseInt(a[5].split(",")[1]);
                     }
                     System.out.println("LobbyID: " + lobbyID + " and #users: " + users);
-//                    if (action == 4) confirmation = 4;
-//                    if (action == 5) confirmation = 5;
                 }
             }
             catch (IOException e){
