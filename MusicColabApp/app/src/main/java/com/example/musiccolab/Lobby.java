@@ -21,6 +21,7 @@ import com.example.musiccolab.instruments.Instrument;
 import com.example.musiccolab.instruments.InstrumentGUIBox;
 import com.example.musiccolab.instruments.InstrumentType;
 import com.example.musiccolab.instruments.Piano;
+import com.example.musiccolab.instruments.SoundPlayer;
 import com.example.musiccolab.instruments.Theremin;
 
 import java.io.Serializable;
@@ -65,6 +66,10 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         ImageButton more = findViewById(R.id.more_button);
         more.setOnClickListener(this);
 
+        SoundPlayer sp = new SoundPlayer(this);
+        sp.generateToneList();
+        Login.networkThread.soundPlayer = sp;
+
         sensorManager = (SensorManager) getSystemService(Service.SENSOR_SERVICE);
 
         createInstrumentGUIBox();
@@ -73,13 +78,13 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
 
         switch (selectedInstrumentFromPreLobby) {
             case InstrumentType.THEREMIN:
-                selectedInstrument = new Theremin(instrumentGUI, this);
+                selectedInstrument = new Theremin(instrumentGUI, sp);
                 break;
             case InstrumentType.DRUMS:
-                selectedInstrument = new Drums(instrumentGUI, this);
+                selectedInstrument = new Drums(instrumentGUI, sp);
                 break;
             case InstrumentType.PIANO:
-                selectedInstrument = new Piano(instrumentGUI, this);
+                selectedInstrument = new Piano(instrumentGUI, this, sp);
                 break;
         }
 

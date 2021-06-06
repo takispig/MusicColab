@@ -1,5 +1,7 @@
 package com.example.musiccolab;
 
+import com.example.musiccolab.instruments.SoundPlayer;
+
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -12,7 +14,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class CommunicationHandling implements Runnable{
+public class CommunicationHandling implements Runnable {
+    public SoundPlayer soundPlayer;
     private Charset messageCharset = null;
     private CharsetDecoder decoder = null;//Network order = Byte --> Characters = Host order
     private CharsetEncoder encoder = null;//Characters = Host order -->  Network order = Byte
@@ -181,8 +184,11 @@ public class CommunicationHandling implements Runnable{
     //______________________________________________________________________________________________________________________
 /////////////////////////                              Lobby functions                         /////////////////////////
 //______________________________________________________________________________________________________________________
-    private void music(){
-        System.out.println("Do you hear our music?");
+    private void music() {
+        if (soundPlayer != null) {
+            String[] results = result.split(",");
+            soundPlayer.playToneFromServer(results[0]);
+        }
     }
 
     private void getData(short dataLength) {
@@ -201,6 +207,7 @@ public class CommunicationHandling implements Runnable{
 
     private void sendTone(short action) throws IOException {
         short dataLength = (short) (data.length());
+        dataLength += 2;
         ByteBuffer buffer = ByteBuffer.allocate(6 + 2 + dataLength);
 
         buffer.put(convertShortToByte(protocolName));

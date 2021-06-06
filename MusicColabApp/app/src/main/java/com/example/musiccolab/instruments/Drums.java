@@ -2,13 +2,9 @@ package com.example.musiccolab.instruments;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
-import android.media.MediaPlayer;
 import android.util.Log;
 
 import java.util.Optional;
-
-import com.example.musiccolab.Lobby;
-import com.example.musiccolab.R;
 
 public class Drums implements Instrument {
 
@@ -21,13 +17,12 @@ public class Drums implements Instrument {
     private static final int DEFAULT_SENSOR = Sensor.TYPE_ACCELEROMETER;
     private final float[] lastKnownSensorValues = new float[3];
     private static final String TAG = "Drums";
+    private final SoundPlayer sp;
     private Optional<Axis> axisPointingToGround = Optional.empty();
-    private final MediaPlayer drum_a, drum_b;
 
-    public Drums(InstrumentGUIBox instrumentGUI, Lobby lobby) {
+    public Drums(InstrumentGUIBox instrumentGUI, SoundPlayer sp) {
         this.instrumentGUI = instrumentGUI;
-        drum_a = MediaPlayer.create(lobby, R.raw.drum_a);
-        drum_b = MediaPlayer.create(lobby, R.raw.drum_b);
+        this.sp = sp;
     }
 
     @Override
@@ -85,10 +80,10 @@ public class Drums implements Instrument {
     private void checkAndHandleTwoValues(double force_1, double force_2) {
         if (!forceWithinLimits(force_1)) {
             instrumentGUI.setTextInCenter("DRUM_A");
-            drum_a.start();
+            sp.sendToneToServer("drums0");
         } else if (!forceWithinLimits(force_2)) {
             instrumentGUI.setTextInCenter("DRUM_B");
-            drum_b.start();
+            sp.sendToneToServer("drums1");
         }
     }
 
