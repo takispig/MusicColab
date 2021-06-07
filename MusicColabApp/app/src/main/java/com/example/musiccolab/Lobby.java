@@ -21,6 +21,7 @@ import com.example.musiccolab.instruments.Instrument;
 import com.example.musiccolab.instruments.InstrumentGUIBox;
 import com.example.musiccolab.instruments.InstrumentType;
 import com.example.musiccolab.instruments.Piano;
+import com.example.musiccolab.instruments.SoundPlayer;
 import com.example.musiccolab.instruments.Theremin;
 
 import java.io.Serializable;
@@ -52,6 +53,8 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             TextView admin_text = findViewById(R.id.admin_boolean);
             admin_text.setText(" true");
         }
+        TextView usersInLobby = findViewById(R.id.members_number);
+        usersInLobby.setText(String.format("%s", Login.networkThread.users));
 
         // Create Listeners for the IDs: about, register
         Button loop = findViewById(R.id.loop);
@@ -63,6 +66,10 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         ImageButton more = findViewById(R.id.more_button);
         more.setOnClickListener(this);
 
+        SoundPlayer sp = new SoundPlayer(this);
+        sp.generateToneList();
+        Login.networkThread.soundPlayer = sp;
+
         sensorManager = (SensorManager) getSystemService(Service.SENSOR_SERVICE);
 
         createInstrumentGUIBox();
@@ -71,13 +78,13 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
 
         switch (selectedInstrumentFromPreLobby) {
             case InstrumentType.THEREMIN:
-                selectedInstrument = new Theremin(instrumentGUI, this);
+                selectedInstrument = new Theremin(instrumentGUI, sp);
                 break;
             case InstrumentType.DRUMS:
-                selectedInstrument = new Drums(instrumentGUI, this);
+                selectedInstrument = new Drums(instrumentGUI, sp);
                 break;
             case InstrumentType.PIANO:
-                selectedInstrument = new Piano(instrumentGUI, this);
+                selectedInstrument = new Piano(instrumentGUI, this, sp);
                 break;
         }
 
@@ -130,7 +137,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         // this is the Leave Lobby function and not a Disconnect
         if (view.getId() == R.id.disconnect) {
             networkThread.action = 6;
-            networkThread.lobbyID = PreLobby.lobbyID;
+            //networkThread.lobbyID = Login.networkThread.lobbyID;
             try {
                 synchronized (Thread.currentThread()) {
                     Thread.currentThread().wait();

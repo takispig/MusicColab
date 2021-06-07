@@ -27,6 +27,7 @@ public class MusicJoiner {
     }
 
     public void handleToneData(){
+        System.out.println("Get tone data: " + toneData);
         for(Player player: lobby.getPlayers()){
             clientChannels.add(player.getPlayerChannel());
             clientResponses.add(toneData + "," + toneType + "," + toneAction);

@@ -94,7 +94,6 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             findViewById(R.id.create_server_popup).setVisibility(View.VISIBLE);
         }
 
-
         if (view.getId() == R.id.create) {
             System.out.println("Created has been pressed");
             EditText name = findViewById(R.id.servername);
@@ -117,6 +116,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             } catch (InterruptedException e) {
                 System.out.println("Error with waiting of main thread.");
             }
+
             String output = networkThread.result;
             lobbyID = networkThread.lobbyID;
 
@@ -128,13 +128,15 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                 status_text.setText(String.format("Connected to Lobby #%s\nLobby name: %s", networkThread.lobbyID, lobbyName));
                 networkThread.confirmation = 0;
                 networkThread.admin = true;
-                networkThread.IdList.add(networkThread.lobbyID);    // add the lobby to the lobbies list
-            } else if (networkThread.confirmation==0) {
-                networkThread.lobbyName = null;
-                toast("Connection timeout");
+                networkThread.users = 1;
+                // uncomment the following line when we can keep track of the number of users
+                // networkThread.IdList.add(networkThread.lobbyID);    // add the lobby to the lobbies list
             } else if (networkThread.confirmation == 14) {
                 networkThread.lobbyName = null;
                 toast("Error while Creating the Lobby\nPlease try again");
+            } else {
+                networkThread.lobbyName = null;
+                toast("Connection timeout");
             }
             networkThread.confirmation = 0;
         }
@@ -173,21 +175,29 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             }
             findViewById(R.id.join_server_popup).setVisibility(View.GONE);
 
+            try {
+                synchronized (Thread.currentThread()) {
+                    Thread.currentThread().wait();
+                }
+            } catch (InterruptedException e) {
+                System.out.println("Error with waiting of main thread.");
+            }
+
             System.out.println("LobbyID " + networkThread.lobbyID + " with conf-code: " + networkThread.confirmation);
             if (networkThread.confirmation==5) {
                 // this means we successfully created a lobby -> set status Connected with server #Num
                 toast("You joined Lobby #" + networkThread.lobbyID);
                 TextView lobby = findViewById(R.id.server_status);
                 lobby.setText(String.format("Connected to Lobby #%s", networkThread.lobbyID));
-            } else if (networkThread.confirmation==0) {
-                networkThread.lobbyID = -1;
-                toast("Connection timeout");
+                networkThread.confirmation = 0;
             } else if (networkThread.confirmation == 15) {
                 networkThread.lobbyID = -1;
                 toast("Error while Joining the Lobby\nIs the ID correct?");
+            } else {
+                networkThread.lobbyID = -1;
+                toast("Connection timeout");
             }
             networkThread.confirmation = 0;
-
         }
 
         if (view.getId() == R.id.cancel_join) {

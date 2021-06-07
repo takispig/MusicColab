@@ -17,15 +17,15 @@ import java.util.*;
 import static java.lang.System.exit;
 
 public class Server {
-    private static Charset messageCharset = null;
-    private static CharsetDecoder decoder = null;//Network order = Byte --> Characters = Host order
-    private static CharsetEncoder encoder = null;//Characters = Host order -->  Network order = Byte
+    private Charset messageCharset = null;
+    private CharsetDecoder decoder = null;//Network order = Byte --> Characters = Host order
+    private CharsetEncoder encoder = null;//Characters = Host order -->  Network order = Byte
     private ServerSocketChannel serverChannel = null;
     private InetSocketAddress serverAddress = null;
     private Selector selector = null;
 
-    private static boolean running = true;
-    private static boolean finished = false;
+    private boolean running = true;
+    private boolean finished = false;
 
     private static int noOfLobbies = -1;
     private static int noOfPlayers = -1;

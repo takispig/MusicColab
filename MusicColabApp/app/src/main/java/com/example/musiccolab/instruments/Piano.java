@@ -2,7 +2,6 @@ package com.example.musiccolab.instruments;
 
 import android.annotation.SuppressLint;
 import android.hardware.SensorEvent;
-import android.media.SoundPool;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
@@ -12,44 +11,38 @@ import android.widget.Button;
 import com.example.musiccolab.Lobby;
 import com.example.musiccolab.R;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Piano implements Instrument, View.OnClickListener {
 
     private final Animation scaleDown;
-    private final SoundPool soundPool;
-    private List<Integer> soundIDs;
     private static final String INSTRUMENT_NAME = "Piano";
     private static final int FREEZE_DURATION_IN_MS = 300;
 
     @SuppressLint("ClickableViewAccessibility")
-    public Piano(InstrumentGUIBox instrumentGUI, Lobby lobby) {
+    public Piano(InstrumentGUIBox instrumentGUI, Lobby lobby, SoundPlayer sp) {
         List<Button> pianoKeys = instrumentGUI.getPianoKeys();
 
         scaleDown = AnimationUtils.loadAnimation(lobby, R.anim.scale_down);
 
-        soundPool = new SoundPool.Builder().setMaxStreams(5).build();
-
-        createSoundIDsList();
         for (int i = 0; i < pianoKeys.size(); i++) {
             Button btn = pianoKeys.get(i);
-            int soundPoolID = soundPool.load(lobby, soundIDs.get(i), 1);
+            int finalI = i;
             btn.setOnTouchListener((v, event) -> {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
                         btn.startAnimation(scaleDown);
-                        soundPool.play(soundPoolID, 1, 1, 0, 0, 1);
+                        sp.sendToneToServer("piano" + finalI);
                         instrumentGUI.setTextInCenter(btn.getText() + " pressed");
                         break;
                     case MotionEvent.ACTION_UP:
                         freeze();
                         btn.clearAnimation();
-                        soundPool.pause(soundPoolID);
+                        //   sp.pause("piano" + finalI);
                         instrumentGUI.setTextInCenter(btn.getText() + " released");
                         break;
                     default:
-                        // instrumentGUI.setTextInCenter("no key pressed");
+                        //      instrumentGUI.setTextInCenter("no key pressed");
                         break;
                 }
                 return true;
@@ -64,18 +57,6 @@ public class Piano implements Instrument, View.OnClickListener {
         } catch (InterruptedException e) {
             // TODO log error
         }
-    }
-
-    private void createSoundIDsList() {
-        soundIDs = new ArrayList<>();
-        soundIDs.add(R.raw.p_c);
-        soundIDs.add(R.raw.p_d);
-        soundIDs.add(R.raw.p_e);
-        soundIDs.add(R.raw.p_f);
-        soundIDs.add(R.raw.p_g);
-        soundIDs.add(R.raw.p_a);
-        soundIDs.add(R.raw.p_h);
-        soundIDs.add(R.raw.p_c2);
     }
 
     @Override

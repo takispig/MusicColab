@@ -183,7 +183,7 @@ public class Protocol {
                 boolean checkResponse = (currentLobby != null);
                 if(checkResponse)
                     checkResponse = currentLobby.addPlayer(player);
-                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " --> you are in."));
+                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " --> you are in.," + currentLobby.getUsersNumber()));
                 if(checkResponse) Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " JOINED LOBBY " + currentLobby.getLobby_id());
 
             } else if(action == leaveLobby){
@@ -285,7 +285,9 @@ public class Protocol {
     private String getLoginSystemResponse(int action, boolean result){
         int index = result? 0:1;
         this.responseAction = (short) action;
-        return responsesArray[action <= 10? action-1:action-11][index] + getAllLobbyIds(Server.lobbyMap);
+        String IDs = "";
+        if(action == 1) IDs = getAllLobbyIds(Server.lobbyMap);
+        return responsesArray[action <= 10? action-1:action-11][index] + IDs;
     }
 
     private String getLobbyResponse(boolean result, Lobby lobby, String additionPart){
@@ -302,7 +304,6 @@ public class Protocol {
     }
 
     public void sendResponseToClient(Charset messageCharset, SocketChannel clientChannel, String message){
-        message += "\r\n";
         short dataLength = (short) message.length();
         ByteBuffer messageBuffer = ByteBuffer.allocate(6 + dataLength);
 

@@ -1,4 +1,6 @@
-package com.example.musiccolab;
+package main.java.com.example.musiccolab;
+
+//import com.example.musiccolab.instruments.SoundPlayer;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -12,7 +14,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class CommunicationHandling implements Runnable{
+public class CommunicationHandling implements Runnable {
+    //public SoundPlayer soundPlayer;
     private Charset messageCharset = null;
     private CharsetDecoder decoder = null;//Network order = Byte --> Characters = Host order
     private CharsetEncoder encoder = null;//Characters = Host order -->  Network order = Byte
@@ -20,6 +23,8 @@ public class CommunicationHandling implements Runnable{
     private InetSocketAddress remoteAddress = null;
     private Selector selector = null;
 
+    private final String IP = "10.0.2.2";
+    private int port = 8080;
 
     final private List<Short> codesList = new ArrayList<Short>();
     final private List<Short> errorCodesList = new ArrayList<Short>();
@@ -29,9 +34,12 @@ public class CommunicationHandling implements Runnable{
     public String email = null;
     public String username = null;
     public String password = null;
+    
     public String lobbyName = null;
     public int lobbyID = -1;
+    public int participants = 0;
     public boolean admin = false;
+    public int users = 0;
     public List<Integer> IdList = new LinkedList<>();
 
     public byte toneAction;
@@ -179,8 +187,11 @@ public class CommunicationHandling implements Runnable{
     //______________________________________________________________________________________________________________________
 /////////////////////////                              Lobby functions                         /////////////////////////
 //______________________________________________________________________________________________________________________
-    private void music(){
-        System.out.println("Do you hear our music?");
+    private void music() {
+        //if (soundPlayer != null) {
+          //  String[] results = result.split(",");
+         //   soundPlayer.playToneFromServer(results[0]);
+       // }
     }
 
     private void getData(short dataLength) {
@@ -199,6 +210,7 @@ public class CommunicationHandling implements Runnable{
 
     private void sendTone(short action) throws IOException {
         short dataLength = (short) (data.length());
+        dataLength += 2;
         ByteBuffer buffer = ByteBuffer.allocate(6 + 2 + dataLength);
 
         buffer.put(convertShortToByte(protocolName));
@@ -222,9 +234,14 @@ public class CommunicationHandling implements Runnable{
                 clientChannel.read(buffer);
                 buffer.flip();
                 result = messageCharset.decode(buffer).toString();
-                if(action == 4) {
-                    int a = result.indexOf(" ");
-                    lobbyID = Integer.parseInt(result.substring(a + 1, a + 2));
+                System.out.println("Result in lobby: " + result);
+                if(action == 4 || action == 5) {
+                    String[] a = result.split(" ");
+                    lobbyID = Integer.parseInt(a[1]);
+                    if (action == 5) {
+                        users = Integer.parseInt(a[5].split(",")[1]);
+                    }
+                    System.out.println("LobbyID: " + lobbyID + " and #users: " + users);
                 }
             }
             catch (IOException e){
@@ -267,7 +284,7 @@ public class CommunicationHandling implements Runnable{
                 }
                 else if(action == 1){
                     response = messageCharset.decode(buffer).toString().split(",");
-                    for(byte index = 0; index < response.length; index++){
+                    for(int index = 0; index < response.length; index++){
                         if(index == 0)
                             result = response[index];
                         else
@@ -369,8 +386,6 @@ public class CommunicationHandling implements Runnable{
             return;
         }
 
-        String IP = "";
-        int port = 0;
         try {
             remoteAddress = new InetSocketAddress(IP, port);
         } catch(IllegalArgumentException | SecurityException e) {
