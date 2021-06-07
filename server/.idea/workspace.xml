@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="bfdd162b-1bc8-4230-8f15-f1d35804fee1" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/.idea/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/.idea/dataSources.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/lib.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/.idea/libraries/lib.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/sqlite_jdbc_3_34_0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/.idea/libraries/sqlite_jdbc_3_34_0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/sqlite_jdbc_3_34_01.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/.idea/libraries/sqlite_jdbc_3_34_01.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/sqlite_jdbc_3_34_02.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/.idea/libraries/sqlite_jdbc_3_34_02.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/Log.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Log.txt.lck" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/Log.txt.lck" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/identifier.sqlite" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/database/identifier.sqlite" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/sqlite-jdbc-3.34.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/database/sqlite-jdbc-3.34.0.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/apiguardian-api-1.1.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/lib/apiguardian-api-1.1.0.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/junit-jupiter-5.7.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/lib/junit-jupiter-5.7.0.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/junit-jupiter-api-5.7.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/lib/junit-jupiter-api-5.7.0.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/junit-jupiter-engine-5.7.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/lib/junit-jupiter-engine-5.7.0.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/junit-jupiter-params-5.7.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/lib/junit-jupiter-params-5.7.0.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/junit-platform-commons-1.7.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/lib/junit-platform-commons-1.7.0.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/junit-platform-engine-1.7.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/lib/junit-platform-engine-1.7.0.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/opentest4j-1.2.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/lib/opentest4j-1.2.0.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/META-INF/MANIFEST.MF" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/META-INF/MANIFEST.MF" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/main/java/com/example/musiccolab/ActionLog$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/main/java/com/example/musiccolab/ActionLog.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/main/java/com/example/musiccolab/ClientState.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/main/java/com/example/musiccolab/CommunicationHandling.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/main/java/com/example/musiccolab/DataBase.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/main/java/com/example/musiccolab/Game.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/main/java/com/example/musiccolab/Lobby.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/main/java/com/example/musiccolab/LoginSystem.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/main/java/com/example/musiccolab/Main.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/main/java/com/example/musiccolab/MusicJoiner.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/main/java/com/example/musiccolab/Player.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/main/java/com/example/musiccolab/Protocol.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/main/java/com/example/musiccolab/Server.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/main/java/com/example/musiccolab/exceptions/IPAddressException.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/main/java/com/example/musiccolab/exceptions/SocketBindException.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/main/res/database/identifier.sqlite" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/main/res/jar/sqlite-jdbc-3.34.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/main/res/jar/sqlite-jdbc-3.34.0.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/test/java/com/example/musiccolab/ProtocolTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/test/java/com/example/musiccolab/ServerTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/server/test/readme.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/test/readme.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/Server.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/musiccolab/ActionLog.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/main/java/com/example/musiccolab/ActionLog.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/musiccolab/ClientState.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/main/java/com/example/musiccolab/ClientState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/musiccolab/CommunicationHandling.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/main/java/com/example/musiccolab/CommunicationHandling.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/musiccolab/DataBase.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/main/java/com/example/musiccolab/DataBase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/musiccolab/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/main/java/com/example/musiccolab/Game.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/musiccolab/Lobby.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/main/java/com/example/musiccolab/Lobby.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/musiccolab/LoginSystem.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/main/java/com/example/musiccolab/LoginSystem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/musiccolab/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/main/java/com/example/musiccolab/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/musiccolab/MusicJoiner.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/main/java/com/example/musiccolab/MusicJoiner.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/musiccolab/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/main/java/com/example/musiccolab/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/musiccolab/Protocol.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/main/java/com/example/musiccolab/Protocol.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/musiccolab/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/main/java/com/example/musiccolab/Server.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/musiccolab/exceptions/IPAddressException.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/main/java/com/example/musiccolab/exceptions/IPAddressException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/musiccolab/exceptions/SocketBindException.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/main/java/com/example/musiccolab/exceptions/SocketBindException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/musiccolab/package-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/main/java/com/example/musiccolab/package-info.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/res/database/identifier.sqlite" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/main/res/database/identifier.sqlite" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/res/jar/sqlite-jdbc-3.34.0.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/example/musiccolab/ProtocolTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/test/java/com/example/musiccolab/ProtocolTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/example/musiccolab/ServerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Server/src/test/java/com/example/musiccolab/ServerTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/readme.txt" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$/.." value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectId" id="1tdn7IFVegLNgX6rnGvX4YtelRY" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="Git.Branch.Popup.ShowAllRemotes" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../Server" />
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="bfdd162b-1bc8-4230-8f15-f1d35804fee1" name="Default Changelist" comment="" />
+      <created>1623107664578</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1623107664578</updated>
+      <workItem from="1623107665902" duration="317000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
