@@ -23,7 +23,7 @@ public class CommunicationHandling implements Runnable {
     private InetSocketAddress remoteAddress = null;
     private Selector selector = null;
 
-    private final String IP = "";
+    private final String IP = "192.168.178.42";
     private int port = 1200;
 
     final private List<Short> codesList = new ArrayList<Short>();
