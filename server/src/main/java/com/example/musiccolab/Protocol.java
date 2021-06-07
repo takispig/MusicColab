@@ -141,55 +141,23 @@ public class Protocol {
         try {
             if (action == register) {
                 checkResponse = LoginSystem.register(username, email, password);
-                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-                if (checkResponse) {
-                    Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " REGISTERED");
-                } else {
-                    Main.logr.log(Level.WARNING, "REGISTRATION FAILED");
-                }
 
             } else if (action == login) {
                 checkResponse = LoginSystem.login(username, password, clientChannel);
-                String response = getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse);
-                sendResponseToClient(messageCharset, clientChannel, response + getAllLobbyIds(Server.lobbyMap));
-                if (checkResponse) {
-                    Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " LOGGED IN ");
-                } else {
-                    Main.logr.log(Level.WARNING, "LOGIN FAILED");
-                }
 
             } else if (action == logout) {
-                checkResponse = LoginSystem.logout(username, password);
-                sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-                if (checkResponse) {
-                    Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " LOGGED OUT");
-                } else {
-                    Main.logr.log(Level.WARNING, "LOGOUT FAILED");
-                }
+                checkResponse = LoginSystem.getPlayerByChannel(clientChannel) != null && LoginSystem.logout(username, password);
             }
+            Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+            return;
         } catch (SQLException e) {
-            checkResponse = false;
-            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-            //System.out.println("SQL ERROR");
-            Main.logr.log(Level.SEVERE,"SQL ERROR");
-            e.printStackTrace();
+            System.out.println("ERROR: SQL");
         } catch (ClassNotFoundException e) {
-            checkResponse = false;
-            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-            //System.out.println("CNF ERROR");
-            Main.logr.log(Level.SEVERE, "CLASS NOT FOUND ERROR");
-            e.printStackTrace();
+            System.out.println("ERROR: ClassNotFound");
         }
-    }
-
-    private String getAllLobbyIds(HashMap<Integer, Lobby> lobbyMap) {
-        String res = ",";
-
-        var entrySet = lobbyMap.entrySet();
-        for(var k: entrySet){
-            res = res + Integer.toString(k.getValue().getLobby_id()) + ", ";
-        }
-        return res;
+        Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(action + 10, false));
+        sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(action + 10, false));
     }
 
     private void parseBufferForLobbyOrGame(Charset messageCharset, SocketChannel clientChannel, int lobbyNameIsSize) throws IOException {
@@ -206,7 +174,6 @@ public class Protocol {
             Lobby lobby = new Lobby(player, lobbyName, id);
             Server.lobbyMap.put(id,lobby);
             sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(true, lobby, " created by client."));
-            //System.out.println("Lobby with ID " + lobby.getLobby_id() + " is for Client " + player.getId() + " created");
             Main.logr.log(Level.INFO, "LOBBY " + lobby.getLobby_id() + " CREATED BY CLIENT " + playerAddress.toString());
         }
         else if((action == joinLobby || action == leaveLobby) && player != null){
@@ -216,17 +183,17 @@ public class Protocol {
                 boolean checkResponse = (currentLobby != null);
                 if(checkResponse)
                     checkResponse = currentLobby.addPlayer(player);
-                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " --> you are in."));
-                //System.out.println("Client with ID " + player.getId() + " is now in lobby: " + currentLobby.getLobby_id());
-                Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " JOINED LOBBY " + currentLobby.getLobby_id());
+                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " --> you are in.," + currentLobby.getUsersNumber()));
+                if(checkResponse) Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " JOINED LOBBY " + currentLobby.getLobby_id());
 
             } else if(action == leaveLobby){
                 boolean checkResponse = (currentLobby != null);
-                if(checkResponse)
+                if(checkResponse) {
                     currentLobby.removePlayer(player);
+                    Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " LEFT LOBBY " + currentLobby.getLobby_id());
+                }
                 sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " you are out."));
-                //System.out.println("Client with ID " + player.getId() + " is now out from lobby: " + currentLobby.getLobby_id());
-                Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " LEFT LOBBY " + currentLobby.getLobby_id());
+                if(checkResponse && currentLobby.isEmpty()) { Server.lobbyMap.remove(currentLobby.getLobby_id()); currentLobby = null; }
             }
 
         }
@@ -289,6 +256,16 @@ public class Protocol {
         }
     }
 
+    private String getAllLobbyIds(HashMap<Integer, Lobby> lobbyMap) {
+        String res = "";
+
+        var entrySet = lobbyMap.entrySet();
+        for(var k: entrySet){
+            res += "," + k.getValue().getLobby_id();
+        }
+        return res;
+    }
+
     public byte[] convertShortToByte(short value){
         byte[] temp = new byte[2];
         temp[0] = (byte)(value & 0xff);
@@ -298,15 +275,19 @@ public class Protocol {
     }
 
     private static short getShort(byte[] b) {
-        if(b.length > 0)
-            return (short) (((b[1] << 8) | b[0] & 0xff));
+        if(b.length > 0) {
+            short value = (short) (((b[1] << 8) | b[0] & 0xff));
+            return value;
+        }
         else return -3;
     }
 
     private String getLoginSystemResponse(int action, boolean result){
         int index = result? 0:1;
         this.responseAction = (short) action;
-        return responsesArray[action <= 10? action-1:action-11][index];
+        String IDs = "";
+        if(action == 1) IDs = getAllLobbyIds(Server.lobbyMap);
+        return responsesArray[action <= 10? action-1:action-11][index] + IDs;
     }
 
     private String getLobbyResponse(boolean result, Lobby lobby, String additionPart){
@@ -323,21 +304,22 @@ public class Protocol {
     }
 
     public void sendResponseToClient(Charset messageCharset, SocketChannel clientChannel, String message){
-    message += "\r\n";
-    short dataLength = (short) message.length();
-    String tempString = "" + protocolName + "," + responseAction + "," + dataLength + ",";
-    tempString += message;
-    ByteBuffer messageBuffer = ByteBuffer.allocate(tempString.length());
-    messageBuffer.put(tempString.getBytes(messageCharset));
-    messageBuffer.flip();
-    try {
-        clientChannel.write(messageBuffer);
-        messageBuffer.clear();
-        if (action == register || action == logout)
-            clientChannel.close();
-    }
-    catch (IOException e){
-        System.out.println("Error by sending message to client.");
-    }
+        short dataLength = (short) message.length();
+        ByteBuffer messageBuffer = ByteBuffer.allocate(6 + dataLength);
+
+        messageBuffer.put(convertShortToByte(protocolName));
+        messageBuffer.put(convertShortToByte(responseAction));
+        messageBuffer.put(convertShortToByte(dataLength));
+        messageBuffer.put(message.getBytes(messageCharset));
+        messageBuffer.flip();
+        try {
+            clientChannel.write(messageBuffer);
+            messageBuffer.clear();
+            if (action == register || action == logout)
+                clientChannel.close();
+        }
+        catch (IOException e){
+            System.out.println("Error by sending message to client.");
+        }
     }
 }

@@ -1,7 +1,7 @@
 package com.example.musiccolab;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
+import static xdroid.toaster.Toaster.toast;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,17 +16,24 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.example.musiccolab.Login;
 
+import com.example.musiccolab.instruments.InstrumentType;
 import com.example.musiccolab.instruments.Piano;
 
 import java.net.Socket;
 
 public class PreLobby extends AppCompatActivity implements View.OnClickListener {
 
-    public String Instrument;
-    String [] instruments = {"Theremin", "Keyboards", "Drums"};
+    public static final String SELECTED_INSTRUMENT = "selectedInstrument";
+    private String selectedInstrument;
+    private final String[] instruments = {InstrumentType.THEREMIN, InstrumentType.DRUMS, InstrumentType.PIANO};
+    public static String lobbyName = null;
+    public static int lobbyID = 0;
+    private int counter = 0;
+    CommunicationHandling networkThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        networkThread = Login.networkThread;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pre_lobby);
 
@@ -41,11 +48,17 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
         logout.setOnClickListener(this);
         Button create = findViewById(R.id.create);
         create.setOnClickListener(this);
+        Button join = (Button) findViewById(R.id.join);
+        join.setOnClickListener(this);
+        Button cancel_create = (Button) findViewById(R.id.cancel_create);
+        cancel_create.setOnClickListener(this);
+        Button cancel_join = (Button) findViewById(R.id.cancel_join);
+        cancel_join.setOnClickListener(this);
 
-        // Update the Username from the Client (data are stored from login)
-        Client.getInstance();
+
+        // Update the Username from the CommunicationHandling Class (data are stored from login)
         TextView username = (TextView) findViewById(R.id.username);
-        username.setText(Client.userName);
+        username.setText(networkThread.username);
 
         // Drop-Down Menu (Spinner) -> now idea what happens here, i took the pieces from some tutorials
         Spinner mySpinner = (Spinner) findViewById(R.id.spinner);
@@ -57,7 +70,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
 
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Instrument = instruments[position]; // set the selected Instrument to the global variable Instrument
+                selectedInstrument = instruments[position]; // set the selected Instrument to the global variable Instrument
                 Toast.makeText(getApplicationContext(), "Instrument: " + instruments[position], Toast.LENGTH_SHORT).show();
             }
 
@@ -73,66 +86,209 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
     public void onClick(View view) {
 
         if (view.getId() == R.id.create_server) {
-            findViewById(R.id.create_server_popup).setVisibility(View.VISIBLE);
-        } else if (view.getId() == R.id.create) {
-            EditText name = findViewById(R.id.servername);
-            if (name.getText().toString().equals("")){
-                Toast.makeText(getApplicationContext(), "Please enter server name", Toast.LENGTH_LONG).show();
+            if ((networkThread.lobbyName != null) || (networkThread.lobbyID != -1)) {
+                System.out.println(networkThread.lobbyName + "  " + networkThread.lobbyID);
+                toast("You are already connected with a Lobby");
                 return;
             }
-            else Client.lobbyName = name.getText().toString();
-            findViewById(R.id.create_server_popup).setVisibility(View.GONE);
-            Client.action = (short) 4;
-            Thread serverThread = new Thread(()->Client.getInstance().run());
-            serverThread.start();
-            // check for any changes in Client...when login succeed then confirmation_code will be 1
-            while (Client.confirmation_code == 0) {
-                Client.getInstance();   // retrieve latest changes in Client to check again for the confirmation
-                if (Client.confirmation_code == 4) {
-                    // this means we successfully created a lobby -> set status Connected with server #Num
-                    Toast.makeText(getApplicationContext(), "Lobby Created Successfully\n", Toast.LENGTH_LONG).show();
-                    Client.getInstance();
-                    TextView lobby = (TextView) findViewById(R.id.server_status);
-                    lobby.setText(String.format("Connected to Lobby #%s", Client.lobbyID));
-                } else if (Client.confirmation_code == 14) {
-                    Toast.makeText(getApplicationContext(), "Can't create Lobby\nPlease try again", Toast.LENGTH_LONG).show();
-                }
-            }
-            Client.confirmation_code = 0;// reset to 0 for future operations
-            serverThread.interrupt();
+            findViewById(R.id.create_server_popup).setVisibility(View.VISIBLE);
+        }
 
-        } else if (view.getId() == R.id.join_server) {
-            // do some stuff
-            Toast.makeText(getApplicationContext(), "Join Server is not yet implemented", Toast.LENGTH_SHORT).show();
-        } else if (view.getId() == R.id.logout) {
-            // do some stuff
-            Client.action = (short) 2;
-            Thread logoutThread = new Thread(()->Client.getInstance().run());
-            logoutThread.start();
-            while (Client.confirmation_code == 0) {
-                Client.getInstance();   // retrieve latest changes in Client to check again for the confirmation
-                if (Client.confirmation_code == 2) {
-                    startActivity(new Intent(this, Login.class));
-                } else if (Client.confirmation_code == 12) {
-                    Toast.makeText(getApplicationContext(), "Logout Failed\nPlease try again", Toast.LENGTH_LONG).show();
-                }
+        if (view.getId() == R.id.create) {
+            System.out.println("Created has been pressed");
+            EditText name = findViewById(R.id.servername);
+            System.out.println("Servername: "+name.getText().toString());
+            if (name.getText().toString().equals("")){
+                toast("Please enter server name");
+                return;
             }
-            Client.confirmation_code = (short) 0;   // reset to 0 for future operations
-            logoutThread.interrupt();
-        } else if (view.getId() == R.id.connect) {
-            // do some stuff
-            System.out.println("Redirect to Lobby - Testing!");
-            if (Instrument == "Theremin") {
-                // redirect to the theremin activity
-                startActivity(new Intent(this, LightsensorTestActivity.class));
-            } else if (Instrument == "Drums") {
-                startActivity(new Intent(this, Lobby.class));
-            } else if (Instrument == "Keyboards") {
-                startActivity(new Intent(this, Piano.class));
+            else {
+                lobbyName = name.getText().toString();
+                networkThread.lobbyName = lobbyName;
+                networkThread.action = 4;
+            }
+            findViewById(R.id.create_server_popup).setVisibility(View.GONE);
+
+            try {
+                synchronized (Thread.currentThread()) {
+                    Thread.currentThread().wait();
+                }
+            } catch (InterruptedException e) {
+                System.out.println("Error with waiting of main thread.");
+            }
+
+            String output = networkThread.result;
+            lobbyID = networkThread.lobbyID;
+
+            System.out.println("LobbyName: " + lobbyName + " with conf-code : " + networkThread.confirmation);
+            if (networkThread.confirmation==4) {
+                // this means we successfully created a lobby -> set status Connected with server #Num
+                toast("Lobby Created Successfully\n");
+                TextView status_text = findViewById(R.id.server_status);
+                status_text.setText(String.format("Connected to Lobby #%s\nLobby name: %s", networkThread.lobbyID, lobbyName));
+                networkThread.confirmation = 0;
+                networkThread.admin = true;
+                networkThread.users = 1;
+                // uncomment the following line when we can keep track of the number of users
+                // networkThread.IdList.add(networkThread.lobbyID);    // add the lobby to the lobbies list
+            } else if (networkThread.confirmation == 14) {
+                networkThread.lobbyName = null;
+                toast("Error while Creating the Lobby\nPlease try again");
             } else {
-                // may be redundant because it can never be empty (at least at this moment)
-                startActivity(new Intent(this, Lobby.class));
-                Toast.makeText(getApplicationContext(), "Not such an Instrument. Try again.", Toast.LENGTH_SHORT).show();
+                networkThread.lobbyName = null;
+                toast("Connection timeout");
+            }
+            networkThread.confirmation = 0;
+        }
+
+
+        if (view.getId() == R.id.cancel_create) {
+            findViewById(R.id.create_server_popup).setVisibility(View.GONE);
+        }
+
+        if (view.getId() == R.id.join_server) {
+            if ((networkThread.lobbyName != null) || (networkThread.lobbyID != -1)) {
+                System.out.println(networkThread.lobbyName + "  " + networkThread.lobbyID);
+                toast("You are already connected with a Lobby");
+                return;
+            }
+            if (networkThread.IdList.isEmpty()) {
+                toast("There are no active Lobbies to join\nCreate one to start rocking");
+                return;
+            }
+            TextView available_lobbies = findViewById(R.id.available_lobbyids);
+            available_lobbies.setText(String.format("Available Lobby IDs to join:\n %s", networkThread.IdList));
+            findViewById(R.id.join_server_popup).setVisibility(View.VISIBLE);
+        }
+
+        if (view.getId() == R.id.join) {
+            EditText lobbyID_text = findViewById(R.id.lobbyID);
+            lobbyID = Integer.parseInt(lobbyID_text.getText().toString());
+            System.out.println("LobbyID: " + lobbyID);
+            if (lobbyID_text.getText().toString().equals("")){
+                toast("Please enter server name");
+                return;
+            }
+            else {
+                networkThread.lobbyID = lobbyID;
+                networkThread.action = 5;
+            }
+            findViewById(R.id.join_server_popup).setVisibility(View.GONE);
+
+            try {
+                synchronized (Thread.currentThread()) {
+                    Thread.currentThread().wait();
+                }
+            } catch (InterruptedException e) {
+                System.out.println("Error with waiting of main thread.");
+            }
+
+            System.out.println("LobbyID " + networkThread.lobbyID + " with conf-code: " + networkThread.confirmation);
+            if (networkThread.confirmation==5) {
+                // this means we successfully created a lobby -> set status Connected with server #Num
+                toast("You joined Lobby #" + networkThread.lobbyID);
+                TextView lobby = findViewById(R.id.server_status);
+                lobby.setText(String.format("Connected to Lobby #%s", networkThread.lobbyID));
+                networkThread.confirmation = 0;
+            } else if (networkThread.confirmation == 15) {
+                networkThread.lobbyID = -1;
+                toast("Error while Joining the Lobby\nIs the ID correct?");
+            } else {
+                networkThread.lobbyID = -1;
+                toast("Connection timeout");
+            }
+            networkThread.confirmation = 0;
+        }
+
+        if (view.getId() == R.id.cancel_join) {
+            findViewById(R.id.join_server_popup).setVisibility(View.GONE);
+        }
+
+        if (view.getId() == R.id.logout) {
+            networkThread.action = 2;
+            try {
+                synchronized (Thread.currentThread()) {
+                    Thread.currentThread().wait();
+                }
+            } catch (InterruptedException e) {
+                System.out.println("Error with waiting of main thread.");
+            }
+
+            String output = networkThread.result;
+
+            if (networkThread.confirmation==2){
+                // reset the sensitive user data after logout
+                networkThread.username = null;
+                networkThread.email = null;
+                networkThread.password = null;
+                networkThread.lobbyID = -1;
+                networkThread.lobbyName = null;
+                networkThread.admin = false;
+                networkThread.confirmation = 0;
+                startActivity(new Intent(this, Login.class));
+            }else if (networkThread.confirmation == 0){
+                toast("Connection timeout - no response");
+            } else if (networkThread.confirmation == 12) {
+                toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
+                networkThread.confirmation = 0;
+            }
+        }
+
+
+        if (view.getId() == R.id.connect) {
+            if (networkThread.lobbyID < 0) {
+                toast("You should create or join a server first");
+                return;
+            }
+            Intent lobbyIntent = new Intent(this, Lobby.class);
+            if (selectedInstrument.equals(InstrumentType.THEREMIN)) {
+                lobbyIntent.putExtra(SELECTED_INSTRUMENT, InstrumentType.THEREMIN);
+                startActivity(lobbyIntent);
+            } else if (selectedInstrument.equals(InstrumentType.DRUMS)) {
+                lobbyIntent.putExtra(SELECTED_INSTRUMENT, InstrumentType.DRUMS);
+                startActivity(lobbyIntent);
+            } else if (selectedInstrument.equals(InstrumentType.PIANO)) {
+                lobbyIntent.putExtra(SELECTED_INSTRUMENT, InstrumentType.PIANO);
+                startActivity(lobbyIntent);
+            } else {
+                Toast.makeText(getApplicationContext(), "No such Instrument: \"" + selectedInstrument + "\". Try again.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (++counter == 1) {
+            toast("Press again to Disconnect");
+        }
+        else {
+            // else disconnect the user
+            networkThread.action = 2;
+            try {
+                synchronized (Thread.currentThread()) {
+                    Thread.currentThread().wait();
+                }
+            } catch (InterruptedException e) {
+                System.out.println("Error with waiting of main thread.");
+            }
+
+            String output = networkThread.result;
+
+            if (networkThread.confirmation==2){
+                // reset the sensitive user data after logout
+                networkThread.username = null;
+                networkThread.email = null;
+                networkThread.password = null;
+                networkThread.lobbyID = -1;
+                networkThread.lobbyName = null;
+                networkThread.admin = false;
+                networkThread.confirmation = 0;
+                startActivity(new Intent(this, Login.class));
+            }else if (networkThread.confirmation == 0){
+                toast("Connection timeout - no response");
+            } else if (networkThread.confirmation == 12) {
+                toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
+                networkThread.confirmation = 0;
             }
         }
     }

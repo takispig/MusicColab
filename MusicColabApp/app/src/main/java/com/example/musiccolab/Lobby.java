@@ -1,6 +1,7 @@
 package com.example.musiccolab;
 
 import androidx.appcompat.app.AppCompatActivity;
+import static xdroid.toaster.Toaster.toast;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.app.Service;
@@ -12,37 +13,30 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.musiccolab.instruments.Drums;
 import com.example.musiccolab.instruments.Instrument;
 import com.example.musiccolab.instruments.InstrumentGUIBox;
 import com.example.musiccolab.instruments.InstrumentType;
+import com.example.musiccolab.instruments.Piano;
+import com.example.musiccolab.instruments.SoundPlayer;
 import com.example.musiccolab.instruments.Theremin;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Lobby extends AppCompatActivity implements View.OnClickListener, SensorEventListener {
+public class Lobby extends AppCompatActivity implements View.OnClickListener, SensorEventListener, Serializable {
 
-    private InstrumentType selectedInstrumentType;
-    private Instrument selectedInstrument;
-
-    /*
-        TODO this is a placeholder for the GUI / box for every instrument in the "green box" in the Lobby
-     */
-    private InstrumentGUIBox instrumentGUI;
-
-    private Instrument drums;
-    private Instrument theremin;
-    private List<Instrument> instrumentList = new ArrayList<Instrument>();
+    private Instrument selectedInstrument = null;
     private SensorManager sensorManager;
     private Sensor sensor;
-    private Boolean visible= false;
-    private Boolean loop= false;
+    private Boolean visible = false;
+    private Boolean loop = false;
+    private InstrumentGUIBox instrumentGUI;
+    private int counter = 0;
 
 
     @Override
@@ -50,9 +44,20 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         super.onCreate(savedInstanceState);
         setContentView(R.layout.lobby);
 
-        // Create Listeners for the IDs: about, register
+        // update 'more' text field in Lobby
+        TextView lobby_nr = findViewById(R.id.server_number);
+        lobby_nr.setText(String.format("%s", Login.networkThread.lobbyID));
+        TextView instr = findViewById(R.id.instrument);
+        instr.setText(String.format("%s", getIntent().getSerializableExtra(PreLobby.SELECTED_INSTRUMENT)));
+        if (Login.networkThread.admin) {
+            TextView admin_text = findViewById(R.id.admin_boolean);
+            admin_text.setText(" true");
+        }
+        TextView usersInLobby = findViewById(R.id.members_number);
+        usersInLobby.setText(String.format("%s", Login.networkThread.users));
 
-        Button loop = (Button) findViewById(R.id.loop);
+        // Create Listeners for the IDs: about, register
+        Button loop = findViewById(R.id.loop);
         loop.setOnClickListener(this);
         Button calibrate = findViewById(R.id.calibrate);
         calibrate.setOnClickListener(this);
@@ -61,36 +66,44 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         ImageButton more = findViewById(R.id.more_button);
         more.setOnClickListener(this);
 
-        // TODO we should receive the selected instrument through the dropdown
+        SoundPlayer sp = new SoundPlayer(this);
+        sp.generateToneList();
+        Login.networkThread.soundPlayer = sp;
 
         sensorManager = (SensorManager) getSystemService(Service.SENSOR_SERVICE);
 
-        instrumentGUI = new InstrumentGUIBox();
+        createInstrumentGUIBox();
 
-        drums = new Drums(instrumentGUI, this);
-        instrumentList.add(drums);
+        String selectedInstrumentFromPreLobby = (String) getIntent().getSerializableExtra(PreLobby.SELECTED_INSTRUMENT);
 
-        theremin = new Theremin(instrumentGUI, this);
-        instrumentList.add(theremin);
+        switch (selectedInstrumentFromPreLobby) {
+            case InstrumentType.THEREMIN:
+                selectedInstrument = new Theremin(instrumentGUI, sp);
+                break;
+            case InstrumentType.DRUMS:
+                selectedInstrument = new Drums(instrumentGUI, sp);
+                break;
+            case InstrumentType.PIANO:
+                selectedInstrument = new Piano(instrumentGUI, this, sp);
+                break;
+        }
 
-        // Drums is set as default instrument:
-        selectedInstrument = drums;
         selectedInstrument.reCalibrate();
-        selectedInstrumentType = selectedInstrument.getInstrumentType();
         sensor = sensorManager.getDefaultSensor(selectedInstrument.getSensorType());
         sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
-    // TODO shall be triggered in the moment the user changes the selection in the drop down
-    public void userSelectedInstrument(InstrumentType newSelectedInstrumentType) {
-        selectedInstrumentType = newSelectedInstrumentType;
-        for (Instrument instrument : instrumentList) {
-            if (instrument.getInstrumentType().equals(selectedInstrumentType)) {
-                selectedInstrument = instrument;
-                selectedInstrument.reCalibrate();
-                sensor = sensorManager.getDefaultSensor(selectedInstrument.getSensorType());
-            }
-        }
+    private void createInstrumentGUIBox() {
+        List<Integer> pianoKeys = new ArrayList<>();
+        pianoKeys.add(R.id.btnC);
+        pianoKeys.add(R.id.btnD);
+        pianoKeys.add(R.id.btnE);
+        pianoKeys.add(R.id.btnF);
+        pianoKeys.add(R.id.btnG);
+        pianoKeys.add(R.id.btnA);
+        pianoKeys.add(R.id.btnH);
+        pianoKeys.add(R.id.btnC2);
+        instrumentGUI = new InstrumentGUIBox(this, R.id.iva_text_1, pianoKeys);
     }
 
     @Override
@@ -109,34 +122,94 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
     // In this function we will 'hear' for onClick events and according to
     // their IDs we will make the correct decision
     public void onClick(View view) {
+        CommunicationHandling networkThread = Login.networkThread;
+
         if (view.getId() == R.id.loop) {
-            Button x=findViewById(R.id.loop);
-            loop=!loop;
-            x.setText(loop ? "Stop  Loop":"Start Loop");
+            Button x = findViewById(R.id.loop);
+            loop = !loop;
+            x.setText(loop ? "Stop  Loop" : "Start Loop");
+        }
 
-        } else if (view.getId() == R.id.calibrate) {
-            // do some stuff
+        if (view.getId() == R.id.calibrate) {
             selectedInstrument.reCalibrate();
-        } else if (view.getId() == R.id.disconnect) {
-            // redirect user to login page
-            startActivity(new Intent(this, PreLobby.class));
-        } else if (view.getId() == R.id.more_button) {
-            ConstraintLayout info = findViewById(R.id.info);
-            visible=!visible;
-            info.setVisibility(visible ? View.VISIBLE:View.GONE);
+        }
 
+        // this is the Leave Lobby function and not a Disconnect
+        if (view.getId() == R.id.disconnect) {
+            networkThread.action = 6;
+            //networkThread.lobbyID = Login.networkThread.lobbyID;
+            try {
+                synchronized (Thread.currentThread()) {
+                    Thread.currentThread().wait();
+                }
+            } catch (InterruptedException e) {
+                System.out.println("Error with waiting of main thread.");
+            }
+            String output = networkThread.result;
+
+            System.out.println("LeaveLobby conf-code: " + networkThread.confirmation);
+            if (networkThread.confirmation==6){
+                // reset the sensitive user data after logout
+                networkThread.confirmation = 0;
+                networkThread.lobbyID = -1;
+                networkThread.lobbyName = null;
+                toast("Logged out successfully");
+                startActivity(new Intent(this, PreLobby.class));
+            }else if (networkThread.confirmation==0){
+                toast("Connection timeout");
+            } else if (networkThread.confirmation == 16) {
+                toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
+            }
+        }
+
+        if (view.getId() == R.id.more_button) {
+            ConstraintLayout info = findViewById(R.id.info);
+            visible = !visible;
+            info.setVisibility(visible ? View.VISIBLE : View.GONE);
         }
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        // TODO does this work for Touch as well?
-        // TODO only if user is "recording" etc
         selectedInstrument.action(event);
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
 
+    @Override
+    public void onBackPressed() {
+        CommunicationHandling networkThread = Login.networkThread;
+        if (++counter == 1) {
+            toast("Press again to Exit Lobby");
+        }
+        else {
+            // else remove the user from lobby
+            // else remove the user from lobby
+            networkThread.action = 6;
+            try {
+                synchronized (Thread.currentThread()) {
+                    Thread.currentThread().wait();
+                }
+            } catch (InterruptedException e) {
+                System.out.println("Error with waiting of main thread.");
+            }
+            String output = networkThread.result;
+
+            System.out.println("LeaveLobby conf-code: " + networkThread.confirmation);
+            if (networkThread.confirmation==6){
+                // reset the sensitive user data after logout
+                networkThread.lobbyID = -1;
+                networkThread.lobbyName = null;
+                toast("Logged out successfully");
+                startActivity(new Intent(this, PreLobby.class));
+            }else if (networkThread.confirmation==0){
+                toast("Connection timeout");
+            } else if (networkThread.confirmation == 16) {
+                toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
+            }
+
+        }
     }
 }

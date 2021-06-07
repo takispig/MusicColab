@@ -17,15 +17,15 @@ import java.util.*;
 import static java.lang.System.exit;
 
 public class Server {
-    private static Charset messageCharset = null;
-    private static CharsetDecoder decoder = null;//Network order = Byte --> Characters = Host order
-    private static CharsetEncoder encoder = null;//Characters = Host order -->  Network order = Byte
+    private Charset messageCharset = null;
+    private CharsetDecoder decoder = null;//Network order = Byte --> Characters = Host order
+    private CharsetEncoder encoder = null;//Characters = Host order -->  Network order = Byte
     private ServerSocketChannel serverChannel = null;
     private InetSocketAddress serverAddress = null;
     private Selector selector = null;
 
-    private static boolean running = true;
-    private static boolean finished = false;
+    private boolean running = true;
+    private boolean finished = false;
 
     private static int noOfLobbies = -1;
     private static int noOfPlayers = -1;
@@ -105,6 +105,19 @@ public class Server {
         }
         else if(result[1] == -3) {
             System.out.println("main.java.com.example.musiccolab.Client is disconnected.");
+            Player disconnectedPlayer = LoginSystem.getPlayerByChannel(clientChannel);
+            int id = -1;
+            if(disconnectedPlayer != null){
+                id = disconnectedPlayer.getLobbyId();
+                loggedInPlayers.remove(disconnectedPlayer.getId());
+            }
+            Lobby lobbyOfDisconnectedPlayer = null;
+            if(id != -1) {
+                lobbyOfDisconnectedPlayer = lobbyMap.get(id);
+                lobbyOfDisconnectedPlayer.removePlayer(disconnectedPlayer);
+                if(lobbyOfDisconnectedPlayer.isEmpty()) lobbyOfDisconnectedPlayer = null;
+            }
+
             clientChannel.close();
         }
         else if(result[1] != 0)

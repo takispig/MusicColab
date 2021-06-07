@@ -68,9 +68,21 @@ public final class LoginSystem {
         //check in list
         if (checkLogin(name, passwort)
                 & Server.loggedInPlayers.get(getId(name, passwort)) != null) {
-            //del player from list
+
             Player player = Server.loggedInPlayers.get(getId(name, passwort));
+            int lobbyId = -1;
+            if(player != null)
+                lobbyId = player.getLobbyId();
+            if(lobbyId != -1) {
+                Lobby lobbyOfPlayer = Server.lobbyMap.get(lobbyId);
+                lobbyOfPlayer.removePlayer(player);
+                if(lobbyOfPlayer.isEmpty()){
+                    Server.lobbyMap.remove(lobbyOfPlayer.getLobby_id());
+                    lobbyOfPlayer = null;
+                }
+            }
             player = null;
+            //del player from list
             Server.loggedInPlayers.remove(getId(name, passwort));
             return true;
         } else {

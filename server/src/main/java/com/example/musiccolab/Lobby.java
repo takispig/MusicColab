@@ -73,4 +73,8 @@ public class Lobby {
     public boolean playerInLobby(Player player) { return players.contains(player); }
 
     public byte getUsersNumber(){return usersNumber;}
+
+    public  boolean isEmpty(){
+        return players.isEmpty();
+    }
 }
