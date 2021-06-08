@@ -1,10 +1,8 @@
 package com.example.musiccolab.instruments;
 
-import android.annotation.SuppressLint;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.media.MediaPlayer;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.musiccolab.Lobby;
@@ -15,17 +13,15 @@ public class Theremin implements Instrument {
     private float lastSensorValue = 0;
     private float max = 0;
     private static final String INSTRUMENT_NAME = "Theremin";
-    private static final InstrumentType INSTRUMENT_TYPE = InstrumentType.THEREMIN;
-    private InstrumentGUIBox instrumentGUI;
+    private static final String INSTRUMENT_TYPE = InstrumentType.THEREMIN;
+    private final InstrumentGUIBox instrumentGUI;
     private MediaPlayer c, d, e, f, g, a, h, c2;
     private Lobby lobby;
     private String toServer = "0 Theremin";
     private TextView light;
     private TextView note;
     private static final int DEFAULT_SENSOR = Sensor.TYPE_LIGHT;
-    private ImageView blackPic;
 
-    @SuppressLint("ResourceType")
     public Theremin(InstrumentGUIBox instrumentGUI, Lobby lobby) {
         this.instrumentGUI = instrumentGUI;
         this.lobby = lobby;
@@ -40,7 +36,7 @@ public class Theremin implements Instrument {
         light = (TextView) lobby.findViewById(R.id.sensor);
         note = (TextView) lobby.findViewById(R.id.note);
 
-        blackPic.setImageResource(R.id.blackPic); //VH - 31.05.2021
+        instrumentGUI.setThereminVisible();
     }
 
     @Override
@@ -58,49 +54,45 @@ public class Theremin implements Instrument {
         if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
             lastSensorValue = event.values[0];
 
-            // TODO implement into instrumentGUIbox
-            System.out.println("Light intensity:" + event.values[0] + " (" + max + ")");
-            System.out.println("Current Note: " + toServer);
-//            light.setText("Light intensity:" + event.values[0] + " (" + max + ")");
-            //          note.setText("Current Note: " + toServer);
-
+            StringBuilder sb = new StringBuilder();
             float x = (max - 5) / 8;
             if (event.values[0] < x) {
                 c.start();
                 toServer = "c Theremin";
-                blackPic.setImageAlpha(224); //value: [0-255]. Where 0 is fully transparent and 255 is fully opaque.
+                instrumentGUI.setThereminAlpha(255);
             } else if (event.values[0] < 2 * x) {
                 d.start();
                 toServer = "d Theremin";
+                instrumentGUI.setThereminAlpha(224);
             } else if (event.values[0] < 3 * x) {
                 e.start();
                 toServer = "e Theremin";
-                blackPic.setImageAlpha(193);
+                instrumentGUI.setThereminAlpha(193);
             } else if (event.values[0] < 4 * x) {
                 f.start();
                 toServer = "f Theremin";
-                blackPic.setImageAlpha(162);
             } else if (event.values[0] < 5 * x) {
                 g.start();
                 toServer = "g Theremin";
-                blackPic.setImageAlpha(131);
+                instrumentGUI.setThereminAlpha(162);
             } else if (event.values[0] < 6 * x) {
                 a.start();
                 toServer = "a Theremin";
-                blackPic.setImageAlpha(100);
             } else if (event.values[0] < 7 * x) {
                 h.start();
                 toServer = "h Theremin";
-                blackPic.setImageAlpha(69);
+                instrumentGUI.setThereminAlpha(100);
             } else if (event.values[0] < 8 * x) {
                 c2.start();
                 toServer = "c2 Theremin";
-                blackPic.setImageAlpha(38);
+                instrumentGUI.setThereminAlpha(69);
             } else {
                 toServer = "0 Theremin";
+                instrumentGUI.setThereminAlpha(38);
             }
-            // TODO Remove later, for test purposes only
-            System.out.println(toServer);
+            sb.append("Light intensity:" + event.values[0] + " (" + max + ")\n");
+            sb.append("Current Note: " + toServer);
+            instrumentGUI.setTextInCenter(toServer);
         }
     }
 
@@ -110,7 +102,7 @@ public class Theremin implements Instrument {
     }
 
     @Override
-    public InstrumentType getInstrumentType() {
+    public String getInstrumentType() {
         return INSTRUMENT_TYPE;
     }
 
