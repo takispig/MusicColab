@@ -55,15 +55,16 @@ public class SoundPlayer {
 
     public void playToneFromServer(String toneAsString) {
         long timeStampReceived = System.nanoTime();
-        long duration = -1;
+        int durationInMillis = -1;
         Optional<MediaPlayer> tone = Optional.ofNullable(sounds.get(toneAsString));
         if (tone.isPresent()) {
             Optional<Long> timeStampSendOptional = Optional.ofNullable(rtt.remove(toneAsString));
             if (timeStampSendOptional.isPresent()) {
-                duration = timeStampSendOptional.get() - timeStampReceived;
+                long duration = timeStampReceived - timeStampSendOptional.get();
+                durationInMillis = (int) duration / 1000000;
             }
             tone.get().start();
-            System.out.println("-----> -----> -----> -----> -----> Played: " + toneAsString + " (" + duration + "ns)");
+            System.out.println("SOUNDPLAYER -----> -----> -----> -----> -----> Played: " + toneAsString + " (" + durationInMillis + "ms)");
         }
     }
 }
