@@ -22,8 +22,12 @@
             </intent-filter>
         </activity>
         <activity android:name=".Register"/>
-        <activity android:name=".Lobby"/>
-        <activity android:name=".PreLobby"/>
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".Lobby"/>
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".PreLobby"/>
         <activity android:name=".About"/>
     </application>
 
