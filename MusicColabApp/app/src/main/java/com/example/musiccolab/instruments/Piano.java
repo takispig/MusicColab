@@ -1,99 +1,96 @@
 package com.example.musiccolab.instruments;
 
-import android.hardware.Sensor;
+import android.annotation.SuppressLint;
 import android.hardware.SensorEvent;
-import android.media.MediaPlayer;
-import android.widget.TextView;
+import android.media.SoundPool;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.Button;
 
 import com.example.musiccolab.Lobby;
 import com.example.musiccolab.R;
 
-public class Theremin implements Instrument {
+import java.util.ArrayList;
+import java.util.List;
 
-    private float lastSensorValue = 0;
-    private float max = 0;
-    private static final String INSTRUMENT_NAME = "Theremin";
-    private static final String INSTRUMENT_TYPE = InstrumentType.THEREMIN;
-    private final InstrumentGUIBox instrumentGUI;
-    private MediaPlayer c, d, e, f, g, a, h, c2;
-    private Lobby lobby;
-    private String toServer = "0 Theremin";
-    private TextView light;
-    private TextView note;
-    private static final int DEFAULT_SENSOR = Sensor.TYPE_LIGHT;
+public class Piano implements Instrument, View.OnClickListener {
 
-    public Theremin(InstrumentGUIBox instrumentGUI, Lobby lobby) {
-        this.instrumentGUI = instrumentGUI;
-        this.lobby = lobby;
-        c = MediaPlayer.create(lobby, R.raw.c);
-        d = MediaPlayer.create(lobby, R.raw.d);
-        e = MediaPlayer.create(lobby, R.raw.e);
-        f = MediaPlayer.create(lobby, R.raw.f);
-        g = MediaPlayer.create(lobby, R.raw.g);
-        a = MediaPlayer.create(lobby, R.raw.a);
-        h = MediaPlayer.create(lobby, R.raw.h);
-        c2 = MediaPlayer.create(lobby, R.raw.c2);
-        light = (TextView) lobby.findViewById(R.id.sensor);
-        note = (TextView) lobby.findViewById(R.id.note);
+    private final Animation scaleDown;
+    private final SoundPool soundPool;
+    private List<Integer> soundIDs;
+    private static final String INSTRUMENT_NAME = "Piano";
+    private static final int FREEZE_DURATION_IN_MS = 300;
 
-        instrumentGUI.setThereminVisible();
+    @SuppressLint("ClickableViewAccessibility")
+    public Piano(InstrumentGUIBox instrumentGUI, Lobby lobby) {
+        List<Button> pianoKeys = instrumentGUI.getPianoKeys();
+
+        scaleDown = AnimationUtils.loadAnimation(lobby, R.anim.scale_down);
+
+        soundPool = new SoundPool.Builder().setMaxStreams(5).build();
+
+        createSoundIDsList();
+        for (int i = 0; i < pianoKeys.size(); i++) {
+            Button btn = pianoKeys.get(i);
+            int soundPoolID = soundPool.load(lobby, soundIDs.get(i), 1);
+            btn.setOnTouchListener((v, event) -> {
+                switch (event.getActionMasked()) {
+                    case MotionEvent.ACTION_DOWN:
+                        btn.startAnimation(scaleDown);
+                        soundPool.play(soundPoolID, 1, 1, 0, 0, 1);
+                        instrumentGUI.setTextInCenter(btn.getText() + " pressed");
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        freeze();
+                        btn.clearAnimation();
+                        soundPool.pause(soundPoolID);
+                        instrumentGUI.setTextInCenter(btn.getText() + " released");
+                        break;
+                    default:
+                        // instrumentGUI.setTextInCenter("no key pressed");
+                        break;
+                }
+                return true;
+            });
+        }
+        instrumentGUI.setPianoKeysVisible();
+    }
+
+    private void freeze() {
+        try {
+            Thread.sleep(FREEZE_DURATION_IN_MS);
+        } catch (InterruptedException e) {
+            // TODO log error
+        }
+    }
+
+    private void createSoundIDsList() {
+        soundIDs = new ArrayList<>();
+        soundIDs.add(R.raw.p_c);
+        soundIDs.add(R.raw.p_d);
+        soundIDs.add(R.raw.p_e);
+        soundIDs.add(R.raw.p_f);
+        soundIDs.add(R.raw.p_g);
+        soundIDs.add(R.raw.p_a);
+        soundIDs.add(R.raw.p_h);
+        soundIDs.add(R.raw.p_c2);
     }
 
     @Override
     public void reCalibrate(SensorEvent event) {
-        max = event.values[0];
+        // do nothing, or maybe changing landscape from vertical to horizontal?
     }
 
     @Override
     public void reCalibrate() {
-        max = lastSensorValue;
+        // do nothing, or maybe changing landscape from vertical to horizontal?
     }
 
     @Override
     public void action(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
-            lastSensorValue = event.values[0];
-
-            StringBuilder sb = new StringBuilder();
-            float x = (max - 5) / 8;
-            if (event.values[0] < x) {
-                c.start();
-                toServer = "c Theremin";
-                instrumentGUI.setThereminAlpha(255);
-            } else if (event.values[0] < 2 * x) {
-                d.start();
-                toServer = "d Theremin";
-                instrumentGUI.setThereminAlpha(224);
-            } else if (event.values[0] < 3 * x) {
-                e.start();
-                toServer = "e Theremin";
-                instrumentGUI.setThereminAlpha(193);
-            } else if (event.values[0] < 4 * x) {
-                f.start();
-                toServer = "f Theremin";
-            } else if (event.values[0] < 5 * x) {
-                g.start();
-                toServer = "g Theremin";
-                instrumentGUI.setThereminAlpha(162);
-            } else if (event.values[0] < 6 * x) {
-                a.start();
-                toServer = "a Theremin";
-            } else if (event.values[0] < 7 * x) {
-                h.start();
-                toServer = "h Theremin";
-                instrumentGUI.setThereminAlpha(100);
-            } else if (event.values[0] < 8 * x) {
-                c2.start();
-                toServer = "c2 Theremin";
-                instrumentGUI.setThereminAlpha(69);
-            } else {
-                toServer = "0 Theremin";
-                instrumentGUI.setThereminAlpha(38);
-            }
-            sb.append("Light intensity:" + event.values[0] + " (" + max + ")\n");
-            sb.append("Current Note: " + toServer);
-            instrumentGUI.setTextInCenter(toServer);
-        }
+        // do nothing
     }
 
     @Override
@@ -103,11 +100,16 @@ public class Theremin implements Instrument {
 
     @Override
     public String getInstrumentType() {
-        return INSTRUMENT_TYPE;
+        return InstrumentType.PIANO;
     }
 
     @Override
     public int getSensorType() {
-        return DEFAULT_SENSOR;
+        return 0;
+    }
+
+    @Override
+    public void onClick(View v) {
+        // do nothing
     }
 }
