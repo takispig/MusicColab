@@ -16,6 +16,7 @@ public class Theremin implements Instrument {
     public Theremin(InstrumentGUIBox instrumentGUI, SoundPlayer sp) {
         this.instrumentGUI = instrumentGUI;
         this.sp = sp;
+        instrumentGUI.setThereminVisible();
     }
 
     @Override
@@ -39,29 +40,38 @@ public class Theremin implements Instrument {
             if (event.values[0] < x) {
                 stringToDisplay = "c Theremin";
                 toneToServer += "0";
+                instrumentGUI.setThereminAlpha(255);
             } else if (event.values[0] < 2 * x) {
                 stringToDisplay = "d Theremin";
                 toneToServer += "1";
+                instrumentGUI.setThereminAlpha(224);
             } else if (event.values[0] < 3 * x) {
                 stringToDisplay = "e Theremin";
                 toneToServer += "2";
+                instrumentGUI.setThereminAlpha(193);
             } else if (event.values[0] < 4 * x) {
                 stringToDisplay = "f Theremin";
                 toneToServer += "3";
+				instrumentGUI.setThereminAlpha(162);
             } else if (event.values[0] < 5 * x) {
                 stringToDisplay = "g Theremin";
                 toneToServer += "4";
+                instrumentGUI.setThereminAlpha(131);
             } else if (event.values[0] < 6 * x) {
                 stringToDisplay = "a Theremin";
                 toneToServer += "5";
+                instrumentGUI.setThereminAlpha(100);
             } else if (event.values[0] < 7 * x) {
                 stringToDisplay = "h Theremin";
                 toneToServer += "6";
+                instrumentGUI.setThereminAlpha(69);
             } else if (event.values[0] < 8 * x) {
                 stringToDisplay = "c2 Theremin";
                 toneToServer += "7";
+                instrumentGUI.setThereminAlpha(38);
             } else {
                 stringToDisplay = "0 Theremin";
+                instrumentGUI.setThereminAlpha(7);
             }
             sp.sendToneToServer(toneToServer);
             sb.append("Light intensity:");

@@ -23,6 +23,7 @@ public class Drums implements Instrument {
     public Drums(InstrumentGUIBox instrumentGUI, SoundPlayer sp) {
         this.instrumentGUI = instrumentGUI;
         this.sp = sp;
+        instrumentGUI.setDrumsVisible();
     }
 
     @Override
@@ -81,9 +82,11 @@ public class Drums implements Instrument {
         if (!forceWithinLimits(force_1)) {
             instrumentGUI.setTextInCenter("DRUM_A");
             sp.sendToneToServer("drums0");
+            instrumentGUI.setDrumsRotateLeft();
         } else if (!forceWithinLimits(force_2)) {
             instrumentGUI.setTextInCenter("DRUM_B");
             sp.sendToneToServer("drums1");
+            instrumentGUI.setDrumsRotateRight();
         }
     }
 

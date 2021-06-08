@@ -5,6 +5,7 @@ import com.example.musiccolab.Login;
 import com.example.musiccolab.R;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 import android.media.MediaPlayer;
 
@@ -14,9 +15,11 @@ public class SoundPlayer {
     public static final byte NETWORK_THREAD_DEFAULT_TONE_ACTION = (byte) 10;
     private final Lobby lobby;
     private HashMap<String, MediaPlayer> sounds;
+    private final HashMap<String, Long> rtt;
 
     public SoundPlayer(Lobby lobby) {
         this.lobby = lobby;
+        rtt = new HashMap<>();
     }
 
     public void generateToneList() {
@@ -46,13 +49,21 @@ public class SoundPlayer {
         Login.networkThread.toneType = NETWORK_THREAD_DEFAULT_TONE_TYPE;
         Login.networkThread.toneAction = NETWORK_THREAD_DEFAULT_TONE_ACTION;
         Login.networkThread.data = toneAsString;
+        long timeStampSend = System.nanoTime();
+        rtt.put(toneAsString, timeStampSend);
     }
 
     public void playToneFromServer(String toneAsString) {
-        MediaPlayer tone = sounds.get(toneAsString);
-        if (tone != null) {
-            tone.start();
-            System.out.println("-----> -----> -----> -----> -----> Played: " + toneAsString);
+        long timeStampReceived = System.nanoTime();
+        long duration = -1;
+        Optional<MediaPlayer> tone = Optional.ofNullable(sounds.get(toneAsString));
+        if (tone.isPresent()) {
+            Optional<Long> timeStampSendOptional = Optional.ofNullable(rtt.remove(toneAsString));
+            if (timeStampSendOptional.isPresent()) {
+                duration = timeStampSendOptional.get() - timeStampReceived;
+            }
+            tone.get().start();
+            System.out.println("-----> -----> -----> -----> -----> Played: " + toneAsString + " (" + duration + "ns)");
         }
     }
 }
