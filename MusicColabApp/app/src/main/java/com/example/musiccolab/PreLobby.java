@@ -23,8 +23,8 @@ import java.net.Socket;
 
 public class PreLobby extends AppCompatActivity implements View.OnClickListener {
 
-    public static final String SELECTED_INSTRUMENT = "selectedInstrument";
-    private String selectedInstrument;
+    public static String SELECTED_INSTRUMENT = "selectedInstrument";
+    public static String selectedInstrument = null;
     private final String[] instruments = {InstrumentType.THEREMIN, InstrumentType.DRUMS, InstrumentType.PIANO};
     public static String lobbyName = null;
     public static int lobbyID = 0;
