@@ -111,6 +111,10 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
                 if (instruments[position] == InstrumentType.PIANO) getIntent().putExtra(PreLobby.SELECTED_INSTRUMENT, InstrumentType.PIANO);
                 if (instruments[position] == InstrumentType.DRUMS) getIntent().putExtra(PreLobby.SELECTED_INSTRUMENT, InstrumentType.DRUMS);
                 Toast.makeText(getApplicationContext(), "Instrument: " + instruments[position], Toast.LENGTH_SHORT).show();
+                // refresh text in more
+                TextView instr = findViewById(R.id.instrument);
+                instr.setText(String.format("%s", getIntent().getSerializableExtra(PreLobby.SELECTED_INSTRUMENT)));
+
                 callInstrument(sp);
             }
 
