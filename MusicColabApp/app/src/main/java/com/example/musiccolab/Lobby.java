@@ -151,6 +151,10 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
                 selectedInstrument = new Drums(instrumentGUI, sp);
                 break;
             case InstrumentType.PIANO:
+                // delete previous text from Theremin or Drums
+                TextView lobby_default_text = findViewById(R.id.iva_text_1);
+                lobby_default_text.setText("");
+
                 selectedInstrument = new Piano(instrumentGUI, this, sp);
                 break;
         }
