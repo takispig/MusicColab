@@ -95,6 +95,6 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
     @Override
     public void onBackPressed() {
         if (++counter == 1) toast("Press again to Exit");
-        else finish();
+        else this.finishAffinity();
     }
 }
