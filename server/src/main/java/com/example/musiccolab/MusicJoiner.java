@@ -10,10 +10,14 @@ public class MusicJoiner {
 
 
     public static void handleToneData(Charset messageCharset, Lobby lobby, byte toneAction, byte toneType, String toneData, short action){
-        playersNumber = (short) lobby.getMax_players();
-        System.out.println("Get tone data: " + toneData);
-        for (Player player : lobby.getPlayers())
-            sendTonToClient(messageCharset, player.getPlayerChannel(), toneData + "," + toneType + "," + toneAction, action);
+        if(lobby != null) {
+            playersNumber = (short) lobby.getMax_players();
+            System.out.println("Get tone data: " + toneData);
+            for (Player player : lobby.getPlayers()) {
+                if (player.state.getState() == ClientState.inLobby)
+                    sendTonToClient(messageCharset, player.getPlayerChannel(), toneData + "," + toneType + "," + toneAction, action);
+            }
+        }
     }
 
     public static void sendTonToClient(Charset messageCharset, SocketChannel clientChannel, String message, short action){
