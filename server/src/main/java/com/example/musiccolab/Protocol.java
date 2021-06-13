@@ -209,7 +209,7 @@ public class Protocol {
     private void parseBufferForMusicJoiner(Charset messageCharset, SocketChannel clientChannel, int dataSize) throws IOException {
 
         ByteBuffer toneBuffer;
-        MusicJoiner musicJoiner;
+        Player sender = null;
 
         toneBuffer = ByteBuffer.allocate(1);
         clientChannel.read(toneBuffer);
@@ -227,15 +227,15 @@ public class Protocol {
         toneBuffer.flip();
         String toneData= messageCharset.decode(toneBuffer).toString();
         toneBuffer.clear();
-        if (LoginSystem.getPlayerByChannel(clientChannel) != null) {
-            Lobby clientLobby = Server.lobbyMap.get(LoginSystem.getPlayerByChannel(clientChannel).getLobbyId());
-            musicJoiner = new MusicJoiner(clientLobby, toneAction, toneType, toneData, clientChannel);
-            musicJoiner.handleToneData();
+
+        sender = LoginSystem.getPlayerByChannel(clientChannel);
+        if ( sender != null) {
+            Lobby clientLobby = Server.lobbyMap.get(sender.getLobbyId());
             responseAction = action;
-            for (byte index = 0; index < clientLobby.getUsersNumber(); index++)
-                sendResponseToClient(messageCharset, musicJoiner.getClientChannels().get(index), musicJoiner.getClientResponses().get(index));
+            MusicJoiner.handleToneData(messageCharset, clientLobby, toneAction, toneType, toneData, responseAction);
         } else {
-            //todo: ERROR
+            responseAction = (short) (action + 10);
+            sendResponseToClient(messageCharset,clientChannel, "Error, client is DISCONNECTED");
         }
     }
 

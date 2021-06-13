@@ -15,19 +15,30 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class CommunicationHandling implements Runnable {
+
+    public static final int PROTOCOL_LOGIN_ACTION = 1;
+    public static final int PROTOCOL_LOGOUT_ACTION = 2;
+    public static final int PROTOCOL_REGISTER_ACTION = 3;
+    public static final int PROTOCOL_CREATE_LOBBY_ACTION = 4;
+    public static final int PROTOCOL_JOIN_LOBBY_ACTION = 5;
+    public static final int PROTOCOL_LEAVE_LOBBY_ACTION = 6;
+    public static final int PROTOCOL_TONE_ACTION = 7;
+
+    private static final String IP = "35.207.116.16";
+    private static final int port = 8080;
+
+    public static final String CAN_NOT_READ_FROM_BUFFER = "Can not read from buffer.";
+    public static final String CAN_NOT_WRITE_IN_BUFFER = "Can not write in buffer.";
+
     //public SoundPlayer soundPlayer;
     private Charset messageCharset = null;
-    private CharsetDecoder decoder = null;//Network order = Byte --> Characters = Host order
-    private CharsetEncoder encoder = null;//Characters = Host order -->  Network order = Byte
+    //Characters = Host order -->  Network order = Byte
     private SocketChannel clientChannel = null;
     private InetSocketAddress remoteAddress = null;
     private Selector selector = null;
 
-    private final String IP = "10.0.2.2";
-    private int port = 8080;
-
-    final private List<Short> codesList = new ArrayList<Short>();
-    final private List<Short> errorCodesList = new ArrayList<Short>();
+    final private List<Short> codesList = new ArrayList<>();
+    final private List<Short> errorCodesList = new ArrayList<>();
     final private short protocolName = 12845;
 
     public short action = 0;
@@ -37,7 +48,6 @@ public class CommunicationHandling implements Runnable {
     
     public String lobbyName = null;
     public int lobbyID = -1;
-    public int participants = 0;
     public boolean admin = false;
     public int users = 0;
     public List<Integer> IdList = new LinkedList<>();
@@ -47,7 +57,7 @@ public class CommunicationHandling implements Runnable {
     public String data;
 
     public Thread communicationThread = null;
-    private Thread mainThread = null;
+    private final Thread mainThread;
     public String result = "";
     public int confirmation;
     public boolean threadExist = false;
@@ -55,23 +65,23 @@ public class CommunicationHandling implements Runnable {
 
     public CommunicationHandling(Thread thread) {
         mainThread = thread;
-        for(short index = 1; index < 11; index++) {
+        for (short index = 1; index < 11; index++) {
             codesList.add(index);
-            errorCodesList.add( (short) (index + 10));
+            errorCodesList.add((short) (index + 10));
         }
     }
 
 
     @Override
-    public void run(){
-        if(action == 3 || action == 1){
+    public void run() {
+        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_LOGIN_ACTION) {
             buildConnection();
             connectToServer();
         }
         while (true) {
-            try{
+            try {
                 selector.select();
-            }catch (IOException e) {
+            } catch (IOException e) {
                 System.out.println("Problem with selector");
             }
 
@@ -89,20 +99,18 @@ public class CommunicationHandling implements Runnable {
                         clientChannel.read(buffer);
                         buffer.flip();
                         System.out.println(messageCharset.decode(buffer));
-                    }catch (IOException e){
+                    } catch (IOException e) {
                         System.out.println("Problem with finishConnect");
                     }
-                }
-                else if (key.isReadable()) {
+                } else if (key.isReadable()) {
                     short[] actionAndDataLength = analyseMainBuffer(messageCharset, clientChannel);
-                    if(actionAndDataLength[1] > 0) {
+                    if (actionAndDataLength[1] > 0) {
                         confirmation = actionAndDataLength[0];
                         handleAction(actionAndDataLength[0], actionAndDataLength[1]);
-                    }
-                    else{
-                        try{
+                    } else {
+                        try {
                             clientChannel.read(ByteBuffer.allocate(1000));
-                        }catch (IOException e){
+                        } catch (IOException e) {
                             System.err.println("Error with empty channel.");
                         }
                     }
@@ -110,7 +118,7 @@ public class CommunicationHandling implements Runnable {
                 }
                 selectedKeys.remove();
             }
-            if(codesList.contains(action)){
+            if (codesList.contains(action)) {
                 sendMessageByAction(action);
                 action = 0;
             }
@@ -119,47 +127,46 @@ public class CommunicationHandling implements Runnable {
 
     public void start() {
         communicationThread = new Thread(this, "secondaryThread");
-        try{
+        try {
             communicationThread.start();
             threadExist = true;
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println("Error with starting network thread.");
         }
     }
 
-    private void sendMessageByAction(short action){
-        if(action == 1 || action == 2 || action == 3){
-            try{sendLoginSystemMessage(action, email, username, password);}
-            catch (IOException e){
-                System.err.println("Can not write in buffer.");
+    private void sendMessageByAction(short action) {
+        if (action == PROTOCOL_LOGIN_ACTION || action == PROTOCOL_LOGOUT_ACTION || action == PROTOCOL_REGISTER_ACTION) {
+            try {
+                sendLoginSystemMessage(action, email, username, password);
+            } catch (IOException e) {
+                System.err.println(CAN_NOT_WRITE_IN_BUFFER);
             }
-        }
-        else if(action == 4 || action == 5 || action == 6){
-            try{
-                if(action == 4)
+        } else if (action == PROTOCOL_CREATE_LOBBY_ACTION || action == PROTOCOL_JOIN_LOBBY_ACTION || action == PROTOCOL_LEAVE_LOBBY_ACTION) {
+            try {
+                if (action == PROTOCOL_CREATE_LOBBY_ACTION)
                     sendLobbyMessage(action, lobbyName);
                 else
                     sendLobbyMessage(action, Integer.toString(lobbyID));
+            } catch (IOException e) {
+                System.err.println(CAN_NOT_WRITE_IN_BUFFER);
             }
-            catch (IOException e){
-                System.err.println("Can not write in buffer.");
-            }
-        }
-        else if(action == 7){
-            try{sendTone(action);}
-            catch (IOException e){
-                System.err.println("Can not write in buffer.");
+        } else if (action == PROTOCOL_TONE_ACTION) {
+            try {
+                sendTone(action);
+            } catch (IOException e) {
+                System.err.println(CAN_NOT_WRITE_IN_BUFFER);
             }
         }
     }
 
-    private void handleAction(short action, short messageLength){
-        if(action == 1 || action == 2 || action == 3 || action == 11 || action == 12 || action == 13){
+    private void handleAction(short action, short messageLength) {
+        if (action == PROTOCOL_LOGIN_ACTION || action == PROTOCOL_LOGOUT_ACTION || action == PROTOCOL_REGISTER_ACTION || action == 11 || action == 12 || action == 13) {
             loginSystem(action, messageLength);
             synchronized (mainThread) {
                 mainThread.notify();
             }
-            if(confirmation == 2) {
+            if (confirmation == 2) {
                 System.out.println(confirmation);
                 try {
                     synchronized (Thread.currentThread()) {
@@ -167,43 +174,41 @@ public class CommunicationHandling implements Runnable {
                     }
                 } catch (InterruptedException e) {
                     System.out.println("Error with waiting of main thread.");
+                    e.printStackTrace();
                 }
 
             }
 
-        }
-        else if(action == 4 || action == 5 || action == 6 || action == 14 || action == 15 || action == 16){
+        } else if (action == PROTOCOL_CREATE_LOBBY_ACTION || action == PROTOCOL_JOIN_LOBBY_ACTION || action == PROTOCOL_LEAVE_LOBBY_ACTION || action == 14 || action == 15 || action == 16) {
             lobby(action, messageLength);
             synchronized (mainThread) {
                 mainThread.notify();
             }
-        }
-        else if(action == 7 || action == 17){
+        } else if (action == PROTOCOL_TONE_ACTION || action == 17) {
             getData(messageLength);
         }
     }
 
-
-    //______________________________________________________________________________________________________________________
-/////////////////////////                              Lobby functions                         /////////////////////////
-//______________________________________________________________________________________________________________________
-    private void music() {
-        //if (soundPlayer != null) {
-          //  String[] results = result.split(",");
-         //   soundPlayer.playToneFromServer(results[0]);
-       // }
+    /*
+        --------------------------------- Lobby Functions ---------------------------------
+     */
+    private void sendToneToSoundPlayer() {
+        /*if (soundPlayer != null) {
+            String[] results = result.split(",");
+            soundPlayer.playToneFromServer(results[0]);
+        }*/
     }
 
     private void getData(short dataLength) {
         if (dataLength >= 0) {
             ByteBuffer buffer = ByteBuffer.allocate(dataLength);
-            try{
+            try {
                 clientChannel.read(buffer);
                 buffer.flip();
                 result = messageCharset.decode(buffer).toString();
-                music();
-            }catch (IOException e){
-                System.err.println("Can not read from buffer.");
+                sendToneToSoundPlayer();
+            } catch (IOException e) {
+                System.err.println(CAN_NOT_READ_FROM_BUFFER);
             }
         }
     }
@@ -224,36 +229,36 @@ public class CommunicationHandling implements Runnable {
         clientChannel.write(buffer);
         buffer.clear();
     }
-    //______________________________________________________________________________________________________________________
-/////////////////////////                              Lobby functions                         /////////////////////////
-//______________________________________________________________________________________________________________________
-    private void lobby(short action, short dataLength){
-        if(dataLength >= 0){
+
+    private void lobby(short action, short dataLength) {
+        if (dataLength >= 0) {
             ByteBuffer buffer = ByteBuffer.allocate(dataLength);
-            try{
+            try {
                 clientChannel.read(buffer);
                 buffer.flip();
                 result = messageCharset.decode(buffer).toString();
                 System.out.println("Result in lobby: " + result);
-                if(action == 4 || action == 5) {
+                if (action == PROTOCOL_CREATE_LOBBY_ACTION || action == PROTOCOL_JOIN_LOBBY_ACTION) {
                     String[] a = result.split(" ");
                     lobbyID = Integer.parseInt(a[1]);
-                    if (action == 5) {
+                    if (action == PROTOCOL_JOIN_LOBBY_ACTION) {
                         users = Integer.parseInt(a[5].split(",")[1]);
                     }
                     System.out.println("LobbyID: " + lobbyID + " and #users: " + users);
                 }
+            } catch (IOException e) {
+                System.err.println(CAN_NOT_READ_FROM_BUFFER);
             }
-            catch (IOException e){
-                System.err.println("Can not read from buffer.");
-            }
-        } else{result = "There are no data."; mainThread.notify();}
+        } else {
+            result = "There are no data.";
+            mainThread.notify();
+        }
 
     }
 
     private void sendLobbyMessage(short action, String lobbyNameOrID) throws IOException {
         short dataLength;
-        ByteBuffer buffer = null;
+        ByteBuffer buffer;
 
         dataLength = (short) lobbyNameOrID.length();
         buffer = ByteBuffer.allocate(6 + dataLength);
@@ -268,37 +273,37 @@ public class CommunicationHandling implements Runnable {
         buffer.clear();
     }
 
-    //______________________________________________________________________________________________________________________
-/////////////////////////                           Login System functions                     /////////////////////////
-//______________________________________________________________________________________________________________________
-    private void loginSystem(short action, short dataLength){
-        if(dataLength >= 0){
+    /*
+        --------------------------------- Login System Functions ---------------------------------
+     */
+    private void loginSystem(short action, short dataLength) {
+        if (dataLength >= 0) {
             ByteBuffer buffer = ByteBuffer.allocate(dataLength);
             String[] response;
-            try{
+            try {
                 clientChannel.read(buffer);
                 buffer.flip();
-                if(action == 3 || action == 2 || action == 13 || action == 12){
+                if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_LOGOUT_ACTION || action == 13 || action == 12) {
                     result = messageCharset.decode(buffer).toString();
                     clientChannel.close();
-                }
-                else if(action == 1){
+                } else if (action == 1) {
                     response = messageCharset.decode(buffer).toString().split(",");
-                    for(int index = 0; index < response.length; index++){
-                        if(index == 0)
+                    for (int index = 0; index < response.length; index++) {
+                        if (index == 0)
                             result = response[index];
                         else
+                            //IdList.add(Character.getNumericValue(response[index].charAt(0)));
                             IdList.add(Integer.parseInt(response[index]));
                     }
-                }else{
+                } else {
                     result = messageCharset.decode(buffer).toString();
                 }
+            } catch (IOException e) {
+                System.err.println(CAN_NOT_READ_FROM_BUFFER);
             }
-            catch (IOException e){
-                System.err.println("Can not read from buffer.");
-            }
-        } else{result = "There are no data.";}
-
+        } else {
+            result = "There is no data.";
+        }
     }
 
     private void sendLoginSystemMessage(short action, String email, String username, String password) throws IOException {
@@ -307,23 +312,23 @@ public class CommunicationHandling implements Runnable {
         emailLength = 0;
 
         String message = "";
-        ByteBuffer buffer = null;
+        ByteBuffer buffer;
 
-        if(action == 3) {
+        if (action == PROTOCOL_REGISTER_ACTION) {
             emailLength = (byte) email.length();
             message = email;
             size = 3;
         }
         userNameLength = (byte) username.length();
         passwordLength = (byte) password.length();
-        message += username+password;
+        message += username + password;
         dataLength = (short) message.length();
         buffer = ByteBuffer.allocate(6 + size + dataLength);
 
         buffer.put(convertShortToByte(protocolName));
         buffer.put(convertShortToByte(action));
         buffer.put(convertShortToByte(dataLength));
-        if(action == 3) buffer.put(emailLength);
+        if (action == PROTOCOL_REGISTER_ACTION) buffer.put(emailLength);
         buffer.put(userNameLength);
         buffer.put(passwordLength);
         buffer.put(message.getBytes(messageCharset));
@@ -333,9 +338,13 @@ public class CommunicationHandling implements Runnable {
         buffer.clear();
     }
 
-    //______________________________________________________________________________________________________________________
-/////////////////////////                             read header function                     /////////////////////////
-//______________________________________________________________________________________________________________________
+    /**
+     * Read header function
+     *
+     * @param messageCharset
+     * @param clientChannel
+     * @return
+     */
     private short[] analyseMainBuffer(Charset messageCharset, SocketChannel clientChannel) {
         short[] temp;
         ByteBuffer mainBuffer;
@@ -364,39 +373,40 @@ public class CommunicationHandling implements Runnable {
                     System.err.println("Server sent unknown action.");
                     return new short[]{action, 0};
                 }
-            }else{
+            } else {
                 System.err.println("Response is not from Server.");
                 return new short[]{action, 0};
             }
-        }
-        catch (IOException e){
+        } catch (IOException e) {
             System.err.println("Error with reading buffer in analyseMainBuffer.");
             return new short[]{action, 0};
         }
     }
-    //______________________________________________________________________________________________________________________
-/////////////////////////                             connection functions                     /////////////////////////
-//______________________________________________________________________________________________________________________
-    private void buildConnection(){
+
+    /*
+        --------------------------------- Connection Functions ---------------------------------
+     */
+    private void buildConnection() {
 
         try {
             messageCharset = StandardCharsets.US_ASCII;
-        } catch(UnsupportedCharsetException uce) {
+        } catch (UnsupportedCharsetException uce) {
             System.err.println("Cannot create charset for this application. Exiting...");
             return;
         }
 
         try {
             remoteAddress = new InetSocketAddress(IP, port);
-        } catch(IllegalArgumentException | SecurityException e) {
+        } catch (IllegalArgumentException | SecurityException e) {
             System.err.println("Can not connect to Server.");
             return;
         }
-        decoder = messageCharset.newDecoder();
+        //Network order = Byte --> Characters = Host order
+        messageCharset.newDecoder();
 
         try {
             selector = Selector.open();
-        } catch(IOException e) {
+        } catch (IOException e) {
             System.err.println("Error with selector.");
             return;
         }
@@ -409,18 +419,18 @@ public class CommunicationHandling implements Runnable {
             clientChannel.configureBlocking(false);
             clientChannel.register(selector, SelectionKey.OP_CONNECT | SelectionKey.OP_READ);
             clientChannel.connect(remoteAddress);
-        }catch (IOException e){
+        } catch (IOException e) {
             System.err.println("Connecting to Server failed.");
         }
     }
-//______________________________________________________________________________________________________________________
-/////////////////////////                             side functions                           /////////////////////////
-//______________________________________________________________________________________________________________________
 
-    private byte[] convertShortToByte(short value){
+    /*
+        --------------------------------- Side Functions ---------------------------------
+     */
+    private byte[] convertShortToByte(short value) {
         byte[] temp = new byte[2];
-        temp[0] = (byte)(value & 0xff);
-        temp[1] = (byte)((value >> 8) & 0xff);
+        temp[0] = (byte) (value & 0xff);
+        temp[1] = (byte) ((value >> 8) & 0xff);
         return temp;
     }
 

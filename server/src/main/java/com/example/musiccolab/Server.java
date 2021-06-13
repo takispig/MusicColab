@@ -89,23 +89,24 @@ public class Server {
 
         SocketChannel clientChannel = (SocketChannel) key.channel();
         //Read the first 6 indexes. (Protocol name, Action and data length. 2 Bytes each)
-
+        Player disconnectedPlayer = LoginSystem.getPlayerByChannel(clientChannel);
         Protocol protocol = new Protocol();
 
         short[] result = protocol.analyseMainBuffer(messageCharset, clientChannel);
         if(result[1] == -1) {
             protocol.sendResponseToClient(messageCharset, clientChannel, "You are not our customer.\r\n");
+            disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
             clientChannel.close();
         }
         else if(result[1] == -2) {
             if(result[0] != 0) {
                 protocol.sendResponseToClient(messageCharset, clientChannel, "Action is not known.\r\n");
+                disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
                 clientChannel.close();
             }
         }
         else if(result[1] == -3) {
             System.out.println("main.java.com.example.musiccolab.Client is disconnected.");
-            Player disconnectedPlayer = LoginSystem.getPlayerByChannel(clientChannel);
             int id = -1;
             if(disconnectedPlayer != null){
                 id = disconnectedPlayer.getLobbyId();
@@ -116,6 +117,7 @@ public class Server {
                 lobbyOfDisconnectedPlayer = lobbyMap.get(id);
                 lobbyOfDisconnectedPlayer.removePlayer(disconnectedPlayer);
                 if(lobbyOfDisconnectedPlayer.isEmpty()) lobbyOfDisconnectedPlayer = null;
+                disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
             }
 
             clientChannel.close();
