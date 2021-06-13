@@ -47,6 +47,7 @@ public final class LoginSystem {
             player.setLoggedIn();
             //add data to List
             Server.loggedInPlayers.put(res.getInt(COL_INT_ID), player);
+            Server.loggedInList.put(channel, player);
 
             player.state.setState(ClientState.loggedIn);
             return true;
@@ -168,14 +169,6 @@ public final class LoginSystem {
      * @return Player which is on the channel
      */
     public static Player getPlayerByChannel(final SocketChannel channel) {
-        Iterator<Map.Entry<Integer, Player>> i
-                = Server.loggedInPlayers.entrySet().iterator();
-        while (i.hasNext()) {
-            Map.Entry<Integer, Player> entry = i.next();
-            if (entry.getValue().getPlayerChannel() == channel) {
-                return entry.getValue();
-            }
-        }
-        return null;
+        return Server.loggedInList.get(channel);
     }
 }

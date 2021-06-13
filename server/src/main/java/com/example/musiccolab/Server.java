@@ -11,7 +11,6 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.*;
-import java.sql.SQLException;
 import java.util.*;
 
 import static java.lang.System.exit;
@@ -32,6 +31,7 @@ public class Server {
 
     public static HashMap<Integer,Lobby> lobbyMap = new HashMap<>();
     public static HashMap<Integer,Player> loggedInPlayers = new HashMap<>();
+    public static HashMap<SocketChannel, Player> loggedInList = new HashMap<>();
 
     public void setupServerAddress(String address, int port) throws IPAddressException {
         try {
@@ -96,12 +96,14 @@ public class Server {
         if(result[1] == -1) {
             protocol.sendResponseToClient(messageCharset, clientChannel, "You are not our customer.\r\n");
             disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
+            loggedInList.remove(clientChannel);
             clientChannel.close();
         }
         else if(result[1] == -2) {
             if(result[0] != 0) {
                 protocol.sendResponseToClient(messageCharset, clientChannel, "Action is not known.\r\n");
                 disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
+                loggedInList.remove(clientChannel);
                 clientChannel.close();
             }
         }
@@ -111,6 +113,7 @@ public class Server {
             if(disconnectedPlayer != null){
                 id = disconnectedPlayer.getLobbyId();
                 loggedInPlayers.remove(disconnectedPlayer.getId());
+                loggedInList.remove(clientChannel);
             }
             Lobby lobbyOfDisconnectedPlayer = null;
             if(id != -1) {
@@ -119,7 +122,6 @@ public class Server {
                 if(lobbyOfDisconnectedPlayer.isEmpty()) lobbyOfDisconnectedPlayer = null;
                 disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
             }
-
             clientChannel.close();
         }
         else if(result[1] != 0)
@@ -141,7 +143,12 @@ public class Server {
                     handleConnectionWhenAcceptable(key);
 
                 } else if (key.isReadable()) {
+                    long a = System.currentTimeMillis();
                     handleConnectionWhenReadable(key);
+                    long b = System.currentTimeMillis();
+                    System.out.println("before: " + a);
+                    System.out.println("after: " + b);
+                    System.out.println("duration: " + (b-a));
                 }
                 selectedKeys.remove();
             }
