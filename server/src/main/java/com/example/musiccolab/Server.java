@@ -23,6 +23,8 @@ public class Server {
     private InetSocketAddress serverAddress = null;
     private Selector selector = null;
 
+    private final Protocol protocol = new Protocol();
+
     private boolean running = true;
     private boolean finished = false;
 
@@ -90,7 +92,6 @@ public class Server {
         SocketChannel clientChannel = (SocketChannel) key.channel();
         //Read the first 6 indexes. (Protocol name, Action and data length. 2 Bytes each)
         Player disconnectedPlayer = LoginSystem.getPlayerByChannel(clientChannel);
-        Protocol protocol = new Protocol();
 
         short[] result = protocol.analyseMainBuffer(messageCharset, clientChannel);
         if(result[1] == -1) {
