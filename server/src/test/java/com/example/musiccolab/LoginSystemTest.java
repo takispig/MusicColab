@@ -16,6 +16,8 @@ class LoginSystemTest {
     String testName = "Karl";
     String testEmail = "karl@mail.de";
     String testPassword = "1234";
+
+
     @AfterEach
     void cleanUp(){
         System.out.println("Cleaning up");
@@ -32,7 +34,6 @@ class LoginSystemTest {
     @Test
     void loginWithoutRegister() {
         SocketChannel testChannel = null;
-
         try {
             assertFalse(LoginSystem.login(testName,testPassword,testChannel));
         } catch (SQLException e) {
@@ -46,8 +47,6 @@ class LoginSystemTest {
 
     @Test
     void loginWithRegister() {
-
-
         try {
             assertTrue(LoginSystem.register(testName,testEmail,testPassword));
             assertTrue(LoginSystem.loginWithoutChannel(testName,testPassword));

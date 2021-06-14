@@ -78,7 +78,6 @@ public final class LoginSystem {
         //check in list
         if (checkLogin(name, passwort)
                 & Server.loggedInPlayers.get(getId(name, passwort)) != null) {
-
             Player player = Server.loggedInPlayers.get(getId(name, passwort));
             int lobbyId = -1;
             if(player != null)
@@ -92,7 +91,6 @@ public final class LoginSystem {
                 }
                 player.state.setState(ClientState.loggedOut);
             }
-            //del player from list
             Server.loggedInPlayers.remove(getId(name, passwort));
             player = null;
             return true;
