@@ -1,4 +1,4 @@
-package test.java.com.example.musiccolab;
+package test;
 
 import main.java.com.example.musiccolab.Lobby;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package test.java.com.example.musiccolab;
+package test;
 
 import main.java.com.example.musiccolab.Server;
 import main.java.com.example.musiccolab.exceptions.IPAddressException;

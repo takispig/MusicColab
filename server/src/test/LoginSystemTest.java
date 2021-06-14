@@ -1,4 +1,4 @@
-package test.java.com.example.musiccolab;
+package test;
 
 import main.java.com.example.musiccolab.DataBase;
 import main.java.com.example.musiccolab.LoginSystem;
@@ -28,6 +28,7 @@ class LoginSystemTest {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+
     }
 
 
@@ -44,18 +45,21 @@ class LoginSystemTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        testChannel.close();
     }
 
     @Test
-    void loginWithRegister() {
+    void loginWithRegister() throws IOException {
+        SocketChannel testChannel = SocketChannel.open();
         try {
             assertTrue(LoginSystem.register(testName,testEmail,testPassword));
-            assertTrue(LoginSystem.loginWithoutChannel(testName,testPassword));
+            assertTrue(LoginSystem.login(testName,testPassword,testChannel));
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+        testChannel.close();
     }
 
 }
