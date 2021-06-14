@@ -32,8 +32,9 @@ class LoginSystemTest {
 
 
     @Test
-    void loginWithoutRegister() {
-        SocketChannel testChannel = null;
+    void loginWithoutRegister() throws IOException {
+        SocketChannel testChannel = SocketChannel.open();
+
         try {
             assertFalse(LoginSystem.login(testName,testPassword,testChannel));
         } catch (SQLException e) {
