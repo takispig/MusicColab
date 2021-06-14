@@ -14,19 +14,18 @@
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
         android:theme="@style/Theme.MusicColab">
-        <activity android:name=".Login">
+
+        <activity android:name=".Login" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Register"/>
-        <activity android:name=".Lobby"/>
-        <activity android:name=".LightsensorTestActivity"/>
-        <activity android:name=".PreLobby"/>
+        <activity android:name=".Register" android:screenOrientation="portrait"/>
+        <activity android:name=".Lobby" android:screenOrientation="portrait"/>
+        <activity android:name=".PreLobby" android:screenOrientation="portrait"/>
         <activity android:name=".About"/>
-        <activity android:name=".instruments.Piano"/>
+
     </application>
 
 </manifest>

@@ -35,7 +35,7 @@ public interface Instrument {
      *
      * @return instrumentType
      */
-    public InstrumentType getInstrumentType();
+    public String getInstrumentType();
 
     /**
      * Returns the type of sensor for this instrument

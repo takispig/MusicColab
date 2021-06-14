@@ -13,9 +13,10 @@
         android:layout_marginTop="20dp"
         android:layout_marginStart="20dp"
         android:text="@string/Welcome"
-        android:textSize="30sp"
+        android:textSize="25sp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
 
     <TextView
         android:id="@+id/username"
@@ -24,18 +25,33 @@
         android:layout_marginTop="20dp"
         android:layout_marginStart="5dp"
         android:text="@string/User123"
-        android:textSize="30sp"
+        android:textSize="25sp"
         android:textStyle="bold"
         app:layout_constraintLeft_toRightOf="@id/welcome"
         app:layout_constraintTop_toTopOf="parent" />
 
+
+    <ImageButton
+        android:id="@+id/logout"
+        style="@style/Widget.AppCompat.ImageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="11dp"
+        android:backgroundTint="#00FFFFFF"
+        android:src="@drawable/ic_baseline_exit_to_app_24"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
     <Button
         android:id="@+id/create_server"
         android:layout_width="wrap_content"
-        android:layout_height="70dp"
+        android:layout_height="wrap_content"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp"
         android:layout_marginTop="20dp"
         android:text="@string/create_server"
-        android:textSize="25sp"
+        android:textSize="20sp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/username" />
@@ -53,12 +69,141 @@
     <Button
         android:id="@+id/join_server"
         android:layout_width="wrap_content"
-        android:layout_height="70dp"
+        android:layout_height="wrap_content"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp"
         android:text="@string/join_server"
-        android:textSize="25sp"
+        android:textSize="20sp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/or" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/create_server_popup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#919191"
+        android:visibility="gone"
+        android:padding="20dp"
+        android:translationZ="100dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/username">
+
+        <TextView
+            android:id="@+id/choose_server_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Choose a name for your server:"
+            android:textSize="20sp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/servername"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:hint="Servername"
+            android:inputType="textEmailAddress"
+            android:textSize="20sp"
+            android:layout_marginTop="5dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/choose_server_name" />
+
+        <Button
+            android:id="@+id/create"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create"
+            android:textSize="20sp"
+            android:layout_marginTop="5dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/cancel_create"
+            app:layout_constraintTop_toBottomOf="@id/servername" />
+
+        <Button
+            android:id="@+id/cancel_create"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:textSize="20sp"
+            android:layout_marginTop="5dp"
+            app:layout_constraintLeft_toRightOf="@id/create"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/servername" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/join_server_popup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#919191"
+        android:visibility="gone"
+        android:padding="20dp"
+        android:translationZ="100dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/username">
+
+        <TextView
+            android:id="@+id/choose_server_name_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Type the Lobby's ID you want to join:"
+            android:textSize="20sp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/available_lobbyids"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Available Lobby IDs to join:\n"
+            android:textSize="20sp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/choose_server_name_2" />
+
+        <EditText
+            android:id="@+id/lobbyID"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:hint="Lobby's ID"
+            android:inputType="textEmailAddress"
+            android:textSize="20sp"
+            android:layout_marginTop="5dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/available_lobbyids" />
+
+        <Button
+            android:id="@+id/join"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Join"
+            android:textSize="20sp"
+            android:layout_marginTop="5dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/cancel_join"
+            app:layout_constraintTop_toBottomOf="@id/lobbyID" />
+
+        <Button
+            android:id="@+id/cancel_join"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:textSize="20sp"
+            android:layout_marginTop="5dp"
+            app:layout_constraintLeft_toRightOf="@id/join"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lobbyID" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <TextView
         android:id="@+id/choose_instr"
@@ -77,6 +222,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
+        android:textSize="25sp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/choose_instr"/>
@@ -87,7 +233,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
         android:text="@string/server_connection"
-        android:textSize="25sp"
+        android:textSize="20sp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toTopOf="@id/server_status"
@@ -99,7 +245,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
         android:text="@string/disconnected"
-        android:textSize="25sp"
+        android:textSize="22sp"
         android:textStyle="bold"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -109,14 +255,15 @@
     <Button
         android:id="@+id/connect"
         android:layout_width="wrap_content"
-        android:layout_height="70dp"
+        android:layout_height="wrap_content"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp"
         android:layout_marginBottom="28dp"
         android:text="@string/let_s_go"
-        android:textSize="25sp"
+        android:textSize="20sp"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

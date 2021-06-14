@@ -18,6 +18,7 @@
         <item name="android:colorBackground">@color/white</item>
         <item name="colorOnBackground">@color/black</item>
         <item name="android:textColor">@color/black</item>
-        <!-- Customize your theme here. -->
+        <!-- Hide the Action Bar -->
+        <item name="windowNoTitle">true</item>
     </style>
 </resources>

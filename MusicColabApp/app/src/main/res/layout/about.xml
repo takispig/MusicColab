@@ -11,9 +11,10 @@
         android:id="@+id/about_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
         android:text="About this App"
-        android:textSize="40sp"
+        android:textSize="35sp"
         android:textStyle="bold"
         android:textAlignment="center"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -25,7 +26,6 @@
         android:layout_width="match_parent"
         android:layout_height="0sp"
         android:layout_margin="10dp"
-        android:layout_marginStart="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:text="\nMusicColab ist ein System, welches Musikbegeisterten es ermöglicht, gemeinsam zu musizieren, auch ohne dabei im gleichen Raum zu sitzen.\nNicht einmal reale Instrumente sind notwendig - es reicht das eigene Android-Smartphone.\n\nMusicColab ist simpel: einloggen, Instrument wählen und sobald alle bereit sind, kann es auch sofort losgehen! Abhängig vom gewählten Instrument wird auf unterschiedlichste Art und Weise mithilfe der im Smartphone integrierten Sensoren Musik gemacht.\n\nDie gespielten Töne der einzelnen Benutzer werden an einen Server gesendet, der alle eingehenden Tonspuren zu einem Stück zusammenfügt und dieses an allen anderen teilnehmenden Musiker zurücksendet.\n\nSomit wird ein gemeinsames Lied erschaffen, das bei allen Benutzern in Echtzeit abgespielt werden kann."
             android:textAlignment="center"
-            android:textSize="21sp"
+            android:textSize="20sp"
             android:textStyle="italic" />
 
     </ScrollView>
