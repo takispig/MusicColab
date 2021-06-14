@@ -55,7 +55,15 @@ public final class LoginSystem {
         }
 
     }
-
+    public static boolean loginWithoutChannel(final String name, final String passwort) throws SQLException, ClassNotFoundException {
+        if (checkLogin(name, passwort)) {
+            //create new player
+            ResultSet res = DataBase.getUserlogin(name, passwort);
+            return true;
+        } else {
+            return false;
+        }
+    }
     /**
      * check if the player is registered and logged in,
      * if so delete player from loggedInPlayers and the game.
