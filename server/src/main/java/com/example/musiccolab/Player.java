@@ -10,11 +10,12 @@ public class Player {
     private String passwort;
     private String email;
     private int id;
-    private int lobbyId;
+    private int lobbyId = -1;
     private boolean loggedIn = false;
     private boolean admin = true;
     private SocketAddress address;
     private SocketChannel channel;
+    public ClientState state = new ClientState();
 
     public Player(String name, String passwort, String email, int id, SocketChannel channel) throws IOException {
         this.name = name;

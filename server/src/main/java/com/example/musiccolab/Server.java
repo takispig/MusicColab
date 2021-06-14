@@ -72,7 +72,7 @@ public class Server {
         channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE); //AddState as third parameter.
 
 
-        String message = "Welcome in MusicCoLab Server.";
+        String message = "Welcome in MusicCoLab Server.\r\n";
         ByteBuffer tempBuffer = ByteBuffer.allocate(message.length());
         tempBuffer.put(message.getBytes(messageCharset));
         tempBuffer.flip();
@@ -84,28 +84,49 @@ public class Server {
      * According to the return value of function "analyseMainBuffer" send an error message or
      * handle the received action.
      */
-    private void handleConnectionWhenReadable(SelectionKey key) throws IOException, SQLException, ClassNotFoundException {
+    private void handleConnectionWhenReadable(SelectionKey key) throws IOException {
         //int state = (Integer) key.attachment(); //To save the state of all clients. Integer --> Class
 
         SocketChannel clientChannel = (SocketChannel) key.channel();
         //Read the first 6 indexes. (Protocol name, Action and data length. 2 Bytes each)
-
+        Player disconnectedPlayer = LoginSystem.getPlayerByChannel(clientChannel);
         Protocol protocol = new Protocol();
 
         short[] result = protocol.analyseMainBuffer(messageCharset, clientChannel);
         if(result[1] == -1) {
-            protocol.sendResponseToClient(messageCharset, clientChannel, "You are not our customer.");
+            protocol.sendResponseToClient(messageCharset, clientChannel, "You are not our customer.\r\n");
+            disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
             clientChannel.close();
         }
         else if(result[1] == -2) {
-            protocol.sendResponseToClient(messageCharset, clientChannel, "Action is not known.");
+            if(result[0] != 0) {
+                protocol.sendResponseToClient(messageCharset, clientChannel, "Action is not known.\r\n");
+                disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
+                clientChannel.close();
+            }
+        }
+        else if(result[1] == -3) {
+            System.out.println("main.java.com.example.musiccolab.Client is disconnected.");
+            int id = -1;
+            if(disconnectedPlayer != null){
+                id = disconnectedPlayer.getLobbyId();
+                loggedInPlayers.remove(disconnectedPlayer.getId());
+            }
+            Lobby lobbyOfDisconnectedPlayer = null;
+            if(id != -1) {
+                lobbyOfDisconnectedPlayer = lobbyMap.get(id);
+                lobbyOfDisconnectedPlayer.removePlayer(disconnectedPlayer);
+                if(lobbyOfDisconnectedPlayer.isEmpty()) lobbyOfDisconnectedPlayer = null;
+                disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
+            }
+
             clientChannel.close();
         }
-        else
+        else if(result[1] != 0)
             protocol.handleAction(messageCharset, clientChannel, result[1]);
     }
 
-    public void handleConnection() throws IOException, SQLException, ClassNotFoundException {
+    public void handleConnection() throws IOException {
         System.out.println("Waiting for connection: ");
 
         while (running) {
@@ -164,5 +185,40 @@ public class Server {
 
     public void setFinishedTrue() {
         finished = true;
+    }
+
+//_____________________________________________________________________________________________________________________
+//                                                 For testing                                                       //
+//_____________________________________________________________________________________________________________________
+    public InetSocketAddress getServerAddressForTesting(){
+        return serverAddress;
+    }
+
+    public Selector getSelectorForTesting(){
+        return selector;
+    }
+
+    public ServerSocketChannel getServerChannelForTesting(){
+        return serverChannel;
+    }
+
+    public Charset getMessageCharsetForTesting(){
+        return messageCharset;
+    }
+
+    public CharsetDecoder getDecoderForTesting(){
+        return decoder;
+    }
+
+    public CharsetEncoder getEncoderForTesting(){
+        return encoder;
+    }
+
+    public boolean isRunningForTesting(){
+        return running;
+    }
+
+    public boolean isFinishedForTesting(){
+        return finished;
     }
 }

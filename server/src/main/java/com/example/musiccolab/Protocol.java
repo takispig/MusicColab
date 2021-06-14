@@ -5,8 +5,10 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.logging.Level;
 
 public class Protocol {
     final private short protocolName = 12845;
@@ -33,12 +35,12 @@ public class Protocol {
 
 
 
-    final private String[][] responsesArray = { {"Client logged in", "error"},
-                                          {"Client logged out", "error"},
-                                          {"Client registered", "error"},};
+    final private String[][] responsesArray = { {"Client logged in", "error with login"},
+                                          {"Client logged out", "error with logout"},
+                                          {"Client registered", "Client is already registered."},};
 
     public Protocol(){
-        for(short index = 1; index < 11; index++)
+        for(short index = 0; index < 11; index++)
             codesList.add(index);
     }
 
@@ -107,10 +109,11 @@ public class Protocol {
         loginSystemBuffer.clear();
     }
 
-    private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel) throws IOException, SQLException, ClassNotFoundException {
+    private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel)
+            throws IOException {
 
         String username, password, email = "";
-        boolean checkResponse;
+        boolean checkResponse = false;
 
         readSizes(messageCharset, clientChannel);
         ByteBuffer loginSystemBuffer;
@@ -135,21 +138,26 @@ public class Protocol {
         password = messageCharset.decode(loginSystemBuffer).toString();
         loginSystemBuffer.clear();
 
-        if(action == register) {
-            checkResponse = LoginSystem.register(username, email, password);
-            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
-            System.out.println("Client is registered.");
+        try {
+            if (action == register) {
+                checkResponse = LoginSystem.register(username, email, password);
+
+            } else if (action == login) {
+                checkResponse = LoginSystem.login(username, password, clientChannel);
+
+            } else if (action == logout) {
+                checkResponse = LoginSystem.getPlayerByChannel(clientChannel) != null && LoginSystem.logout(username, password);
+            }
+            Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+            return;
+        } catch (SQLException e) {
+            System.out.println("ERROR: SQL");
+        } catch (ClassNotFoundException e) {
+            System.out.println("ERROR: ClassNotFound");
         }
-        else if(action == login) {
-            checkResponse = LoginSystem.login(username, password, clientChannel);
-            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
-            System.out.println("Client is logged in.");
-        }
-        else if(LoginSystem.getPlayerByChannel(clientChannel) != null){
-            checkResponse = LoginSystem.logout(username, password);
-            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action:action+10, checkResponse));
-            System.out.println("Client is logged out.");
-        }
+        Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(action + 10, false));
+        sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(action + 10, false));
     }
 
     private void parseBufferForLobbyOrGame(Charset messageCharset, SocketChannel clientChannel, int lobbyNameIsSize) throws IOException {
@@ -166,7 +174,7 @@ public class Protocol {
             Lobby lobby = new Lobby(player, lobbyName, id);
             Server.lobbyMap.put(id,lobby);
             sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(true, lobby, " created by client."));
-            System.out.println("Lobby with ID " + lobby.getLobby_id() + " is for Client " + player.getId() + " created");
+            Main.logr.log(Level.INFO, "LOBBY " + lobby.getLobby_id() + " CREATED BY CLIENT " + playerAddress.toString());
         }
         else if((action == joinLobby || action == leaveLobby) && player != null){
             int lobbyID = Integer.parseInt(messageCharset.decode(lobbyBuffer).toString());
@@ -175,14 +183,17 @@ public class Protocol {
                 boolean checkResponse = (currentLobby != null);
                 if(checkResponse)
                     checkResponse = currentLobby.addPlayer(player);
-                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " --> you are in."));
-                System.out.println("Client with ID " + player.getId() + " is now in lobby: " + currentLobby.getLobby_id());
+                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " --> you are in.," + currentLobby.getUsersNumber()));
+                if(checkResponse) Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " JOINED LOBBY " + currentLobby.getLobby_id());
+
             } else if(action == leaveLobby){
                 boolean checkResponse = (currentLobby != null);
-                if(checkResponse)
+                if(checkResponse) {
                     currentLobby.removePlayer(player);
+                    Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " LEFT LOBBY " + currentLobby.getLobby_id());
+                }
                 sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " you are out."));
-                System.out.println("Client with ID " + player.getId() + " is now out from lobby: " + currentLobby.getLobby_id());
+                if(checkResponse && currentLobby.isEmpty()) { Server.lobbyMap.remove(currentLobby.getLobby_id()); currentLobby = null; }
             }
 
         }
@@ -198,7 +209,7 @@ public class Protocol {
     private void parseBufferForMusicJoiner(Charset messageCharset, SocketChannel clientChannel, int dataSize) throws IOException {
 
         ByteBuffer toneBuffer;
-        MusicJoiner musicJoiner;
+        Player sender = null;
 
         toneBuffer = ByteBuffer.allocate(1);
         clientChannel.read(toneBuffer);
@@ -217,15 +228,21 @@ public class Protocol {
         String toneData= messageCharset.decode(toneBuffer).toString();
         toneBuffer.clear();
 
-        Lobby clientLobby = Server.lobbyMap.get(LoginSystem.getPlayerByChannel(clientChannel).getLobbyId());
-        musicJoiner = new MusicJoiner(clientLobby, toneAction, toneType, toneData, clientChannel);
-        musicJoiner.handleToneData();
-        responseAction = action;
-        for(byte index = 0; index < clientLobby.getUsersNumber(); index++)
-            sendResponseToClient(messageCharset, musicJoiner.getClientChannels().get(index), musicJoiner.getClientResponses().get(index));
+        sender = LoginSystem.getPlayerByChannel(clientChannel);
+        if ( sender != null) {
+            Lobby clientLobby = Server.lobbyMap.get(sender.getLobbyId());
+            responseAction = action;
+            if(!MusicJoiner.handleToneData(messageCharset, clientLobby, toneAction, toneType, toneData, responseAction)){
+                System.out.println("Fehler in MusicJoiner");
+            }
+
+        } else {
+            responseAction = (short) (action + 10);
+            sendResponseToClient(messageCharset,clientChannel, "Error, client is DISCONNECTED");
+        }
     }
 
-    public void handleAction(Charset messageCharset, SocketChannel clientChannel, int bufferSize) throws SQLException, IOException, ClassNotFoundException {
+    public void handleAction(Charset messageCharset, SocketChannel clientChannel, int bufferSize) throws IOException {
         if(bufferSize != 0){
             playerAddress = clientChannel.getRemoteAddress();
 
@@ -242,6 +259,16 @@ public class Protocol {
         }
     }
 
+    private String getAllLobbyIds(HashMap<Integer, Lobby> lobbyMap) {
+        String res = "";
+
+        var entrySet = lobbyMap.entrySet();
+        for(var k: entrySet){
+            res += "," + k.getValue().getLobby_id();
+        }
+        return res;
+    }
+
     public byte[] convertShortToByte(short value){
         byte[] temp = new byte[2];
         temp[0] = (byte)(value & 0xff);
@@ -251,15 +278,19 @@ public class Protocol {
     }
 
     private static short getShort(byte[] b) {
-        if(b.length > 0)
-            return (short) (((b[1] << 8) | b[0] & 0xff));
+        if(b.length > 0) {
+            short value = (short) (((b[1] << 8) | b[0] & 0xff));
+            return value;
+        }
         else return -3;
     }
 
     private String getLoginSystemResponse(int action, boolean result){
         int index = result? 0:1;
         this.responseAction = (short) action;
-        return responsesArray[action <= 10? action-1:action-11][index];
+        String IDs = "";
+        if(action == 1) IDs = getAllLobbyIds(Server.lobbyMap);
+        return responsesArray[action <= 10? action-1:action-11][index] + IDs;
     }
 
     private String getLobbyResponse(boolean result, Lobby lobby, String additionPart){
@@ -269,7 +300,7 @@ public class Protocol {
             responseAction = action;
         }
         else{
-            message = "either lobby is full, lobbyId is wrong or you are already in.";
+            message = "either lobby is full or lobbyId is wrong or you are already in.";
             responseAction = (short) (action + 10);
         }
         return message;
@@ -278,6 +309,7 @@ public class Protocol {
     public void sendResponseToClient(Charset messageCharset, SocketChannel clientChannel, String message){
         short dataLength = (short) message.length();
         ByteBuffer messageBuffer = ByteBuffer.allocate(6 + dataLength);
+
         messageBuffer.put(convertShortToByte(protocolName));
         messageBuffer.put(convertShortToByte(responseAction));
         messageBuffer.put(convertShortToByte(dataLength));
