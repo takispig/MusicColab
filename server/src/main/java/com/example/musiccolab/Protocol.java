@@ -232,7 +232,10 @@ public class Protocol {
         if ( sender != null) {
             Lobby clientLobby = Server.lobbyMap.get(sender.getLobbyId());
             responseAction = action;
-            MusicJoiner.handleToneData(messageCharset, clientLobby, toneAction, toneType, toneData, responseAction);
+            if(!MusicJoiner.handleToneData(messageCharset, clientLobby, toneAction, toneType, toneData, responseAction)){
+                System.out.println("Fehler in MusicJoiner");
+            }
+
         } else {
             responseAction = (short) (action + 10);
             sendResponseToClient(messageCharset,clientChannel, "Error, client is DISCONNECTED");

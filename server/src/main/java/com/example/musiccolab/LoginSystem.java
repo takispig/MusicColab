@@ -55,7 +55,15 @@ public final class LoginSystem {
         }
 
     }
-
+    public static boolean loginWithoutChannel(final String name, final String passwort) throws SQLException, ClassNotFoundException {
+        if (checkLogin(name, passwort)) {
+            //create new player
+            ResultSet res = DataBase.getUserlogin(name, passwort);
+            return true;
+        } else {
+            return false;
+        }
+    }
     /**
      * check if the player is registered and logged in,
      * if so delete player from loggedInPlayers and the game.
@@ -70,7 +78,6 @@ public final class LoginSystem {
         //check in list
         if (checkLogin(name, passwort)
                 & Server.loggedInPlayers.get(getId(name, passwort)) != null) {
-
             Player player = Server.loggedInPlayers.get(getId(name, passwort));
             int lobbyId = -1;
             if(player != null)
@@ -84,7 +91,6 @@ public final class LoginSystem {
                 }
                 player.state.setState(ClientState.loggedOut);
             }
-            //del player from list
             Server.loggedInPlayers.remove(getId(name, passwort));
             player = null;
             return true;
