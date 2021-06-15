@@ -24,8 +24,8 @@ public class Protocol {
     final private int joinLobby = 5;
     final private int leaveLobby = 6;
     final private int tone = 7;
-    final private int gameStart = 8;
-    final private int gameEnd = 9;
+    final private int passwordForgotten = 8;
+    final private int mutePlayer = 9;
     final private int gameRestart = 10;
 
     private short action;
@@ -109,6 +109,57 @@ public class Protocol {
         loginSystemBuffer.flip();
         passwordSize = messageCharset.decode(loginSystemBuffer).toString().getBytes(messageCharset)[0];
         loginSystemBuffer.clear();
+    }
+
+
+    private void parseBufferIfPasswordForgotten(Charset messageCharset, SocketChannel clientChannel) throws IOException {
+
+        String username, email = "";
+        boolean checkResponse = false;
+        ByteBuffer loginSystemBuffer1 = ByteBuffer.allocate(1);
+
+        // read email-size
+        clientChannel.read(loginSystemBuffer1);
+        loginSystemBuffer1.flip();
+        emailSize = messageCharset.decode(loginSystemBuffer1).toString().getBytes(messageCharset)[0];
+        loginSystemBuffer1.clear();
+
+        //read username-size
+        clientChannel.read(loginSystemBuffer1);
+        loginSystemBuffer1.flip();
+        userNameSize = messageCharset.decode(loginSystemBuffer1).toString().getBytes(messageCharset)[0];
+        loginSystemBuffer1.clear();
+
+        ByteBuffer loginSystemBuffer;
+
+        // read email
+        loginSystemBuffer = ByteBuffer.allocate(emailSize);
+        clientChannel.read(loginSystemBuffer);
+        loginSystemBuffer.flip();
+        email = messageCharset.decode(loginSystemBuffer).toString();
+        loginSystemBuffer.clear();
+
+        // read username
+        loginSystemBuffer = ByteBuffer.allocate(userNameSize);
+        clientChannel.read(loginSystemBuffer);
+        loginSystemBuffer.flip();
+        username = messageCharset.decode(loginSystemBuffer).toString();
+        loginSystemBuffer.clear();
+
+        try {
+            checkResponse = LoginSystem.forgotPassword(email, username);
+            Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+            return;
+        }
+        /*
+        catch (SQLException e) {
+            System.out.println("ERROR: SQL");
+        } catch (ClassNotFoundException e) {
+            System.out.println("ERROR: ClassNotFound");
+        */
+        Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(action + 10, false));
+        sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(action + 10, false));
     }
 
     private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel, SelectionKey key)
@@ -255,18 +306,21 @@ public class Protocol {
 
             if(action == login || action == logout || action == register){
                 parseBufferForLoginSystem(messageCharset, clientChannel, key);
-                if (action == login) key.attach(currenPlayer);
             }
-            else if(action == createLobby || action == joinLobby || action == leaveLobby ||
-                    action == gameStart || action == gameEnd || action == gameRestart){
+            else if(action == createLobby || action == joinLobby || action == leaveLobby){
                 parseBufferForLobbyOrGame(messageCharset, clientChannel, bufferSize, key);
             }
             else if(action == tone){
                 parseBufferForMusicJoiner(messageCharset, clientChannel, bufferSize, key);
             }
+            else if (action == passwordForgotten) {
+                parseBufferIfPasswordForgotten(messageCharset, clientChannel);
+            }
+            else if (action == mutePlayer){
+                // parseBufferIfMutePlayer(messageCharset, clientChannel);
+            }
         }
     }
-
     private String getAllLobbyIds(HashMap<Integer, Lobby> lobbyMap) {
         String res = "";
 
