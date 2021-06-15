@@ -12,9 +12,13 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.musiccolab.instruments.Drums;
 import com.example.musiccolab.instruments.Instrument;
@@ -23,6 +27,7 @@ import com.example.musiccolab.instruments.InstrumentType;
 import com.example.musiccolab.instruments.Piano;
 import com.example.musiccolab.instruments.SoundPlayer;
 import com.example.musiccolab.instruments.Theremin;
+import com.example.musiccolab.PreLobby;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -31,12 +36,14 @@ import java.util.List;
 public class Lobby extends AppCompatActivity implements View.OnClickListener, SensorEventListener, Serializable {
 
     private Instrument selectedInstrument = null;
+    private final String[] instruments = {InstrumentType.THEREMIN, InstrumentType.DRUMS, InstrumentType.PIANO}; // for the drop down menu
     private SensorManager sensorManager;
     private Sensor sensor;
     private Boolean visible = false;
     private Boolean loop = false;
     private InstrumentGUIBox instrumentGUI;
     private int counter = 0;
+    private int counter2 = 0;
 
 
     @Override
@@ -69,28 +76,55 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         SoundPlayer sp = new SoundPlayer(this);
         sp.generateToneList();
         Login.networkThread.soundPlayer = sp;
-
         sensorManager = (SensorManager) getSystemService(Service.SENSOR_SERVICE);
 
-        createInstrumentGUIBox();
+        callInstrument(sp);
 
-        String selectedInstrumentFromPreLobby = (String) getIntent().getSerializableExtra(PreLobby.SELECTED_INSTRUMENT);
-
-        switch (selectedInstrumentFromPreLobby) {
+        // Drop-Down Menu (Spinner)
+        Spinner mySpinner = (Spinner) findViewById(R.id.spinner);
+        ArrayAdapter<String> p = new ArrayAdapter<String>(Lobby.this, android.R.layout.simple_spinner_item, instruments);
+        p.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mySpinner.setAdapter(p);
+        // set default value according to user's preLobby position
+        switch (PreLobby.selectedInstrument) {
             case InstrumentType.THEREMIN:
-                selectedInstrument = new Theremin(instrumentGUI, sp);
+                mySpinner.setSelection(0);
                 break;
             case InstrumentType.DRUMS:
-                selectedInstrument = new Drums(instrumentGUI, sp);
+                mySpinner.setSelection(1);
                 break;
             case InstrumentType.PIANO:
-                selectedInstrument = new Piano(instrumentGUI, this, sp);
+                mySpinner.setSelection(2);
                 break;
         }
 
-        selectedInstrument.reCalibrate();
-        sensor = sensorManager.getDefaultSensor(selectedInstrument.getSensorType());
-        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+        mySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (counter2 == 0) {
+                    counter2++;
+                    return;
+                }
+                // set the selected Instrument to the global variable SELECTED_INSTRUMENT
+                if (instruments[position] == InstrumentType.THEREMIN) getIntent().putExtra(PreLobby.SELECTED_INSTRUMENT, InstrumentType.THEREMIN);
+                if (instruments[position] == InstrumentType.PIANO) getIntent().putExtra(PreLobby.SELECTED_INSTRUMENT, InstrumentType.PIANO);
+                if (instruments[position] == InstrumentType.DRUMS) getIntent().putExtra(PreLobby.SELECTED_INSTRUMENT, InstrumentType.DRUMS);
+                Toast.makeText(getApplicationContext(), "Instrument: " + instruments[position], Toast.LENGTH_SHORT).show();
+                // refresh text in more
+                TextView instr = findViewById(R.id.instrument);
+                instr.setText(String.format("%s", getIntent().getSerializableExtra(PreLobby.SELECTED_INSTRUMENT)));
+
+                callInstrument(sp);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+
     }
 
     private void createInstrumentGUIBox() {
@@ -104,6 +138,32 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         pianoKeys.add(R.id.btnH);
         pianoKeys.add(R.id.btnC2);
         instrumentGUI = new InstrumentGUIBox(this, R.id.iva_text_1, pianoKeys);
+    }
+
+    private void callInstrument(SoundPlayer sp) {
+        createInstrumentGUIBox();
+        String selectedInstrumentFromPreLobby = (String) getIntent().getSerializableExtra(PreLobby.SELECTED_INSTRUMENT);
+        switch (selectedInstrumentFromPreLobby) {
+            case InstrumentType.THEREMIN:
+                selectedInstrument = new Theremin(instrumentGUI, sp);
+                break;
+            case InstrumentType.DRUMS:
+                selectedInstrument = new Drums(instrumentGUI, sp);
+                break;
+            case InstrumentType.PIANO:
+                // delete previous text from Theremin or Drums
+                TextView lobby_default_text = findViewById(R.id.iva_text_1);
+                lobby_default_text.setText("");
+
+                selectedInstrument = new Piano(instrumentGUI, this, sp);
+                break;
+        }
+
+        selectedInstrument.reCalibrate();
+        sensor = sensorManager.getDefaultSensor(selectedInstrument.getSensorType());
+        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+        // createInstrumentGUIBox();
     }
 
     @Override
