@@ -33,6 +33,8 @@ public class Server {
     public static HashMap<Integer,Lobby> lobbyMap = new HashMap<>();
     public static HashMap<Integer,Player> loggedInPlayers = new HashMap<>();
 
+    private static Protocol protocol = new Protocol();
+
     public void setupServerAddress(String address, int port) throws IPAddressException {
         try {
             serverAddress = new InetSocketAddress(address, port);
@@ -89,19 +91,23 @@ public class Server {
 
         SocketChannel clientChannel = (SocketChannel) key.channel();
         //Read the first 6 indexes. (Protocol name, Action and data length. 2 Bytes each)
-        Player disconnectedPlayer = LoginSystem.getPlayerByChannel(clientChannel);
-        Protocol protocol = new Protocol();
+        Player disconnectedPlayer = (Player) key.attachment();
+
 
         short[] result = protocol.analyseMainBuffer(messageCharset, clientChannel);
         if(result[1] == -1) {
             protocol.sendResponseToClient(messageCharset, clientChannel, "You are not our customer.\r\n");
-            disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
+            if (disconnectedPlayer != null) {
+                disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
+            }
             clientChannel.close();
         }
         else if(result[1] == -2) {
             if(result[0] != 0) {
                 protocol.sendResponseToClient(messageCharset, clientChannel, "Action is not known.\r\n");
-                disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
+                if (disconnectedPlayer != null) {
+                    disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
+                }
                 clientChannel.close();
             }
         }
@@ -123,7 +129,9 @@ public class Server {
             clientChannel.close();
         }
         else if(result[1] != 0)
-            protocol.handleAction(messageCharset, clientChannel, result[1]);
+            protocol.handleAction(messageCharset, clientChannel, result[1], key);
+
+        protocol.resetProtocol();
     }
 
     public void handleConnection() throws IOException {

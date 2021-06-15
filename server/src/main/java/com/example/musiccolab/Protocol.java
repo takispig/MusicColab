@@ -3,6 +3,7 @@ package main.java.com.example.musiccolab;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -13,6 +14,7 @@ import java.util.logging.Level;
 public class Protocol {
     final private short protocolName = 12845;
     SocketAddress playerAddress;
+    private Player currenPlayer;
     final private List<Short> codesList = new ArrayList<Short>();
 
     final private int login = 1;
@@ -109,7 +111,7 @@ public class Protocol {
         loginSystemBuffer.clear();
     }
 
-    private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel)
+    private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel, SelectionKey key)
             throws IOException {
 
         String username, password, email = "";
@@ -143,10 +145,15 @@ public class Protocol {
                 checkResponse = LoginSystem.register(username, email, password);
 
             } else if (action == login) {
-                checkResponse = LoginSystem.login(username, password, clientChannel);
+                Player player = LoginSystem.login(username, password, clientChannel);
+                if (player == null) checkResponse = false;
+                else {
+                    checkResponse = true;
+                    currenPlayer = player;
+                }
 
             } else if (action == logout) {
-                checkResponse = LoginSystem.getPlayerByChannel(clientChannel) != null && LoginSystem.logout(username, password);
+                checkResponse = key.attachment() != null && LoginSystem.logout(username, password);
             }
             Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
             sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
@@ -160,9 +167,9 @@ public class Protocol {
         sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(action + 10, false));
     }
 
-    private void parseBufferForLobbyOrGame(Charset messageCharset, SocketChannel clientChannel, int lobbyNameIsSize) throws IOException {
+    private void parseBufferForLobbyOrGame(Charset messageCharset, SocketChannel clientChannel, int lobbyNameIsSize, SelectionKey key) throws IOException {
 
-        Player player = LoginSystem.getPlayerByChannel(clientChannel);
+        Player player = (Player) key.attachment();
         ByteBuffer lobbyBuffer;
 
         lobbyBuffer = ByteBuffer.allocate(lobbyNameIsSize);
@@ -206,7 +213,7 @@ public class Protocol {
         lobbyBuffer.clear();
     }
 
-    private void parseBufferForMusicJoiner(Charset messageCharset, SocketChannel clientChannel, int dataSize) throws IOException {
+    private void parseBufferForMusicJoiner(Charset messageCharset, SocketChannel clientChannel, int dataSize, SelectionKey key) throws IOException {
 
         ByteBuffer toneBuffer;
         Player sender = null;
@@ -228,7 +235,7 @@ public class Protocol {
         String toneData= messageCharset.decode(toneBuffer).toString();
         toneBuffer.clear();
 
-        sender = LoginSystem.getPlayerByChannel(clientChannel);
+        sender = (Player) key.attachment();
         if ( sender != null) {
             Lobby clientLobby = Server.lobbyMap.get(sender.getLobbyId());
             responseAction = action;
@@ -242,19 +249,20 @@ public class Protocol {
         }
     }
 
-    public void handleAction(Charset messageCharset, SocketChannel clientChannel, int bufferSize) throws IOException {
+    public void handleAction(Charset messageCharset, SocketChannel clientChannel, int bufferSize, SelectionKey key) throws IOException {
         if(bufferSize != 0){
             playerAddress = clientChannel.getRemoteAddress();
 
             if(action == login || action == logout || action == register){
-                parseBufferForLoginSystem(messageCharset, clientChannel);
+                parseBufferForLoginSystem(messageCharset, clientChannel, key);
+                if (action == login) key.attach(currenPlayer);
             }
             else if(action == createLobby || action == joinLobby || action == leaveLobby ||
                     action == gameStart || action == gameEnd || action == gameRestart){
-                parseBufferForLobbyOrGame(messageCharset, clientChannel, bufferSize);
+                parseBufferForLobbyOrGame(messageCharset, clientChannel, bufferSize, key);
             }
             else if(action == tone){
-                parseBufferForMusicJoiner(messageCharset, clientChannel, bufferSize);
+                parseBufferForMusicJoiner(messageCharset, clientChannel, bufferSize, key);
             }
         }
     }
@@ -324,5 +332,18 @@ public class Protocol {
         catch (IOException e){
             System.out.println("Error by sending message to client.");
         }
+    }
+
+
+    public void resetProtocol() {
+        playerAddress = null;
+        currenPlayer = null;
+
+        action = 0;
+        responseAction = 0;
+
+        userNameSize = 0;
+        emailSize = 0;
+        passwordSize = 0;
     }
 }
