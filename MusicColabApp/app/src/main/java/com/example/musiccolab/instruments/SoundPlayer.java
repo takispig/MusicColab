@@ -34,6 +34,7 @@ public class SoundPlayer {
         sounds.put("piano7", MediaPlayer.create(lobby, R.raw.p_c2));
         sounds.put("drums0", MediaPlayer.create(lobby, R.raw.drum_a));
         sounds.put("drums1", MediaPlayer.create(lobby, R.raw.drum_b));
+        sounds.put("drums2", MediaPlayer.create(lobby, R.raw.drum_c));
         sounds.put("therm0", MediaPlayer.create(lobby, R.raw.c));
         sounds.put("therm1", MediaPlayer.create(lobby, R.raw.d));
         sounds.put("therm2", MediaPlayer.create(lobby, R.raw.e));
