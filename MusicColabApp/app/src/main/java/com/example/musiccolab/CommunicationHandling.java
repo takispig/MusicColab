@@ -23,8 +23,10 @@ public class CommunicationHandling implements Runnable {
     public static final int PROTOCOL_JOIN_LOBBY_ACTION = 5;
     public static final int PROTOCOL_LEAVE_LOBBY_ACTION = 6;
     public static final int PROTOCOL_TONE_ACTION = 7;
+    public static final int PROTOCOL_FORGOT_PASSWORD = 8;
 
-    private static final String IP = "35.207.116.16";
+    // private static final String IP = "35.207.116.16";    // Google Server IP-Address
+    private static final String IP = "130.149.80.94";   // VM IP-Address
     private static final int port = 8080;
 
     public static final String CAN_NOT_READ_FROM_BUFFER = "Can not read from buffer.";
@@ -72,7 +74,7 @@ public class CommunicationHandling implements Runnable {
 
     @Override
     public void run() {
-        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_LOGIN_ACTION) {
+        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_LOGIN_ACTION || action == PROTOCOL_FORGOT_PASSWORD) {
             buildConnection();
             connectToServer();
         }
@@ -133,7 +135,7 @@ public class CommunicationHandling implements Runnable {
     }
 
     private void sendMessageByAction(short action) {
-        if (action == PROTOCOL_LOGIN_ACTION || action == PROTOCOL_LOGOUT_ACTION || action == PROTOCOL_REGISTER_ACTION) {
+        if (action == PROTOCOL_LOGIN_ACTION || action == PROTOCOL_LOGOUT_ACTION || action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD) {
             try {
                 sendLoginSystemMessage(action, email, username, password);
             } catch (IOException e) {
@@ -158,7 +160,7 @@ public class CommunicationHandling implements Runnable {
     }
 
     private void handleAction(short action, short messageLength) {
-        if (action == PROTOCOL_LOGIN_ACTION || action == PROTOCOL_LOGOUT_ACTION || action == PROTOCOL_REGISTER_ACTION || action == 11 || action == 12 || action == 13) {
+        if (action == PROTOCOL_LOGIN_ACTION || action == PROTOCOL_LOGOUT_ACTION || action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD || action == 11 || action == 12 || action == 13 || action == 18) {
             loginSystem(action, messageLength);
             synchronized (mainThread) {
                 mainThread.notify();
@@ -279,7 +281,7 @@ public class CommunicationHandling implements Runnable {
             try {
                 clientChannel.read(buffer);
                 buffer.flip();
-                if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_LOGOUT_ACTION || action == 13 || action == 12) {
+                if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_LOGOUT_ACTION || action == PROTOCOL_FORGOT_PASSWORD || action == 13 || action == 12 || action == 18) {
                     result = messageCharset.decode(buffer).toString();
                     clientChannel.close();
                 } else if (action == 1) {
@@ -310,7 +312,7 @@ public class CommunicationHandling implements Runnable {
         String message = "";
         ByteBuffer buffer;
 
-        if (action == PROTOCOL_REGISTER_ACTION) {
+        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD) {
             emailLength = (byte) email.length();
             message = email;
             size = 3;
@@ -324,7 +326,7 @@ public class CommunicationHandling implements Runnable {
         buffer.put(convertShortToByte(protocolName));
         buffer.put(convertShortToByte(action));
         buffer.put(convertShortToByte(dataLength));
-        if (action == PROTOCOL_REGISTER_ACTION) buffer.put(emailLength);
+        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD) buffer.put(emailLength);
         buffer.put(userNameLength);
         buffer.put(passwordLength);
         buffer.put(message.getBytes(messageCharset));

@@ -43,11 +43,9 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         if (view.getId() == R.id.register) {
             startActivity(new Intent(this, Register.class));
         } else if (view.getId() == R.id.about) {
-            // send the user to about us website, or pip up a new window
             startActivity(new Intent(this, About.class));
         } else if (view.getId() == R.id.forgot_password) {
-            // send a reset link/code to the user
-            toast("Really? Create a new account\nIt's easier :)");
+            startActivity(new Intent(this, ForgotPassword.class));
         } else if (view.getId() == R.id.login_submit) {
             // send the email + password in the server to check authorisation
             userNameView = findViewById(R.id.email);
