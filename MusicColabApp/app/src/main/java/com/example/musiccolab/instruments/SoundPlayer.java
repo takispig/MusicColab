@@ -15,11 +15,9 @@ public class SoundPlayer {
     public static final byte NETWORK_THREAD_DEFAULT_TONE_ACTION = (byte) 10;
     private final Lobby lobby;
     private HashMap<String, MediaPlayer> sounds;
-    private final HashMap<String, Long> rtt;
 
     public SoundPlayer(Lobby lobby) {
         this.lobby = lobby;
-        rtt = new HashMap<>();
     }
 
     public void generateToneList() {
@@ -46,26 +44,22 @@ public class SoundPlayer {
     }
 
     public void sendToneToServer(String toneAsString) {
+        Optional<MediaPlayer> tone = Optional.ofNullable(sounds.get(toneAsString));
+        if (tone.isPresent()) {
+            tone.get().start();
+            System.out.println("LOCAL  -----> -----> -----> -----> -----> Played: " + toneAsString);
+        }
         Login.networkThread.action = NETWORK_THREAD_ACTION_SEND_TONE;
         Login.networkThread.toneType = NETWORK_THREAD_DEFAULT_TONE_TYPE;
         Login.networkThread.toneAction = NETWORK_THREAD_DEFAULT_TONE_ACTION;
         Login.networkThread.data = toneAsString;
-        long timeStampSend = System.nanoTime();
-        rtt.put(toneAsString, timeStampSend);
     }
 
     public void playToneFromServer(String toneAsString) {
-        long timeStampReceived = System.nanoTime();
-        int durationInMillis = -1;
         Optional<MediaPlayer> tone = Optional.ofNullable(sounds.get(toneAsString));
         if (tone.isPresent()) {
-            Optional<Long> timeStampSendOptional = Optional.ofNullable(rtt.remove(toneAsString));
-            if (timeStampSendOptional.isPresent()) {
-                long duration = timeStampReceived - timeStampSendOptional.get();
-                durationInMillis = (int) duration / 1000000;
-            }
             tone.get().start();
-            System.out.println("SOUNDPLAYER -----> -----> -----> -----> -----> Played: " + toneAsString + " (" + durationInMillis + "ms)");
+            System.out.println("SERVER -----> -----> -----> -----> -----> Played: " + toneAsString);
         }
     }
 }
