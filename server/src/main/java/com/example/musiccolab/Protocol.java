@@ -152,6 +152,7 @@ public class Protocol {
             sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
             return;
         } catch (SQLException e) {
+            e.printStackTrace();
             System.out.println("ERROR: SQL");
         } catch (ClassNotFoundException e) {
             System.out.println("ERROR: ClassNotFound");

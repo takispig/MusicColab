@@ -28,6 +28,15 @@ public class Server {
     private boolean finished = false;
 
     private static int noOfLobbies = -1;
+
+    public static int getNoOfPlayers() {
+        return noOfPlayers;
+    }
+
+    public static void setNoOfPlayers(int noOfPlayers) {
+        Server.noOfPlayers = noOfPlayers;
+    }
+
     private static int noOfPlayers = -1;
 
     public static HashMap<Integer,Lobby> lobbyMap = new HashMap<>();
@@ -153,8 +162,8 @@ public class Server {
         return noOfLobbies;
     }
     public static int createPlayerId(){
-        noOfPlayers++;
-        return noOfPlayers;
+        int id = noOfPlayers++;
+        return id;
     }
 
     public void finishServer() {

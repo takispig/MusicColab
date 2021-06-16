@@ -24,7 +24,7 @@ public class CommunicationHandling implements Runnable {
     public static final int PROTOCOL_LEAVE_LOBBY_ACTION = 6;
     public static final int PROTOCOL_TONE_ACTION = 7;
 
-    private static final String IP = "35.207.116.16";
+    private static final String IP = "130.149.80.94"; // tub vm: 130.149.80.94 // google: 35.207.116.16
     private static final int port = 8080;
 
     public static final String CAN_NOT_READ_FROM_BUFFER = "Can not read from buffer.";

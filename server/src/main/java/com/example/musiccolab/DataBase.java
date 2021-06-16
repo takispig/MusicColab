@@ -28,7 +28,7 @@ public final class DataBase {
      * .
      */
     private static final String PATH_TO_DB =
-            "jdbc:sqlite:src/main/res/database/identifier.sqlite";
+            "jdbc:sqlite:database/identifier.sqlite";
     /**
      * .
      */
@@ -150,14 +150,23 @@ public final class DataBase {
 
         PreparedStatement prep = con.prepareStatement("INSERT INTO "
                 + TABLE_NAME + " values(?, ?, ?, ?);");
+        if (Server.getNoOfPlayers() == -1) {
+            createFirstPlayerId();
+        }
         prep.setInt(COL_INT_ID, Server.createPlayerId());
         prep.setString(COL_INT_NAME, name);
         prep.setString(COL_INT_EMAIL, email);
         prep.setString(COL_INT_PW, passwort);
 
         prep.execute();
+    }
 
-
+    private static void createFirstPlayerId() throws SQLException {
+        Statement state = con.createStatement();
+        ResultSet res = state.executeQuery("SELECT COUNT(id) FROM "
+                + TABLE_NAME);
+        Server.setNoOfPlayers((res.getInt(1)));
+        System.out.println(Server.getNoOfPlayers());
     }
 
     /**
