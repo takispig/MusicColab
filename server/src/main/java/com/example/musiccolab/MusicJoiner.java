@@ -9,20 +9,22 @@ public class MusicJoiner {
     public static short playersNumber;
 
 
-    public static boolean handleToneData(Charset messageCharset, Lobby lobby, byte toneAction, byte toneType, String toneData, short action) throws IOException {
+    public static int handleToneData(Charset messageCharset, Lobby lobby, byte toneAction, byte toneType, String toneData, short action) {
         if(lobby != null) {
             playersNumber = (short) lobby.getMax_players();
             System.out.println("Get tone data: " + toneData);
             for (Player player : lobby.getPlayers()) {
                 if (player.state.getState() == ClientState.inLobby)
-                    sendTonToClient(messageCharset, player.getPlayerChannel(), toneData + "," + toneType + "," + toneAction, action);
+                    if (sendTonToClient(messageCharset, player.getPlayerChannel(), toneData + "," + toneType + "," + toneAction, action) == -1){
+                        return -2;
+                    }
             }
-            return true;
+            return 0;
         }
-        return false;
+        return -1;
     }
 
-    public static void sendTonToClient(Charset messageCharset, SocketChannel clientChannel, String message, short action) throws IOException {
+    public static int sendTonToClient(Charset messageCharset, SocketChannel clientChannel, String message, short action) {
         short dataLength = (short) message.length();
         ByteBuffer messageBuffer = ByteBuffer.allocate(6 + dataLength);
 
@@ -32,10 +34,13 @@ public class MusicJoiner {
         messageBuffer.put(message.getBytes(messageCharset));
         messageBuffer.flip();
 
-        clientChannel.write(messageBuffer);
+        try {
+            clientChannel.write(messageBuffer);
+        } catch (IOException e) {
+            return -1;
+        }
         messageBuffer.clear();
-
-
+        return 0;
     }
 
     public static byte[] ShortToByte(short value){
