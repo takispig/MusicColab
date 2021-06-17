@@ -15,6 +15,7 @@ public class Player {
     private boolean admin = true;
     private SocketAddress address;
     private SocketChannel channel;
+    private boolean muted;
     public ClientState state = new ClientState();
 
     public Player(String name, String passwort, String email, int id, SocketChannel channel) throws IOException {
@@ -24,8 +25,10 @@ public class Player {
         this.id = id;
         this.channel = channel;
         this.address = channel.getRemoteAddress();
+        this.muted = false;
     }
 
+    public void toggleMute() {this.muted = !this.muted;}
 
     public SocketChannel getPlayerChannel(){ return this.channel; }
 
@@ -57,4 +60,5 @@ public class Player {
     public void setLobbyId(int id){lobbyId = id;}
     public int getLobbyId(){return lobbyId;}
 
+    public boolean isMuted() { return this.muted;}
 }

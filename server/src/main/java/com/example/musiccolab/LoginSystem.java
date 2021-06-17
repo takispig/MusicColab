@@ -1,5 +1,6 @@
 package main.java.com.example.musiccolab;
 
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 
@@ -183,5 +184,13 @@ public final class LoginSystem {
             }
         }
         return null;
+    }
+
+    public static boolean forgotPassword(String username, String email,String password) throws SQLException, ClassNotFoundException {
+        if(checkForRegistration(username,email)){
+            DataBase.resetPasswort(username,email,password);
+            return true;
+        }
+        return false;
     }
 }

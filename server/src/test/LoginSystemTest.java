@@ -37,7 +37,7 @@ class LoginSystemTest {
         SocketChannel testChannel = SocketChannel.open();
 
         try {
-            assertFalse(LoginSystem.login(testName,testPassword,testChannel));
+            assertFalse(LoginSystem.login(testName,testPassword,testChannel)==null);
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
@@ -53,7 +53,7 @@ class LoginSystemTest {
         SocketChannel testChannel = SocketChannel.open();
         try {
             assertTrue(LoginSystem.register(testName,testEmail,testPassword));
-            assertTrue(LoginSystem.login(testName,testPassword,testChannel));
+            assertTrue(LoginSystem.login(testName,testPassword,testChannel)!=null);
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
