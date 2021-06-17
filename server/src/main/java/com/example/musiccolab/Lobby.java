@@ -22,8 +22,9 @@ public class Lobby {
         this.usersNumber++;
 
         this.players.add(admin);
-        admin.setAdmin();
+        admin.setAdmin(true);
         admin.setLobbyId(id);
+        admin.state.setState(ClientState.inLobby);
     }
 
     public int getLobby_id() { return this.lobby_id; }
@@ -51,6 +52,7 @@ public class Lobby {
             players.add(player);
             usersNumber++;
             player.setLobbyId(lobby_id);
+            player.state.setState(ClientState.inLobby);
             return true;
         }
         return false;
@@ -66,6 +68,7 @@ public class Lobby {
                     admin = players.peek();
                 }
                 else admin = null;
+                player.state.setState(ClientState.notInLobby);
             }
         }
     }
@@ -74,7 +77,15 @@ public class Lobby {
 
     public byte getUsersNumber(){return usersNumber;}
 
-    public  boolean isEmpty(){
+    public boolean isEmpty(){
         return players.isEmpty();
+    }
+
+    public String getPlayerIDs() {
+        StringBuilder ids = new StringBuilder();
+        for (Player player : players) {
+            ids.append(player.getId() + ";");
+        }
+        return ids.toString();
     }
 }

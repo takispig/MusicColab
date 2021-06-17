@@ -14,7 +14,7 @@ import java.util.logging.Level;
 public class Protocol {
     final private short protocolName = 12845;
     SocketAddress playerAddress;
-    private Player currentPlayer;
+    private Player currenPlayer;
     final private List<Short> codesList = new ArrayList<Short>();
 
     final private int login = 1;
@@ -24,8 +24,8 @@ public class Protocol {
     final private int joinLobby = 5;
     final private int leaveLobby = 6;
     final private int tone = 7;
-    final private int gameStart = 8;
-    final private int gameEnd = 9;
+    final private int passwordForgotten = 8;
+    final private int mutePlayer = 9;
     final private int gameRestart = 10;
 
     private short action;
@@ -35,8 +35,6 @@ public class Protocol {
     private byte emailSize;
     private byte passwordSize;
 
-
-    private MusicJoiner musicJoiner = new MusicJoiner();
 
 
     final private String[][] responsesArray = { {"Client logged in", "error with login"},
@@ -70,7 +68,7 @@ public class Protocol {
                 clientChannel.read(mainBuffer);
                 mainBuffer.flip();
                 action = getShort(messageCharset.decode(mainBuffer).toString().getBytes(messageCharset));
-                if (action > 0 && action < 12) {
+                if (codesList.contains(action)) {
                     mainBuffer.clear();
 
                     clientChannel.read(mainBuffer);
@@ -113,6 +111,59 @@ public class Protocol {
         loginSystemBuffer.clear();
     }
 
+
+    private void parseBufferIfPasswordForgotten(Charset messageCharset, SocketChannel clientChannel) throws IOException {
+
+        String username, email = "";
+        boolean checkResponse = false;
+        ByteBuffer loginSystemBuffer1 = ByteBuffer.allocate(1);
+
+        // read email-size
+        clientChannel.read(loginSystemBuffer1);
+        loginSystemBuffer1.flip();
+        emailSize = messageCharset.decode(loginSystemBuffer1).toString().getBytes(messageCharset)[0];
+        loginSystemBuffer1.clear();
+
+        //read username-size
+        clientChannel.read(loginSystemBuffer1);
+        loginSystemBuffer1.flip();
+        userNameSize = messageCharset.decode(loginSystemBuffer1).toString().getBytes(messageCharset)[0];
+        loginSystemBuffer1.clear();
+
+        ByteBuffer loginSystemBuffer;
+
+        // read email
+        loginSystemBuffer = ByteBuffer.allocate(emailSize);
+        clientChannel.read(loginSystemBuffer);
+        loginSystemBuffer.flip();
+        email = messageCharset.decode(loginSystemBuffer).toString();
+        loginSystemBuffer.clear();
+
+        // read username
+        loginSystemBuffer = ByteBuffer.allocate(userNameSize);
+        clientChannel.read(loginSystemBuffer);
+        loginSystemBuffer.flip();
+        username = messageCharset.decode(loginSystemBuffer).toString();
+        loginSystemBuffer.clear();
+
+        /*
+        try {
+            checkResponse = LoginSystem.forgotPassword(email, username);
+            Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+            return;
+        }
+        */
+        /*
+        catch (SQLException e) {
+            System.out.println("ERROR: SQL");
+        } catch (ClassNotFoundException e) {
+            System.out.println("ERROR: ClassNotFound");
+        */
+        Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(action + 10, false));
+        sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(action + 10, false));
+    }
+
     private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel, SelectionKey key)
             throws IOException {
 
@@ -151,7 +202,7 @@ public class Protocol {
                 if (player == null) checkResponse = false;
                 else {
                     checkResponse = true;
-                    currentPlayer = player;
+                    currenPlayer = player;
                 }
 
             } else if (action == logout) {
@@ -172,7 +223,6 @@ public class Protocol {
     private void parseBufferForLobbyOrGame(Charset messageCharset, SocketChannel clientChannel, int lobbyNameIsSize, SelectionKey key) throws IOException {
 
         Player player = (Player) key.attachment();
-        //Player player = LoginSystem.getPlayerByChannel(clientChannel);
         ByteBuffer lobbyBuffer;
 
         lobbyBuffer = ByteBuffer.allocate(lobbyNameIsSize);
@@ -207,7 +257,7 @@ public class Protocol {
             }
 
         }
-        else if(player != null){
+        else if(player != null){//
             int lobbyID = Integer.parseInt(messageCharset.decode(lobbyBuffer).toString());
             Game game = new Game(Server.lobbyMap.get(lobbyID));
             responseAction = action;
@@ -218,9 +268,8 @@ public class Protocol {
 
     private void parseBufferForMusicJoiner(Charset messageCharset, SocketChannel clientChannel, int dataSize, SelectionKey key) throws IOException {
 
-        Player player = (Player) key.attachment();
-
         ByteBuffer toneBuffer;
+        Player sender = null;
 
         toneBuffer = ByteBuffer.allocate(1);
         clientChannel.read(toneBuffer);
@@ -238,15 +287,18 @@ public class Protocol {
         toneBuffer.flip();
         String toneData= messageCharset.decode(toneBuffer).toString();
         toneBuffer.clear();
-        if (player != null) {
-            Lobby clientLobby = Server.lobbyMap.get(player.getLobbyId());
-            musicJoiner.setMusicJoiner(clientLobby, toneAction, toneType, toneData, clientChannel);
-            musicJoiner.handleToneData();
+
+        sender = (Player) key.attachment();
+        if ( sender != null) {
+            Lobby clientLobby = Server.lobbyMap.get(sender.getLobbyId());
             responseAction = action;
-            for (byte index = 0; index < clientLobby.getUsersNumber(); index++)
-                sendResponseToClient(messageCharset, musicJoiner.getClientChannels().get(index), musicJoiner.getClientResponses().get(index));
+            if(MusicJoiner.handleToneData(messageCharset, clientLobby, toneAction, toneType, toneData, responseAction) != 0){
+                System.out.println("Fehler in MusicJoiner");
+            }
+
         } else {
-            //todo: ERROR
+            responseAction = (short) (action + 10);
+            sendResponseToClient(messageCharset,clientChannel, "Error, client is DISCONNECTED");
         }
     }
 
@@ -256,18 +308,21 @@ public class Protocol {
 
             if(action == login || action == logout || action == register){
                 parseBufferForLoginSystem(messageCharset, clientChannel, key);
-                if (action == login) key.attach(currentPlayer);
             }
-            else if(action == createLobby || action == joinLobby || action == leaveLobby ||
-                    action == gameStart || action == gameEnd || action == gameRestart){
+            else if(action == createLobby || action == joinLobby || action == leaveLobby){
                 parseBufferForLobbyOrGame(messageCharset, clientChannel, bufferSize, key);
             }
             else if(action == tone){
                 parseBufferForMusicJoiner(messageCharset, clientChannel, bufferSize, key);
             }
+            else if (action == passwordForgotten) {
+                parseBufferIfPasswordForgotten(messageCharset, clientChannel);
+            }
+            else if (action == mutePlayer){
+                // parseBufferIfMutePlayer(messageCharset, clientChannel);
+            }
         }
     }
-
     private String getAllLobbyIds(HashMap<Integer, Lobby> lobbyMap) {
         String res = "";
 
@@ -338,7 +393,7 @@ public class Protocol {
 
     public void resetProtocol() {
         playerAddress = null;
-        currentPlayer = null;
+        currenPlayer = null;
 
         action = 0;
         responseAction = 0;
@@ -347,5 +402,4 @@ public class Protocol {
         emailSize = 0;
         passwordSize = 0;
     }
-
 }

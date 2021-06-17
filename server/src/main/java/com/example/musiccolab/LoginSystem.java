@@ -48,13 +48,22 @@ public final class LoginSystem {
             //add data to List
             Server.loggedInPlayers.put(res.getInt(COL_INT_ID), player);
 
+            player.state.setState(ClientState.loggedIn);
             return player;
         } else {
             return null;
         }
 
     }
-
+    public static boolean loginWithoutChannel(final String name, final String passwort) throws SQLException, ClassNotFoundException {
+        if (checkLogin(name, passwort)) {
+            //create new player
+            ResultSet res = DataBase.getUserlogin(name, passwort);
+            return true;
+        } else {
+            return false;
+        }
+    }
     /**
      * check if the player is registered and logged in,
      * if so delete player from loggedInPlayers and the game.
@@ -64,11 +73,11 @@ public final class LoginSystem {
      * @throws SQLException if something goes wrong with SQL
      * @throws ClassNotFoundException if something goes wrong with driver
      */
-    public static boolean logout(final String name, final String passwort) throws SQLException, ClassNotFoundException {
+    public static boolean logout(final String name, final String passwort)
+            throws SQLException, ClassNotFoundException {
         //check in list
         if (checkLogin(name, passwort)
                 & Server.loggedInPlayers.get(getId(name, passwort)) != null) {
-
             Player player = Server.loggedInPlayers.get(getId(name, passwort));
             int lobbyId = -1;
             if(player != null)
@@ -80,10 +89,10 @@ public final class LoginSystem {
                     Server.lobbyMap.remove(lobbyOfPlayer.getLobby_id());
                     lobbyOfPlayer = null;
                 }
+                player.state.setState(ClientState.loggedOut);
             }
-            player = null;
-            //del player from list
             Server.loggedInPlayers.remove(getId(name, passwort));
+            player = null;
             return true;
         } else {
             return false;
@@ -100,7 +109,9 @@ public final class LoginSystem {
      * @throws ClassNotFoundException if something goes wrong with driver
      * @throws ClassNotFoundException
      */
-    public static boolean register(final String name, final String email, final String passwort) throws SQLException, ClassNotFoundException {
+    public static boolean register(final String name,
+                                   final String email, final String passwort)
+            throws SQLException, ClassNotFoundException {
         //check for registration
         if (!checkForRegistration(name, email)) {
             //add data to DB
@@ -119,7 +130,9 @@ public final class LoginSystem {
      * @throws SQLException if something goes wrong with SQL
      * @throws ClassNotFoundException if something goes wrong with driver
      */
-    private static boolean checkForRegistration(final String name, final String email) throws SQLException, ClassNotFoundException {
+    private static boolean checkForRegistration(final String name,
+                                                final String email)
+            throws SQLException, ClassNotFoundException {
         ResultSet res = DataBase.getUser(name, email);
         return res.next();
     }
@@ -132,7 +145,8 @@ public final class LoginSystem {
      * @throws SQLException if something goes wrong with SQL
      * @throws ClassNotFoundException if something goes wrong with driver
      */
-    private static boolean checkLogin(final String name, final String passwort) throws SQLException, ClassNotFoundException {
+    private static boolean checkLogin(final String name, final String passwort)
+            throws SQLException, ClassNotFoundException {
         ResultSet res = DataBase.getUserlogin(name, passwort);
         return res.next();
     }
@@ -146,7 +160,8 @@ public final class LoginSystem {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    private static int getId(final String name, final String passwort) throws SQLException, ClassNotFoundException {
+    private static int getId(final String name, final String passwort)
+            throws SQLException, ClassNotFoundException {
         ResultSet res = DataBase.getUserlogin(name, passwort);
         if (res.next()) {
             return res.getInt(COL_INT_ID);
@@ -159,14 +174,14 @@ public final class LoginSystem {
      * @return Player which is on the channel
      */
     public static Player getPlayerByChannel(final SocketChannel channel) {
-        Iterator<Map.Entry<Integer, Player>> i = Server.loggedInPlayers.entrySet().iterator();
+        Iterator<Map.Entry<Integer, Player>> i
+                = Server.loggedInPlayers.entrySet().iterator();
         while (i.hasNext()) {
             Map.Entry<Integer, Player> entry = i.next();
             if (entry.getValue().getPlayerChannel() == channel) {
                 return entry.getValue();
             }
         }
-
         return null;
     }
 }

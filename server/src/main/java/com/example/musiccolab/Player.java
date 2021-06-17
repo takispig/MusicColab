@@ -12,9 +12,10 @@ public class Player {
     private int id;
     private int lobbyId = -1;
     private boolean loggedIn = false;
-    private boolean admin = true;
+    private boolean admin = false;
     private SocketAddress address;
     private SocketChannel channel;
+    public ClientState state = new ClientState();
 
     public Player(String name, String passwort, String email, int id, SocketChannel channel) throws IOException {
         this.name = name;
@@ -32,6 +33,8 @@ public class Player {
         this.address = address;
     }
 
+    public SocketAddress getAddress() { return this.address; }
+
     public String getName() { return this.name; }
 
     public String getPasswort() { return this.passwort; }
@@ -42,18 +45,16 @@ public class Player {
 
     public int getId() { return this.id; }
 
-    public SocketAddress getAddress() { return this.address; }
+    public boolean isAdmin(){ return admin; }
 
-    public boolean isAdmin(){return admin;}
+    public void setAdmin(boolean set){ admin = set; }
 
-    public void setAdmin(){admin = true;}
+    public boolean isLoggedIn(){ return loggedIn; }
 
-    public boolean isLoggedIn(){return loggedIn;}
+    public void setLoggedIn(){ loggedIn = true; }
+    public void setLoggedOut(){ loggedIn = false; }
 
-    public void setLoggedIn(){loggedIn = true;}
-    public void setLoggedOut(){loggedIn = false;}
-
-    public void setLobbyId(int id){lobbyId = id;}
-    public int getLobbyId(){return lobbyId;}
+    public void setLobbyId(int id){ lobbyId = id; }
+    public int getLobbyId(){ return lobbyId; }
 
 }
