@@ -34,7 +34,7 @@ public final class LoginSystem {
      * @throws SQLException if something goes wrong with SQL
      * @throws ClassNotFoundException if something goes wrong with driver
      */
-    public static boolean login(final String name, final String passwort,
+    public static Player login(final String name, final String passwort,
                                 final SocketChannel channel)
             throws SQLException, ClassNotFoundException, IOException {
         //check for registration
@@ -49,9 +49,9 @@ public final class LoginSystem {
             Server.loggedInPlayers.put(res.getInt(COL_INT_ID), player);
 
             player.state.setState(ClientState.loggedIn);
-            return true;
+            return player;
         } else {
-            return false;
+            return null;
         }
 
     }

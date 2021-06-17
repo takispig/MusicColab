@@ -22,6 +22,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".Register" android:screenOrientation="portrait"/>
+        <activity android:name=".ForgotPassword" android:screenOrientation="portrait"/>
         <activity android:name=".Lobby" android:screenOrientation="portrait"/>
         <activity android:name=".PreLobby" android:screenOrientation="portrait"/>
         <activity android:name=".About"/>

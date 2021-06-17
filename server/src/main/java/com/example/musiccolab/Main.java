@@ -5,34 +5,53 @@ import main.java.com.example.musiccolab.exceptions.SocketBindException;
 
 import java.io.IOException;
 import java.nio.charset.UnsupportedCharsetException;
-import java.sql.SQLException;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Main {
 
-    private static final String DEFAULT_ADDRESS = "192.168.178.42";
-    private static final int DEFAULT_PORT = 1200;
+    // DEFAULT VALUES //
+    private static final String DEFAULT_ADDRESS = "130.149.80.94";
+    private static final int DEFAULT_PORT = 8080;
+    // // // // // // //
 
+    /**
+     * exit program?
+     */
     private static boolean exit = false;
-    private static boolean finish = false;
+    /**
+     * has server finished?
+     */
+    private static boolean finished = false;
+    /**
+     * close server
+     */
     private static boolean close = false;
+    /**
+     * error has occurred
+     */
     private static boolean error = false;
+    /**
+     * invalid input
+     */
     private static boolean invalidInput = false;
+
     private static int serverNumber = 1;
     private static String address = "";
     private static int port = 0;
     private static Server currentServer;
     private static Thread serverThread;
     private static Scanner input;
-
     private static long time = 0;
     private static int restart = 0;
 
     public static Logger logr = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-
+    /**
+     * main loop
+     * @param args optional: ip address & port
+     */
     public static void main(String[] args) {
         ActionLog.initLogger(logr);
 
@@ -47,11 +66,13 @@ public class Main {
 
             loop();
         }
-
         exit();
-
     }
 
+    /**
+     * set up basic input & output
+     * @param args optional: ip address & port
+     */
     private static void init(String[] args) {
         if (args.length == 0) {
             address = DEFAULT_ADDRESS;
@@ -69,57 +90,81 @@ public class Main {
         input = new Scanner(System.in);
     }
 
+    /**
+     * read in ip address & port if necessary
+     */
     private static void input() {
         if (!invalidInput)
             return;
         while (invalidInput) {
             System.out.println("An error occurred with the specified IP address and port!\nTry a new input.");
             System.out.println("This server will exit after 30 seconds without further interaction.");
-            System.out.print("address: ");
-            long Itime = System.currentTimeMillis();
-            boolean BAddress = false;
-            boolean b = true;
-            while (!BAddress && (b = System.currentTimeMillis() - Itime < 30000)) {
-                try {
-                    if (System.in.available() > 0) {
-                        address = input.nextLine();
-                        BAddress = true;
-                    } else {
-                        Thread.sleep(20);
-                    }
-                } catch (InterruptedException | IOException ignored) {
-                }
-            }
-            if (!b) {
-                System.out.println();
-                exit();
-            }
-            Itime = System.currentTimeMillis();
-            System.out.print("port: ");
-            boolean BPort = false;
-            while (!BPort && (b = System.currentTimeMillis() - Itime < 30000)) {
-                try {
-                    if (System.in.available() > 0) {
-                        try {
-                            port = Integer.parseInt(input.nextLine());
-                            invalidInput = false;
-                        } catch (NumberFormatException ignored) {
-                        }
-                        BPort = true;
-                    } else {
-                        Thread.sleep(20);
-                    }
-                } catch (InterruptedException | IOException ignored) {
-                }
-            }
-            if (!b) {
-                System.out.println();
-                exit();
-            }
+
+            readIpAddress();
+
+            readPort();
+
             invalidInput = false;
         }
     }
 
+    /**
+     * read ip address from console
+     */
+    private static void readIpAddress() {
+        long currentTime = System.currentTimeMillis();
+        System.out.print("address: ");
+        boolean inputAddress = false;
+        boolean b = true;
+        while (!inputAddress && (b = System.currentTimeMillis() - currentTime < 30000)) {
+            try {
+                if (System.in.available() > 0) {
+                    address = input.nextLine();
+                    inputAddress = true;
+                } else {
+                    Thread.sleep(20);
+                }
+            } catch (InterruptedException | IOException ignored) {
+            }
+        }
+        if (!b) {
+            System.out.println();
+            exit();
+        }
+    }
+
+    /**
+     * read port from console
+     */
+    private static void readPort() {
+        long currentTime = System.currentTimeMillis();
+        System.out.print("port: ");
+        boolean inputPort = false;
+        boolean b = true;
+        while (!inputPort && (b = System.currentTimeMillis() - currentTime < 30000)) {
+            try {
+                if (System.in.available() > 0) {
+                    try {
+                        port = Integer.parseInt(input.nextLine());
+                        invalidInput = false;
+                    } catch (NumberFormatException ignored) {
+                    }
+                    inputPort = true;
+                } else {
+                    Thread.sleep(20);
+                }
+            } catch (InterruptedException | IOException ignored) {
+            }
+        }
+        if (!b) {
+            System.out.println();
+            exit();
+        }
+    }
+
+    /**
+     * run server thread
+     */
     private static void runServer() {
         //System.out.println("Creating new server...");
         logr.log(Level.INFO,"CREATING NEW SERVER");
@@ -131,7 +176,7 @@ public class Main {
             currentServer.defineCharType();
 
             //System.out.println("Setting up new server...");
-            logr.log(Level.INFO,"SETTING UP SERVER: IP = " + address.toString() + " PORT = " + port);
+            logr.log(Level.INFO,"SETTING UP SERVER: IP = " + address + " PORT = " + port);
             currentServer.OpenSelectorAndSetupSocket();
 
             currentServer.handleConnection();
@@ -154,37 +199,53 @@ public class Main {
         close = true;
     }
 
+    /**
+     * loop to react to input on the console
+     */
     private static void loop() {
-        while (!finish) {
-            try {
-                if (System.in.available() > 0) {
-                    String nextLine = input.nextLine();
-                    switch (nextLine) {
-                        case "restart":
-                            closeServer();
-                            break;
-                        case "exit":
-                            closeServer();
-                            exit = true;
-                            break;
-                        default:
-                            System.out.println("Undefined input");
-                            break;
-                    }
-                } else {
-                    Thread.sleep(500);
-                }
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
+        while (!finished) {
+
+            listenConsole();
+
             if (close) {
                 close = false;
                 closeServer();
             }
         }
-        finish = false;
+        finished = false;
     }
 
+    /**
+     * listen to input on the console
+     */
+    private static void listenConsole() {
+        try {
+            if (System.in.available() > 0) {
+                String nextLine = input.nextLine();
+                switch (nextLine) {
+                    case "restart":
+                        closeServer();
+                        break;
+                    case "exit":
+                        closeServer();
+                        exit = true;
+                        break;
+                    default:
+                        System.out.println("Undefined input");
+                        break;
+                }
+            } else {
+                Thread.sleep(500);
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * trys to figure out if a serious error has occurred
+     * @return result of that question
+     */
     private static boolean error() {
         if (System.currentTimeMillis() - time < 10000)
             restart++;
@@ -198,6 +259,9 @@ public class Main {
         return restart >= 4;
     }
 
+    /**
+     * finish current server thread & close all connections
+     */
     private static void closeServer() {
         //System.out.println("Closing Server...");
         logr.log(Level.INFO, "CLOSING SERVER");
@@ -213,9 +277,12 @@ public class Main {
                 e.printStackTrace();
             }
         }
-        finish = true;
+        finished = true;
     }
 
+    /**
+     * exit program
+     */
     private static void exit() {
         input.close();
         logr.log(Level.INFO,"EXIT");
