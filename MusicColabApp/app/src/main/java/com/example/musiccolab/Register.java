@@ -42,38 +42,45 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
             userView = findViewById(R.id.username);
             username = userView.getText().toString();
 
-            CommunicationHandling networkThread = new CommunicationHandling(Thread.currentThread());
-            networkThread.username = username;
-            networkThread.password = password;
-            networkThread.email = email;
-            networkThread.action = 3;
-
-            if (networkThread.threadExist) {
-                networkThread.communicationThread.notify();
-            } else {
-                networkThread.start();
+            // check data validity (no empty input)
+            if (email.isEmpty() || password.isEmpty() || username.isEmpty()) {
+                toast("All fields must be filled");
             }
+            else {
 
-            try {
-                synchronized (Thread.currentThread()) {
-                    Thread.currentThread().wait();
+                CommunicationHandling networkThread = new CommunicationHandling(Thread.currentThread());
+                networkThread.username = username;
+                networkThread.password = password;
+                networkThread.email = email;
+                networkThread.action = 3;
+
+                if (networkThread.threadExist) {
+                    networkThread.communicationThread.notify();
+                } else {
+                    networkThread.start();
                 }
-            } catch (InterruptedException e) {
-                System.out.println("Error with waiting of main thread.");
-            }
 
-            String output = networkThread.result;
+                try {
+                    synchronized (Thread.currentThread()) {
+                        Thread.currentThread().wait();
+                    }
+                } catch (InterruptedException e) {
+                    System.out.println("Error with waiting of main thread.");
+                }
 
-            System.out.println("Confirmation-code after in Register.java is: " + networkThread.confirmation);
-            if (networkThread.confirmation==3) {
-                toast("Registration Successful");
-                startActivity(new Intent(this, Login.class));
-            } else if (networkThread.confirmation==0) {
-                toast("Connection timeout");
-            } else if (networkThread.confirmation==13) {
-                toast("Registration Failed\nUsername already exists");
+                String output = networkThread.result;
+
+                System.out.println("Confirmation-code after in Register.java is: " + networkThread.confirmation);
+                if (networkThread.confirmation == 3) {
+                    toast("Registration Successful");
+                    startActivity(new Intent(this, Login.class));
+                } else if (networkThread.confirmation == 0) {
+                    toast("Connection timeout");
+                } else if (networkThread.confirmation == 13) {
+                    toast("Registration Failed\nUsername already exists");
+                }
+                networkThread.confirmation = 0;
             }
-            networkThread.confirmation = 0;
 
 
         } else if (view.getId() == R.id.aboutt) {
