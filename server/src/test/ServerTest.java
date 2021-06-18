@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import main.java.com.example.musiccolab.exceptions.SocketBindException;
 import org.junit.jupiter.api.Test;
-import test.Client;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
