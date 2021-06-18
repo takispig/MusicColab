@@ -251,7 +251,7 @@ public class Protocol {
                 if(checkResponse)
                     checkResponse = currentLobby.addPlayer(player);
                 sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " --> you are in.," + currentLobby.getUsersNumber()));
-                sendResponseToClient(messageCharset,currentLobby.getAdmin().getPlayerChannel(),getJoinResponse(true,player.getId()));
+                //sendResponseToClient(messageCharset,currentLobby.getAdmin().getPlayerChannel(),getJoinResponse(true,player.getId()));
                 if(checkResponse) Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " JOINED LOBBY " + currentLobby.getLobby_id());
 
             } else if(action == leaveLobby){
@@ -261,7 +261,7 @@ public class Protocol {
                     Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " LEFT LOBBY " + currentLobby.getLobby_id());
                 }
                 sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " you are out."));
-                sendResponseToClient(messageCharset,currentLobby.getAdmin().getPlayerChannel(),getJoinResponse(false,player.getId()));
+                //sendResponseToClient(messageCharset,currentLobby.getAdmin().getPlayerChannel(),getJoinResponse(false,player.getId()));
                 if(checkResponse && currentLobby.isEmpty()) { Server.lobbyMap.remove(currentLobby.getLobby_id()); currentLobby = null; }
             }
 
