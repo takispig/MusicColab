@@ -169,23 +169,6 @@ public final class LoginSystem {
         } else return -1;
     }
 
-    /**
-     * method to get the player from "on" the channel.
-     * @param channel from searched player
-     * @return Player which is on the channel
-     */
-    public static Player getPlayerByChannel(final SocketChannel channel) {
-        Iterator<Map.Entry<Integer, Player>> i
-                = Server.loggedInPlayers.entrySet().iterator();
-        while (i.hasNext()) {
-            Map.Entry<Integer, Player> entry = i.next();
-            if (entry.getValue().getPlayerChannel() == channel) {
-                return entry.getValue();
-            }
-        }
-        return null;
-    }
-
     public static boolean forgotPassword(String username, String email,String password) throws SQLException, ClassNotFoundException {
         if(checkForRegistration(username,email)){
             DataBase.resetPasswort(username,email,password);

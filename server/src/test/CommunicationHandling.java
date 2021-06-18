@@ -1,4 +1,4 @@
-package main.java.com.example.musiccolab;
+package test;
 
 //import com.example.musiccolab.instruments.SoundPlayer;
 
@@ -98,7 +98,14 @@ public class CommunicationHandling implements Runnable {
                         clientChannel.finishConnect();
                         clientChannel.read(buffer);
                         buffer.flip();
-                        System.out.println(messageCharset.decode(buffer));
+                        result = messageCharset.decode(buffer).toString();
+                        System.out.println(result);
+                        //for test 1
+                        action = 0;
+                        synchronized (mainThread) {
+                            mainThread.notify();
+                        }
+                        //for test 1
                     } catch (IOException e) {
                         System.out.println("Problem with finishConnect");
                     }
@@ -121,6 +128,12 @@ public class CommunicationHandling implements Runnable {
             if (codesList.contains(action)) {
                 sendMessageByAction(action);
                 action = 0;
+
+                //for test 0
+                synchronized (mainThread) {
+                    mainThread.notify();
+                }
+                //for test 0
             }
         }
     }
@@ -133,6 +146,10 @@ public class CommunicationHandling implements Runnable {
         } catch (Exception e) {
             System.out.println("Error with starting network thread.");
         }
+    }
+
+    public void stop(){
+        communicationThread.stop();
     }
 
     private void sendMessageByAction(short action) {

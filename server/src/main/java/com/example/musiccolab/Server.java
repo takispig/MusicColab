@@ -87,7 +87,6 @@ public class Server {
      * handle the received action.
      */
     private void handleConnectionWhenReadable(SelectionKey key) throws IOException {
-        //int state = (Integer) key.attachment(); //To save the state of all clients. Integer --> Class
 
         SocketChannel clientChannel = (SocketChannel) key.channel();
         //Read the first 6 indexes. (Protocol name, Action and data length. 2 Bytes each)
@@ -205,6 +204,7 @@ public class Server {
     public Selector getSelectorForTesting(){
         return selector;
     }
+    public void setSelector(Selector s){selector = s;}
 
     public ServerSocketChannel getServerChannelForTesting(){
         return serverChannel;
@@ -213,6 +213,7 @@ public class Server {
     public Charset getMessageCharsetForTesting(){
         return messageCharset;
     }
+    public void setMessageCharset(Charset m){messageCharset = m;}
 
     public CharsetDecoder getDecoderForTesting(){
         return decoder;
@@ -229,4 +230,8 @@ public class Server {
     public boolean isFinishedForTesting(){
         return finished;
     }
+
+    public void acceptForTest(SelectionKey key) throws IOException { handleConnectionWhenAcceptable(key);}
+
+    public void handleForTest(SelectionKey key) throws IOException { handleConnectionWhenReadable(key);}
 }
