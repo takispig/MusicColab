@@ -305,6 +305,8 @@ public class Protocol {
             if(!sender.isMuted()) {
                 Lobby clientLobby = Server.lobbyMap.get(sender.getLobbyId());
                 responseAction = action;
+
+
                 if (MusicJoiner.handleToneData(messageCharset, clientLobby, toneAction, toneType, toneData, responseAction) != 0) {
                     System.out.println("Fehler in MusicJoiner");
                 }
@@ -341,7 +343,10 @@ public class Protocol {
     }
 
     private void parseBufferIfMutePlayer(Charset messageCharset, SocketChannel clientChannel) {
-        LoginSystem.getPlayerByChannel(clientChannel).toggleMute();
+        //todo;
+
+
+
     }
 
     private String getAllLobbyIds(HashMap<Integer, Lobby> lobbyMap) {
