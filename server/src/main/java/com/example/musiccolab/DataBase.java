@@ -225,6 +225,20 @@ public final class DataBase {
         prep.execute();
     }
 
+    public static void resetPasswort(String username, String email, String password) throws SQLException, ClassNotFoundException {
+        if (con == null) {
+            getConnection();
+        }
+        PreparedStatement prep = con.prepareStatement("UPDATE "
+                + TABLE_NAME + " SET " + PASSWORD_COL_NAME + " = ? WHERE " + NAME_COL_NAME
+                + " = ? AND " + EMAIL_COL_NAME + " = ?");
+        prep.setString(1, password);
+        prep.setString(2, username);
+        prep.setString(3, email);
+        prep.execute();
+
+    }
+
     /*
     public static int getID(final String name, final String password)
             throws SQLException, ClassNotFoundException {
