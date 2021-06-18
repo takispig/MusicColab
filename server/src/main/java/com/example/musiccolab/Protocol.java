@@ -14,7 +14,6 @@ import java.util.logging.Level;
 public class Protocol {
     final private short protocolName = 12845;
     SocketAddress playerAddress;
-    private Player currenPlayer;
     final private List<Short> codesList = new ArrayList<Short>();
 
     final private int login = 1;
@@ -210,7 +209,7 @@ public class Protocol {
                 if (player == null) checkResponse = false;
                 else {
                     checkResponse = true;
-                    currenPlayer = player;
+                    key.attach(player);
                 }
 
             } else if (action == logout) {
@@ -425,7 +424,6 @@ public class Protocol {
 
     public void resetProtocol() {
         playerAddress = null;
-        currenPlayer = null;
 
         action = 0;
         responseAction = 0;
