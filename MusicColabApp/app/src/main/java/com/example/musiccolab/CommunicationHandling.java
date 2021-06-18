@@ -1,5 +1,7 @@
 package com.example.musiccolab;
 
+import android.widget.TextView;
+
 import com.example.musiccolab.instruments.SoundPlayer;
 
 import java.io.*;
@@ -24,6 +26,7 @@ public class CommunicationHandling implements Runnable {
     public static final int PROTOCOL_LEAVE_LOBBY_ACTION = 6;
     public static final int PROTOCOL_TONE_ACTION = 7;
     public static final int PROTOCOL_FORGOT_PASSWORD = 8;
+    public static final int PROTOCOL_ADMIN_LEFT = 9;
 
     // private static final String IP = "35.207.116.16";    // Google Server IP-Address
     private static final String IP = "130.149.80.94";   // VM IP-Address
@@ -184,6 +187,8 @@ public class CommunicationHandling implements Runnable {
             }
         } else if (action == PROTOCOL_TONE_ACTION || action == 17) {
             getData(messageLength);
+        } else if (action == PROTOCOL_ADMIN_LEFT) {
+            admin=true;
         }
     }
 

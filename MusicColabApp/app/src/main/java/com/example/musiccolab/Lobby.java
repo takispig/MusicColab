@@ -214,6 +214,8 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         }
 
         if (view.getId() == R.id.more_button) {
+            TextView admin_text = findViewById(R.id.admin_boolean);
+            admin_text.setText(networkThread.admin ? "true" : "false");
             ConstraintLayout info = findViewById(R.id.info);
             visible = !visible;
             info.setVisibility(visible ? View.VISIBLE : View.GONE);
