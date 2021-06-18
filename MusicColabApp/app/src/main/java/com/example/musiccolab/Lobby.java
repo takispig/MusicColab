@@ -40,7 +40,6 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
     private SensorManager sensorManager;
     private Sensor sensor;
     private Boolean visible = false;
-    private Boolean loop = false;
     private InstrumentGUIBox instrumentGUI;
     private int counter = 0;
     private int counter2 = 0;
@@ -64,8 +63,6 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         usersInLobby.setText(String.format("%s", Login.networkThread.users));
 
         // Create Listeners for the IDs: about, register
-        Button loop = findViewById(R.id.loop);
-        loop.setOnClickListener(this);
         Button calibrate = findViewById(R.id.calibrate);
         calibrate.setOnClickListener(this);
         ImageButton disconnect = findViewById(R.id.disconnect);
@@ -183,12 +180,6 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
     // their IDs we will make the correct decision
     public void onClick(View view) {
         CommunicationHandling networkThread = Login.networkThread;
-
-        if (view.getId() == R.id.loop) {
-            Button x = findViewById(R.id.loop);
-            loop = !loop;
-            x.setText(loop ? "Stop  Loop" : "Start Loop");
-        }
 
         if (view.getId() == R.id.calibrate) {
             selectedInstrument.reCalibrate();
