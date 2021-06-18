@@ -262,7 +262,9 @@ public class Protocol {
                 }
                 sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " you are out."));
                 //sendResponseToClient(messageCharset,currentLobby.getAdmin().getPlayerChannel(),getJoinResponse(false,player.getId()));
-                if(checkResponse && currentLobby.isEmpty()) { Server.lobbyMap.remove(currentLobby.getLobby_id()); currentLobby = null; }
+                if(checkResponse && currentLobby.isEmpty()) {
+                    Server.lobbyMap.remove(currentLobby.getLobby_id());
+                }
             }
 
         }
@@ -305,9 +307,15 @@ public class Protocol {
                 Lobby clientLobby = Server.lobbyMap.get(sender.getLobbyId());
                 responseAction = action;
 
-
-                if (MusicJoiner.handleToneData(messageCharset, clientLobby, toneAction, toneType, toneData, responseAction) != 0) {
-                    System.out.println("Fehler in MusicJoiner");
+                int i;
+                if ((i = MusicJoiner.handleToneData(messageCharset, clientLobby, toneAction, toneType, toneData, responseAction)) != 0) {
+                    // for testing
+                    if (i == -1)
+                        System.out.println("Fehler in MusicJoiner -1");
+                    else if (i == -2)
+                        System.out.println("Fehler in MusicJoiner -2");
+                    else
+                        System.out.println("Fehler in MusicJoiner -??");
                 }
             } else {
                 MusicJoiner.sendTonToClient(messageCharset,sender.getPlayerChannel(),toneData + "," + toneType + "," + toneAction, action);

@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 public class Main {
 
     // DEFAULT VALUES //
-    private static final String DEFAULT_ADDRESS = "130.149.80.94";
+    private static final String DEFAULT_ADDRESS = "10.1.1.1"; // vm: 130.149.80.94
     private static final int DEFAULT_PORT = 8080;
     // // // // // // //
 
