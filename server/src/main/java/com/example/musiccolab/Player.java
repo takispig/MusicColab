@@ -12,7 +12,7 @@ public class Player {
     private int id;
     private int lobbyId = -1;
     private boolean loggedIn = false;
-    private boolean admin = true;
+    private boolean admin = false;
     private SocketAddress address;
     private SocketChannel channel;
     private boolean muted;
