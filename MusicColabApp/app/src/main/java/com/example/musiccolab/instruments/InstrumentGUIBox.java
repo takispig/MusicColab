@@ -33,8 +33,8 @@ public class InstrumentGUIBox {
 
         //init
         image4Drums = lobby.findViewById(R.id.drumImageView);
-        image4Theremin = (ImageView) lobby.findViewById(R.id.thereminView);
-        defaultBlack = (ImageView) lobby.findViewById(R.id.blackView);
+        image4Theremin = lobby.findViewById(R.id.thereminView);
+        defaultBlack = lobby.findViewById(R.id.blackView);
 
         if (instrumentType == 0) { //PIANO
             this.setDrumsInvisible();
@@ -56,8 +56,8 @@ public class InstrumentGUIBox {
 
             setPianoKeysInvisible();
 
-            image4Theremin = (ImageView) lobby.findViewById(R.id.thereminView);
-            defaultBlack = (ImageView) lobby.findViewById(R.id.blackView);
+            image4Theremin = lobby.findViewById(R.id.thereminView);
+            defaultBlack = lobby.findViewById(R.id.blackView);
 
             image4Theremin.setVisibility(View.VISIBLE);
             defaultBlack.setVisibility(View.VISIBLE);

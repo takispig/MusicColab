@@ -1,7 +1,6 @@
 package com.example.musiccolab.instruments;
 
 import android.annotation.SuppressLint;
-import android.hardware.SensorEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
@@ -60,7 +59,7 @@ public class Piano implements Instrument, View.OnClickListener {
     }
 
     @Override
-    public void reCalibrate(SensorEvent event) {
+    public void reCalibrate(SensorEventAdapter event) {
         // do nothing, or maybe changing landscape from vertical to horizontal?
     }
 
@@ -70,7 +69,7 @@ public class Piano implements Instrument, View.OnClickListener {
     }
 
     @Override
-    public void action(SensorEvent event) {
+    public void action(SensorEventAdapter event) {
         // do nothing
     }
 

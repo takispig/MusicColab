@@ -28,9 +28,9 @@ import com.example.musiccolab.instruments.Instrument;
 import com.example.musiccolab.instruments.InstrumentGUIBox;
 import com.example.musiccolab.instruments.InstrumentType;
 import com.example.musiccolab.instruments.Piano;
+import com.example.musiccolab.instruments.SensorEventAdapter;
 import com.example.musiccolab.instruments.SoundPlayer;
 import com.example.musiccolab.instruments.Theremin;
-import com.example.musiccolab.PreLobby;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -231,7 +231,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
     @Override
     public void onSensorChanged(SensorEvent event) {
         try {
-            selectedInstrument.action(event);
+            selectedInstrument.action(new SensorEventAdapter(event));
         } catch (IllegalArgumentException exception) {
             Log.e(getClass().getName(), exception.getMessage());
         }
