@@ -31,6 +31,35 @@ public class Drums implements Instrument {
         axisPointingToGround = Optional.of(getAxisWithGravity(event.values));
     }
 
+    @Override
+    public void reCalibrate() {
+        axisPointingToGround = Optional.of(getAxisWithGravity(lastKnownSensorValues));
+    }
+
+    @Override
+    public void action(SensorEvent event) {
+        if (event.sensor.getType() != Sensor.TYPE_ACCELEROMETER) {
+            throw new IllegalArgumentException("Instrument " + TAG + " need Sensor of type " + Sensor.TYPE_ACCELEROMETER + " but received sensor of type " + event.sensor.getType() + "!");
+        } else {
+            checkAndHandleAllValues(event);
+        }
+    }
+
+    @Override
+    public String getInstrumentName() {
+        return INSTRUMENT_NAME;
+    }
+
+    @Override
+    public String getInstrumentType() {
+        return INSTRUMENT_TYPE;
+    }
+
+    @Override
+    public int getSensorType() {
+        return DEFAULT_SENSOR;
+    }
+
     private Axis getAxisWithGravity(float[] values) {
         if (isForceWithinGravityRange(values[0])) {
             return Axis.X;
@@ -46,20 +75,6 @@ public class Drums implements Instrument {
             value = value * (-1);
         }
         return value > GRAVITY - TOLERANCE && value < GRAVITY + TOLERANCE;
-    }
-
-    @Override
-    public void reCalibrate() {
-        axisPointingToGround = Optional.of(getAxisWithGravity(lastKnownSensorValues));
-    }
-
-    @Override
-    public void action(SensorEvent event) {
-        if (event.sensor.getType() != Sensor.TYPE_ACCELEROMETER) {
-            Log.e(TAG, "Instrument DRUMS need Sensor of type " + Sensor.TYPE_ACCELEROMETER + " but received sensor of type " + event.sensor.getType() + "!");
-        } else {
-            checkAndHandleAllValues(event);
-        }
     }
 
     private void checkAndHandleAllValues(SensorEvent event) {
@@ -107,20 +122,5 @@ public class Drums implements Instrument {
         } else {
             return true;
         }
-    }
-
-    @Override
-    public String getInstrumentName() {
-        return INSTRUMENT_NAME;
-    }
-
-    @Override
-    public String getInstrumentType() {
-        return INSTRUMENT_TYPE;
-    }
-
-    @Override
-    public int getSensorType() {
-        return DEFAULT_SENSOR;
     }
 }

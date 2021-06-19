@@ -1,7 +1,9 @@
 package com.example.musiccolab;
 
 import androidx.appcompat.app.AppCompatActivity;
+
 import static xdroid.toaster.Toaster.toast;
+
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.app.Service;
@@ -11,6 +13,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -104,9 +107,12 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
                     return;
                 }
                 // set the selected Instrument to the global variable SELECTED_INSTRUMENT
-                if (instruments[position] == InstrumentType.THEREMIN) getIntent().putExtra(PreLobby.SELECTED_INSTRUMENT, InstrumentType.THEREMIN);
-                if (instruments[position] == InstrumentType.PIANO) getIntent().putExtra(PreLobby.SELECTED_INSTRUMENT, InstrumentType.PIANO);
-                if (instruments[position] == InstrumentType.DRUMS) getIntent().putExtra(PreLobby.SELECTED_INSTRUMENT, InstrumentType.DRUMS);
+                if (instruments[position] == InstrumentType.THEREMIN)
+                    getIntent().putExtra(PreLobby.SELECTED_INSTRUMENT, InstrumentType.THEREMIN);
+                if (instruments[position] == InstrumentType.PIANO)
+                    getIntent().putExtra(PreLobby.SELECTED_INSTRUMENT, InstrumentType.PIANO);
+                if (instruments[position] == InstrumentType.DRUMS)
+                    getIntent().putExtra(PreLobby.SELECTED_INSTRUMENT, InstrumentType.DRUMS);
                 Toast.makeText(getApplicationContext(), "Instrument: " + instruments[position], Toast.LENGTH_SHORT).show();
                 // refresh text in more
                 TextView instr = findViewById(R.id.instrument);
@@ -200,12 +206,12 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             System.out.println(output);
 
             System.out.println("LeaveLobby conf-code: " + networkThread.confirmation);
-            if (networkThread.confirmation==6){
+            if (networkThread.confirmation == 6) {
                 // reset the sensitive user data after logout
                 CommunicationHandling.wipeData(6, networkThread);
                 toast("Logged out successfully");
                 startActivity(new Intent(this, PreLobby.class));
-            }else if (networkThread.confirmation==0){
+            } else if (networkThread.confirmation == 0) {
                 toast("Connection timeout");
             } else if (networkThread.confirmation == 16) {
                 toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
@@ -223,7 +229,11 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        selectedInstrument.action(event);
+        try {
+            selectedInstrument.action(event);
+        } catch (IllegalArgumentException exception) {
+            Log.e(getClass().getName(), exception.getMessage());
+        }
     }
 
     @Override
@@ -235,8 +245,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         CommunicationHandling networkThread = Login.networkThread;
         if (++counter == 1) {
             toast("Press again to Exit Lobby");
-        }
-        else {
+        } else {
             // else remove the user from lobby
             // else remove the user from lobby
             networkThread.action = 6;
@@ -250,12 +259,12 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             String output = networkThread.result;
 
             System.out.println("LeaveLobby conf-code: " + networkThread.confirmation);
-            if (networkThread.confirmation==6){
+            if (networkThread.confirmation == 6) {
                 // reset the sensitive user data after logout
                 CommunicationHandling.wipeData(6, networkThread);
                 toast("Logged out successfully");
                 startActivity(new Intent(this, PreLobby.class));
-            }else if (networkThread.confirmation==0){
+            } else if (networkThread.confirmation == 0) {
                 toast("Connection timeout");
             } else if (networkThread.confirmation == 16) {
                 toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
