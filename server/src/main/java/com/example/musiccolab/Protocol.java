@@ -99,7 +99,7 @@ public class Protocol {
     private void readSizes(Charset messageCharset, SocketChannel clientChannel) throws IOException {
 
         ByteBuffer loginSystemBuffer = ByteBuffer.allocate(1);
-        if(action == register){
+        if(action == register || action == passwordForgotten){
             clientChannel.read(loginSystemBuffer);
             loginSystemBuffer.flip();
             emailSize = messageCharset.decode(loginSystemBuffer).toString().getBytes(messageCharset)[0];
@@ -126,11 +126,12 @@ public class Protocol {
         readSizes(messageCharset, clientChannel);
         ByteBuffer loginSystemBuffer;
 
-        // read email
+
         loginSystemBuffer = ByteBuffer.allocate(emailSize);
         clientChannel.read(loginSystemBuffer);
         loginSystemBuffer.flip();
         email = messageCharset.decode(loginSystemBuffer).toString();
+        System.out.println(email);
         loginSystemBuffer.clear();
 
         // read username
@@ -138,16 +139,17 @@ public class Protocol {
         clientChannel.read(loginSystemBuffer);
         loginSystemBuffer.flip();
         username = messageCharset.decode(loginSystemBuffer).toString();
+        System.out.println(username);
         loginSystemBuffer.clear();
 
         loginSystemBuffer = ByteBuffer.allocate(passwordSize);
         clientChannel.read(loginSystemBuffer);
         loginSystemBuffer.flip();
         password = messageCharset.decode(loginSystemBuffer).toString();
+        System.out.println(password);
         loginSystemBuffer.clear();
 
 
-        System.out.println(username +" "+ email +" "+ password);
         try {
             checkResponse = LoginSystem.forgotPassword(username, email, password);
             //Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
