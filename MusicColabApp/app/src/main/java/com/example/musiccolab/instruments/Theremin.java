@@ -11,6 +11,7 @@ public class Theremin implements Instrument {
     private static final String INSTRUMENT_TYPE = InstrumentType.THEREMIN;
     private final InstrumentGUIBox instrumentGUI;
     private static final int DEFAULT_SENSOR = Sensor.TYPE_LIGHT;
+    String stringToDisplay;
 
     public Theremin(InstrumentGUIBox instrumentGUI, SoundPlayer sp) {
         this.instrumentGUI = instrumentGUI;
@@ -35,7 +36,6 @@ public class Theremin implements Instrument {
             String toneToServer = "therm";
             StringBuilder sb = new StringBuilder();
             float x = (max - 5) / 8;
-            String stringToDisplay;
             if (event.getValues()[0] < x) {
                 stringToDisplay = "c Theremin";
                 toneToServer += "0";
