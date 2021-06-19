@@ -1,7 +1,6 @@
 package com.example.musiccolab.instruments;
 
 import android.annotation.SuppressLint;
-import android.hardware.SensorEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
@@ -18,10 +17,11 @@ public class Piano implements Instrument, View.OnClickListener {
     private final Animation scaleDown;
     private static final String INSTRUMENT_NAME = "Piano";
     private static final int FREEZE_DURATION_IN_MS = 300;
+    List<Button> pianoKeys;
 
     @SuppressLint("ClickableViewAccessibility")
     public Piano(InstrumentGUIBox instrumentGUI, Lobby lobby, SoundPlayer sp) {
-        List<Button> pianoKeys = instrumentGUI.getPianoKeys();
+        pianoKeys = instrumentGUI.getPianoKeys();
 
         scaleDown = AnimationUtils.loadAnimation(lobby, R.anim.scale_down);
 
@@ -32,7 +32,7 @@ public class Piano implements Instrument, View.OnClickListener {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
                         btn.startAnimation(scaleDown);
-                        sp.sendToneToServer("piano" + finalI);
+                        sp.sendToneToServer("piano"+finalI);
                         instrumentGUI.setTextInCenter(btn.getText() + " pressed");
                         break;
                     case MotionEvent.ACTION_UP:
@@ -60,7 +60,7 @@ public class Piano implements Instrument, View.OnClickListener {
     }
 
     @Override
-    public void reCalibrate(SensorEvent event) {
+    public void reCalibrate(SensorEventAdapter event) {
         // do nothing, or maybe changing landscape from vertical to horizontal?
     }
 
@@ -70,7 +70,7 @@ public class Piano implements Instrument, View.OnClickListener {
     }
 
     @Override
-    public void action(SensorEvent event) {
+    public void action(SensorEventAdapter event) {
         // do nothing
     }
 

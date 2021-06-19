@@ -72,7 +72,8 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
 
                 try {
                     synchronized (Thread.currentThread()) {
-                        Thread.currentThread().wait();
+                        // Set as connection timeout 2 seconds
+                        Thread.currentThread().wait(2000);
                     }
                 } catch (InterruptedException e) {
                     System.out.println("Error with waiting of main thread.");
@@ -86,6 +87,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                     toast("Connection timeout");
                 } else if (networkThread.confirmation == 11) {
                     toast("Username/password wrong\nPlease try again");
+                    networkThread.confirmation = 0;
                 }
             }
         }
