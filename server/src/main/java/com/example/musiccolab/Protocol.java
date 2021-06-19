@@ -32,9 +32,13 @@ public class Protocol {
     private short action;
     private short responseAction;
 
-    private byte userNameSize;
-    private byte emailSize;
-    private byte passwordSize;
+    byte userNameSize;
+    byte emailSize;
+    byte passwordSize;
+
+    String username, password, email = "";
+    String lobbyName = "";
+
 
 
 
@@ -173,8 +177,6 @@ public class Protocol {
 
     private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel, SelectionKey key)
             throws IOException {
-
-        String username, password, email = "";
         boolean checkResponse = false;
 
         readSizes(messageCharset, clientChannel);
@@ -236,7 +238,7 @@ public class Protocol {
         clientChannel.read(lobbyBuffer);
         lobbyBuffer.flip();
         if(action == createLobby && player != null){
-            String lobbyName = messageCharset.decode(lobbyBuffer).toString();
+            lobbyName = messageCharset.decode(lobbyBuffer).toString();
             int id = Server.createLobbyId();
             Lobby lobby = new Lobby(player, lobbyName, id);
             Server.lobbyMap.put(id,lobby);
@@ -266,12 +268,14 @@ public class Protocol {
             }
 
         }
+        /*
         else if(player != null){//
             int lobbyID = Integer.parseInt(messageCharset.decode(lobbyBuffer).toString());
             Game game = new Game(Server.lobbyMap.get(lobbyID));
             responseAction = action;
             sendResponseToClient(messageCharset,clientChannel,Integer.toString(lobbyID));
         }
+         */
         lobbyBuffer.clear();
     }
 
@@ -432,4 +436,18 @@ public class Protocol {
         emailSize = 0;
         passwordSize = 0;
     }
+
+
+//-------------------------------------------------For Tests -------------------------------------------------------
+    public void getParseLogin(Charset m, SocketChannel c, SelectionKey k) throws IOException {parseBufferForLoginSystem(m, c, k);}
+    public void getParseLobby(Charset m, SocketChannel c, SelectionKey k) throws IOException {parseBufferForLobbyOrGame(m, c, 7, k);}
+    public void getSize(Charset c, SocketChannel s) throws IOException {readSizes(c, s);}
+
+    public String getEmail(){return email;}
+    public String getUsername(){return username;}
+    public String getPassword(){return password;}
+    public String getLobbyName(){return lobbyName;}
+    public byte getEmailSize(){return emailSize;}
+    public byte getUserNameSize(){return userNameSize;}
+    public byte getPasswordSize(){return passwordSize;}
 }

@@ -233,5 +233,5 @@ public class Server {
 
     public void acceptForTest(SelectionKey key) throws IOException { handleConnectionWhenAcceptable(key);}
 
-    public void handleForTest(SelectionKey key) throws IOException { handleConnectionWhenReadable(key);}
+    public void handleReadableForTest(SelectionKey key) throws IOException { handleConnectionWhenReadable(key);}
 }

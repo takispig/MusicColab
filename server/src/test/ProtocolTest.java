@@ -88,7 +88,139 @@ class ProtocolTest {
     }
 
     @Test
-    void handleAction() {
+    void ParseForLoginSystem() throws IPAddressException, IOException, SocketBindException {
+        resetProperties();
+
+        setupServerAddress("192.168.178.42", 1203);
+        defineCharType();
+        OpenSelectorAndSetupSocket();
+
+        int action = 3;
+        Client thread = new Client(3, Thread.currentThread(), (short)action);
+        thread.start();
+
+        int counter = 0;
+        while (counter < 2) {
+            selector.select();
+
+            Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
+
+            while (selectedKeys.hasNext()) {
+                SelectionKey key = (SelectionKey) selectedKeys.next();
+
+                if (key.isAcceptable()) {
+                    handleConnectionWhenAcceptable(key);
+
+                } else if (key.isReadable()) {
+                    protocol.getParseLogin(messageCharset, (SocketChannel) key.channel(), key);
+                    assert protocol.getEmail().equals("zead@gmail.com");
+                    assert protocol.getUsername().equals("zead");
+                    assert protocol.getPassword().equals("123");
+                }
+                selectedKeys.remove();
+            }
+
+            if(counter == 1) {
+                try {
+                    synchronized (Thread.currentThread()) {
+                        Thread.currentThread().wait();
+                    }
+                } catch (InterruptedException e) {
+                    System.out.println("Error with waiting of main thread.");
+                }
+            }
+            counter++;
+        }
+    }
+
+    @Test
+    void ParseForLobby() throws IPAddressException, IOException, SocketBindException {
+        resetProperties();
+
+        setupServerAddress("192.168.178.42", 1204);
+        defineCharType();
+        OpenSelectorAndSetupSocket();
+
+        int action = 4;
+        Client thread = new Client(4, Thread.currentThread(), (short)action);
+        thread.start();
+
+        int counter = 0;
+        while (counter < 2) {
+            selector.select();
+
+            Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
+
+            while (selectedKeys.hasNext()) {
+                SelectionKey key = (SelectionKey) selectedKeys.next();
+
+                if (key.isAcceptable()) {
+                    handleConnectionWhenAcceptable(key);
+
+                } else if (key.isReadable()) {
+                    protocol.getParseLobby(messageCharset, (SocketChannel) key.channel(), key);
+                    assert protocol.getLobbyName().equals("example");
+                }
+                selectedKeys.remove();
+            }
+
+            if(counter == 1) {
+                try {
+                    synchronized (Thread.currentThread()) {
+                        Thread.currentThread().wait();
+                    }
+                } catch (InterruptedException e) {
+                    System.out.println("Error with waiting of main thread.");
+                }
+            }
+            counter++;
+        }
+    }
+
+    @Test
+    void readSizes() throws IPAddressException, IOException, SocketBindException {
+        resetProperties();
+
+        setupServerAddress("192.168.178.42", 1205);
+        defineCharType();
+        OpenSelectorAndSetupSocket();
+
+        int action = 3;
+        Client thread = new Client(5, Thread.currentThread(), (short)action);
+        thread.start();
+
+        int counter = 0;
+        while (counter < 2) {
+            selector.select();
+
+            Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
+
+            while (selectedKeys.hasNext()) {
+                SelectionKey key = (SelectionKey) selectedKeys.next();
+
+                if (key.isAcceptable()) {
+                    handleConnectionWhenAcceptable(key);
+
+                } else if (key.isReadable()) {
+                    protocol.getSize(messageCharset, (SocketChannel) key.channel());
+                    assert protocol.getEmailSize() == 14;
+                    assert protocol.getUserNameSize() == 4;
+                    assert protocol.getPasswordSize() == 3;
+                }
+                selectedKeys.remove();
+            }
+
+            if(counter == 1) {
+                try {
+                    synchronized (Thread.currentThread()) {
+                        Thread.currentThread().wait();
+                    }
+                } catch (InterruptedException e) {
+                    System.out.println("Error with waiting of main thread.");
+                }
+            }
+            counter++;
+        }
     }
 
     @Test
@@ -148,5 +280,14 @@ class ProtocolTest {
         tempBuffer.flip();
         channel.write(tempBuffer);
         tempBuffer.clear();
+    }
+
+    private void resetProperties(){
+        messageCharset = null;
+        decoder = null;//Network order = Byte --> Characters = Host order
+        encoder = null;//Characters = Host order -->  Network order = Byte
+        serverChannel = null;
+        serverAddress = null;
+        selector = null;
     }
 }

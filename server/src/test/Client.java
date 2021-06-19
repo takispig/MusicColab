@@ -21,10 +21,10 @@ public class Client implements Runnable{
 
     @Override
     public void run() {
-        if(test == 0)
-            client = new CommunicationHandling(mainThread, test);
-        else if(test == 1)
+        if(test == 1)
             client = new CommunicationHandling(Thread.currentThread(), test);
+        else
+            client = new CommunicationHandling(mainThread, test);
         client.username = "zead";
         client.password = "123";
         client.email = "zead@gmail.com";

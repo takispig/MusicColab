@@ -32,6 +32,7 @@ class ServerTest {
     private Selector selector = null;
 
     public static String result = "";
+    public static short protocolName = 0;
 
     private final Protocol protocol = new Protocol();
 
@@ -109,7 +110,53 @@ class ServerTest {
         } catch (InterruptedException e) {
             System.out.println("Error with waiting of main thread.");
         }
+        System.out.println(result);
         assert result.equals("Welcome in MusicCoLab Server.\r\n");
+    }
+
+    @Test
+    void handleConnectionWhenReadable() throws IPAddressException, IOException, SocketBindException {
+        resetProperties();
+
+        setupServerAddress("192.168.178.42", 1202);
+        defineCharType();
+        OpenSelectorAndSetupSocket();
+        server.setSelector(selector);
+        server.setMessageCharset(messageCharset);
+
+        int action = 3;
+        protocolName = 12844;
+        Client thread = new Client(2, Thread.currentThread(), (short)action);
+        thread.start();
+
+        int counter = 0;
+        while (counter < 2) {
+            selector.select();
+
+            Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
+
+            while (selectedKeys.hasNext()) {
+                SelectionKey key = (SelectionKey) selectedKeys.next();
+
+                if (key.isAcceptable()) {
+                    server.acceptForTest(key);
+                    counter = 1;
+                } else if (key.isReadable()) {
+                    server.handleReadableForTest(key);
+                    counter = 2;
+                }
+                selectedKeys.remove();
+            }
+        }
+        try {
+            synchronized (Thread.currentThread()) {
+                Thread.currentThread().wait(2000);
+            }
+        } catch (InterruptedException e) {
+            System.out.println("Error with waiting of main thread.");
+        }
+        System.out.println(result);
+        assert result.substring(result.indexOf("Y")).equals("You are not our customer.\r\n");
     }
 
     @Test
@@ -177,5 +224,6 @@ class ServerTest {
         serverChannel = null;
         serverAddress = null;
         selector = null;
+        result = "";
     }
 }

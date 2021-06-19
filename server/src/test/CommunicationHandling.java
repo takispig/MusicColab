@@ -39,7 +39,7 @@ public class CommunicationHandling implements Runnable {
 
     final private List<Short> codesList = new ArrayList<>();
     final private List<Short> errorCodesList = new ArrayList<>();
-    final private short protocolName = 12845;
+    private short protocolName = 12845;
 
     public short action = 0;
     public String email = null;
@@ -77,9 +77,20 @@ public class CommunicationHandling implements Runnable {
 
     @Override
     public void run() {
-        if(test == 1)
+        if(test == 0)
+            port = 1200;
+        else if(test == 1)
             port = 1201;
-        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_LOGIN_ACTION) {
+        else if (test == 2){
+            port = 1202; protocolName = ServerTest.protocolName;}
+        else if(test == 3)
+            port = 1203;
+        else if(test == 4)
+            port = 1204;
+        else if(test == 5)
+            port = 1205;
+
+        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_LOGIN_ACTION || test == 4) {
             buildConnection();
             connectToServer();
         }
@@ -103,17 +114,19 @@ public class CommunicationHandling implements Runnable {
                         clientChannel.finishConnect();
                         clientChannel.read(buffer);
                         buffer.flip();
+                        result = null;
+                        ServerTest.result = null;
                         result = messageCharset.decode(buffer).toString();
                         ServerTest.result = result;
                         System.out.println(result);
-                        //for test 1
+
                         if(test == 1) {
                             action = 0;
                             synchronized (mainThread) {
                                 mainThread.notify();
                             }
                         }
-                        //for test 1
+
                     } catch (IOException e) {
                         System.out.println("Problem with finishConnect");
                     }
@@ -124,7 +137,19 @@ public class CommunicationHandling implements Runnable {
                         handleAction(actionAndDataLength[0], actionAndDataLength[1]);
                     } else {
                         try {
-                            clientChannel.read(ByteBuffer.allocate(1000));
+                            ByteBuffer errorBuffer = ByteBuffer.allocate(31);
+                            clientChannel.read(errorBuffer);
+                            errorBuffer.flip();
+                            result = null;
+                            ServerTest.result = null;
+                            ServerTest.result = messageCharset.decode(errorBuffer).toString().substring(1);
+                            result = ServerTest.result;
+                            if(test == 2) {
+                                synchronized (mainThread) {
+                                    mainThread.notify();
+                                }
+                            }
+                            clientChannel.close();
                         } catch (IOException e) {
                             System.err.println("Error with empty channel.");
                         }
@@ -137,12 +162,12 @@ public class CommunicationHandling implements Runnable {
                 sendMessageByAction(action);
                 action = 0;
 
-                //for test 0
-                if(test == 0){
-                synchronized (mainThread) {
-                    mainThread.notify();
-                }}
-                //for test 0
+
+                if(test == 0 || test == 3 || test == 4 || test == 5){
+                    synchronized (mainThread) {
+                        mainThread.notify();
+                    }
+                }
             }
         }
     }
@@ -311,6 +336,7 @@ public class CommunicationHandling implements Runnable {
                 buffer.flip();
                 if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_LOGOUT_ACTION || action == 13 || action == 12) {
                     result = messageCharset.decode(buffer).toString();
+                    ServerTest.result = result;
                     clientChannel.close();
                 } else if (action == 1) {
                     response = messageCharset.decode(buffer).toString().split(",");
@@ -461,6 +487,6 @@ public class CommunicationHandling implements Runnable {
     }
 
     private static short getShort(byte[] b) {
-        return (short) (((b[1] << 8) | b[0] & 0xff));
+        return b.length > 2? (short) (((b[1] << 8) | b[0] & 0xff)) : -1;
     }
 }
