@@ -120,18 +120,8 @@ public class Protocol {
         boolean checkResponse = false;
         ByteBuffer loginSystemBuffer1 = ByteBuffer.allocate(1);
 
-        // read email-size
-        clientChannel.read(loginSystemBuffer1);
-        loginSystemBuffer1.flip();
-        emailSize = messageCharset.decode(loginSystemBuffer1).toString().getBytes(messageCharset)[0];
-        loginSystemBuffer1.clear();
 
-        //read username-size
-        clientChannel.read(loginSystemBuffer1);
-        loginSystemBuffer1.flip();
-        userNameSize = messageCharset.decode(loginSystemBuffer1).toString().getBytes(messageCharset)[0];
-        loginSystemBuffer1.clear();
-
+        readSizes(messageCharset, clientChannel);
         ByteBuffer loginSystemBuffer;
 
         // read email
@@ -157,7 +147,7 @@ public class Protocol {
         try {
             checkResponse = LoginSystem.forgotPassword(username, email, password);
             Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+            sendResponseToClient(messageCharset, clientChannel, checkResponse? "8":"18" + "Password changed");
         } catch (SQLException e) {
             System.out.println("Fehler passwort Reset");
             e.printStackTrace();
