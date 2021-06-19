@@ -440,4 +440,17 @@ public class CommunicationHandling implements Runnable {
     private static short getShort(byte[] b) {
         return (short) (((b[1] << 8) | b[0] & 0xff));
     }
+
+    // function to clear up the data after logout or leaveLobby
+    public static void wipeData(int action, CommunicationHandling networkThread) {
+        if (action == 2) {
+            networkThread.username = null;
+            networkThread.email = null;
+            networkThread.password = null;
+        }
+        networkThread.admin = false;
+        networkThread.confirmation = 0;
+        networkThread.lobbyID = -1;
+        networkThread.lobbyName = null;
+    }
 }

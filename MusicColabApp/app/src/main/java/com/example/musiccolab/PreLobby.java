@@ -218,13 +218,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
 
             if (networkThread.confirmation==2){
                 // reset the sensitive user data after logout
-                networkThread.username = null;
-                networkThread.email = null;
-                networkThread.password = null;
-                networkThread.lobbyID = -1;
-                networkThread.lobbyName = null;
-                networkThread.admin = false;
-                networkThread.confirmation = 0;
+                CommunicationHandling.wipeData(2, networkThread);
                 startActivity(new Intent(this, Login.class));
             }else if (networkThread.confirmation == 0){
                 toast("Connection timeout - no response");
@@ -276,13 +270,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
 
             if (networkThread.confirmation==2){
                 // reset the sensitive user data after logout
-                networkThread.username = null;
-                networkThread.email = null;
-                networkThread.password = null;
-                networkThread.lobbyID = -1;
-                networkThread.lobbyName = null;
-                networkThread.admin = false;
-                networkThread.confirmation = 0;
+                CommunicationHandling.wipeData(2, networkThread);
                 startActivity(new Intent(this, Login.class));
             }else if (networkThread.confirmation == 0){
                 toast("Connection timeout - no response");

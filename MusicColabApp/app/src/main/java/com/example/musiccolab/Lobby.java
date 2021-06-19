@@ -197,13 +197,12 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
                 System.out.println("Error with waiting of main thread.");
             }
             String output = networkThread.result;
+            System.out.println(output);
 
             System.out.println("LeaveLobby conf-code: " + networkThread.confirmation);
             if (networkThread.confirmation==6){
                 // reset the sensitive user data after logout
-                networkThread.confirmation = 0;
-                networkThread.lobbyID = -1;
-                networkThread.lobbyName = null;
+                CommunicationHandling.wipeData(6, networkThread);
                 toast("Logged out successfully");
                 startActivity(new Intent(this, PreLobby.class));
             }else if (networkThread.confirmation==0){
@@ -253,8 +252,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             System.out.println("LeaveLobby conf-code: " + networkThread.confirmation);
             if (networkThread.confirmation==6){
                 // reset the sensitive user data after logout
-                networkThread.lobbyID = -1;
-                networkThread.lobbyName = null;
+                CommunicationHandling.wipeData(6, networkThread);
                 toast("Logged out successfully");
                 startActivity(new Intent(this, PreLobby.class));
             }else if (networkThread.confirmation==0){
