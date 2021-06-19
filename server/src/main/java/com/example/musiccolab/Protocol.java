@@ -147,7 +147,7 @@ public class Protocol {
         try {
             checkResponse = LoginSystem.forgotPassword(username, email, password);
             Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-            sendResponseToClient(messageCharset, clientChannel, checkResponse? "8":"18" + "Password changed");
+            sendResponseToClient(messageCharset, clientChannel, checkResponse? "8":"18");
         } catch (SQLException e) {
             System.out.println("Fehler passwort Reset");
             e.printStackTrace();
