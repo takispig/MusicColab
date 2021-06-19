@@ -118,8 +118,6 @@ public class Protocol {
 
         String username, email, password = "";
         boolean checkResponse = false;
-        ByteBuffer loginSystemBuffer1 = ByteBuffer.allocate(1);
-
 
         readSizes(messageCharset, clientChannel);
         ByteBuffer loginSystemBuffer;
@@ -144,9 +142,11 @@ public class Protocol {
         password = messageCharset.decode(loginSystemBuffer).toString();
         loginSystemBuffer.clear();
 
+
+        System.out.println(username +" "+ email +" "+ password);
         try {
             checkResponse = LoginSystem.forgotPassword(username, email, password);
-            Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+            //Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
             sendResponseToClient(messageCharset, clientChannel, checkResponse? "8":"18");
         } catch (SQLException e) {
             System.out.println("Fehler passwort Reset");
@@ -156,9 +156,6 @@ public class Protocol {
             e.printStackTrace();
         }
 
-
-        Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(action + 10, false));
-        sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(action + 10, false));
     }
 
     private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel, SelectionKey key)
@@ -320,7 +317,6 @@ public class Protocol {
     public void handleAction(Charset messageCharset, SocketChannel clientChannel, int bufferSize, SelectionKey key) throws IOException {
         if(bufferSize != 0){
             playerAddress = clientChannel.getRemoteAddress();
-
             if(action == login || action == logout || action == register){
                 parseBufferForLoginSystem(messageCharset, clientChannel, key);
             }
