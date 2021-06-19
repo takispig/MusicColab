@@ -24,8 +24,8 @@ public class CommunicationHandling implements Runnable {
     public static final int PROTOCOL_LEAVE_LOBBY_ACTION = 6;
     public static final int PROTOCOL_TONE_ACTION = 7;
 
-    private static final String IP = "35.207.116.16";
-    private static final int port = 8080;
+    private static final String IP = "192.168.178.42";
+    private static int port = 1200;
 
     public static final String CAN_NOT_READ_FROM_BUFFER = "Can not read from buffer.";
     public static final String CAN_NOT_WRITE_IN_BUFFER = "Can not write in buffer.";
@@ -62,18 +62,23 @@ public class CommunicationHandling implements Runnable {
     public int confirmation;
     public boolean threadExist = false;
 
+    private int test;
 
-    public CommunicationHandling(Thread thread) {
+
+    public CommunicationHandling(Thread thread, int test) {
         mainThread = thread;
         for (short index = 1; index < 11; index++) {
             codesList.add(index);
             errorCodesList.add((short) (index + 10));
         }
+        this.test = test;
     }
 
 
     @Override
     public void run() {
+        if(test == 1)
+            port = 1201;
         if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_LOGIN_ACTION) {
             buildConnection();
             connectToServer();
@@ -99,11 +104,14 @@ public class CommunicationHandling implements Runnable {
                         clientChannel.read(buffer);
                         buffer.flip();
                         result = messageCharset.decode(buffer).toString();
+                        ServerTest.result = result;
                         System.out.println(result);
                         //for test 1
-                        action = 0;
-                        synchronized (mainThread) {
-                            mainThread.notify();
+                        if(test == 1) {
+                            action = 0;
+                            synchronized (mainThread) {
+                                mainThread.notify();
+                            }
                         }
                         //for test 1
                     } catch (IOException e) {
@@ -130,9 +138,10 @@ public class CommunicationHandling implements Runnable {
                 action = 0;
 
                 //for test 0
+                if(test == 0){
                 synchronized (mainThread) {
                     mainThread.notify();
-                }
+                }}
                 //for test 0
             }
         }

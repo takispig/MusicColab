@@ -31,6 +31,8 @@ class ServerTest {
     private InetSocketAddress serverAddress = null;
     private Selector selector = null;
 
+    public static String result = "";
+
     private final Protocol protocol = new Protocol();
 
     private boolean running = true;
@@ -74,7 +76,10 @@ class ServerTest {
 
     @Test
     void handleConnectionWhenAcceptable() throws IPAddressException, IOException, SocketBindException {
-        setupServerAddress("192.168.178.42", 1200);
+
+        resetProperties();
+
+        setupServerAddress("192.168.178.42", 1201);
         defineCharType();
         OpenSelectorAndSetupSocket();
         server.setSelector(selector);
@@ -104,8 +109,7 @@ class ServerTest {
         } catch (InterruptedException e) {
             System.out.println("Error with waiting of main thread.");
         }
-        String s = thread.result;
-        assert thread.result.equals("Welcome in MusicCoLab Server.\r\n");
+        assert result.equals("Welcome in MusicCoLab Server.\r\n");
     }
 
     @Test
@@ -164,5 +168,14 @@ class ServerTest {
         } catch (IOException e) {
             throw new SocketBindException();
         }
+    }
+
+    private void resetProperties(){
+        messageCharset = null;
+        decoder = null;//Network order = Byte --> Characters = Host order
+        encoder = null;//Characters = Host order -->  Network order = Byte
+        serverChannel = null;
+        serverAddress = null;
+        selector = null;
     }
 }

@@ -2,6 +2,8 @@ package test;
 
 import test.CommunicationHandling;
 
+import java.sql.Time;
+
 
 public class Client implements Runnable{
 
@@ -9,8 +11,6 @@ public class Client implements Runnable{
     private Thread thread = null;
     CommunicationHandling client;
     short action;
-
-    public String result = "";
     public int test;
 
     public Client(int test, Thread thread, short action){
@@ -22,9 +22,9 @@ public class Client implements Runnable{
     @Override
     public void run() {
         if(test == 0)
-            client = new CommunicationHandling(mainThread);
+            client = new CommunicationHandling(mainThread, test);
         else if(test == 1)
-            client = new CommunicationHandling(Thread.currentThread());
+            client = new CommunicationHandling(Thread.currentThread(), test);
         client.username = "zead";
         client.password = "123";
         client.email = "zead@gmail.com";
@@ -51,13 +51,17 @@ public class Client implements Runnable{
             } catch (InterruptedException e) {
                 System.out.println("Error with waiting of main thread.");
             }
-            result = client.result;
             synchronized (mainThread) {
                 mainThread.notify();
             }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            client.stop();
         }
 
-        client.stop();
         Thread.currentThread().stop();
     }
 
