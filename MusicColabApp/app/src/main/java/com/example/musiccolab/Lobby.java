@@ -191,7 +191,8 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             //networkThread.lobbyID = Login.networkThread.lobbyID;
             try {
                 synchronized (Thread.currentThread()) {
-                    Thread.currentThread().wait();
+                    // Set as connection timeout 2 seconds
+                    Thread.currentThread().wait(2000);
                 }
             } catch (InterruptedException e) {
                 System.out.println("Error with waiting of main thread.");
@@ -242,7 +243,8 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             networkThread.action = 6;
             try {
                 synchronized (Thread.currentThread()) {
-                    Thread.currentThread().wait();
+                    // Set as connection timeout 2 seconds
+                    Thread.currentThread().wait(2000);
                 }
             } catch (InterruptedException e) {
                 System.out.println("Error with waiting of main thread.");

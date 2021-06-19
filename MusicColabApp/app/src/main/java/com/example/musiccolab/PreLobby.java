@@ -111,7 +111,8 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
 
             try {
                 synchronized (Thread.currentThread()) {
-                    Thread.currentThread().wait();
+                    // Set as connection timeout 2 seconds
+                    Thread.currentThread().wait(2000);
                 }
             } catch (InterruptedException e) {
                 System.out.println("Error with waiting of main thread.");
@@ -177,7 +178,8 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
 
             try {
                 synchronized (Thread.currentThread()) {
-                    Thread.currentThread().wait();
+                    // Set as connection timeout 2 seconds
+                    Thread.currentThread().wait(2000);
                 }
             } catch (InterruptedException e) {
                 System.out.println("Error with waiting of main thread.");
@@ -208,7 +210,8 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             networkThread.action = 2;
             try {
                 synchronized (Thread.currentThread()) {
-                    Thread.currentThread().wait();
+                    // Set as connection timeout 2 seconds
+                    Thread.currentThread().wait(2000);
                 }
             } catch (InterruptedException e) {
                 System.out.println("Error with waiting of main thread.");
@@ -260,7 +263,8 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             networkThread.action = 2;
             try {
                 synchronized (Thread.currentThread()) {
-                    Thread.currentThread().wait();
+                    // Set as connection timeout 2 seconds
+                    Thread.currentThread().wait(2000);
                 }
             } catch (InterruptedException e) {
                 System.out.println("Error with waiting of main thread.");
