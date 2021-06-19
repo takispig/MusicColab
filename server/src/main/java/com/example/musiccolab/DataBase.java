@@ -229,12 +229,14 @@ public final class DataBase {
         if (con == null) {
             getConnection();
         }
+        System.out.println("ResetPasword");
         PreparedStatement prep = con.prepareStatement("UPDATE "
                 + TABLE_NAME + " SET " + PASSWORD_COL_NAME + " = ? WHERE " + NAME_COL_NAME
                 + " = ? AND " + EMAIL_COL_NAME + " = ?");
         prep.setString(1, password);
         prep.setString(2, username);
         prep.setString(3, email);
+        System.out.println(prep.toString());
         prep.execute();
 
     }

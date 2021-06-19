@@ -170,7 +170,9 @@ public final class LoginSystem {
     }
 
     public static boolean forgotPassword(String username, String email,String password) throws SQLException, ClassNotFoundException {
+        System.out.println(checkForRegistration(username,email));
         if(checkForRegistration(username,email)){
+            System.out.println("ResetPassword");
             DataBase.resetPasswort(username,email,password);
             return true;
         }

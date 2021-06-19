@@ -111,7 +111,7 @@ public class Server {
             }
         }
         else if(result[1] == -3) {
-            System.out.println("main.java.com.example.musiccolab.Client is disconnected.");
+            System.out.println("Client is disconnected.");
             int id = -1;
             if(disconnectedPlayer != null){
                 id = disconnectedPlayer.getLobbyId();
@@ -121,7 +121,9 @@ public class Server {
             if(id != -1) {
                 lobbyOfDisconnectedPlayer = lobbyMap.get(id);
                 lobbyOfDisconnectedPlayer.removePlayer(disconnectedPlayer);
-                if(lobbyOfDisconnectedPlayer.isEmpty()) lobbyOfDisconnectedPlayer = null;
+                if(lobbyOfDisconnectedPlayer.isEmpty()) {
+                    lobbyMap.remove(id);
+                }
                 disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
             }
 
