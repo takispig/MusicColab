@@ -77,7 +77,15 @@ public class Lobby {
 
     public byte getUsersNumber(){return usersNumber;}
 
-    public  boolean isEmpty(){
+    public boolean isEmpty(){
         return players.isEmpty();
+    }
+
+    public String getPlayerIDs() {
+        StringBuilder ids = new StringBuilder();
+        for (Player player : players) {
+            ids.append(player.getId() + ";");
+        }
+        return ids.toString();
     }
 }

@@ -123,11 +123,11 @@ public final class DataBase {
                         + " varchar (60)," + PASSWORD_COL_NAME
                         + " varchar (60)," + "primary key(id));");
                 PreparedStatement prep =
-                        con.prepareStatement("INSERT INTO User "
-                                + "values(?, ?, ?, ?); ");
-                prep.setString(COL_INT_NAME, "Max Mustermann");
-                prep.setString(COL_INT_EMAIL, "maxmustermann@mail.de");
-                prep.setString(COL_INT_PW, "1234");
+                        con.prepareStatement("INSERT INTO User (name,email,passwort) "
+                                + "values(?, ?, ?); ");
+                prep.setString(1, "Max Mustermann");
+                prep.setString(2, "maxmustermann@mail.de");
+                prep.setString(3, "1234");
                 prep.execute();
             }
         }
@@ -149,11 +149,11 @@ public final class DataBase {
         }
 
         PreparedStatement prep = con.prepareStatement("INSERT INTO "
-                + TABLE_NAME + " values(?, ?, ?, ?);");
-        prep.setInt(COL_INT_ID, Server.createPlayerId());
-        prep.setString(COL_INT_NAME, name);
-        prep.setString(COL_INT_EMAIL, email);
-        prep.setString(COL_INT_PW, passwort);
+                + TABLE_NAME + " (name,email,passwort) values(?, ?, ?);");
+
+        prep.setString(1, name);
+        prep.setString(2, email);
+        prep.setString(3, passwort);
 
         prep.execute();
 
@@ -200,15 +200,15 @@ public final class DataBase {
                 + "' AND " + PASSWORD_COL_NAME + " ='" + password + "'");
         return res;
     }
-    /*
-    **
+
+    /**
      * Delete user from Database.
      * @param name from User
      * @param email from user
      * @param password from User
      * @throws SQLException
      * @throws ClassNotFoundException
-    *
+    */
     public static void delUser(final String name, final String email,
                                final String password)
             throws SQLException, ClassNotFoundException {
@@ -219,12 +219,26 @@ public final class DataBase {
                 + TABLE_NAME + " WHERE " + NAME_COL_NAME
                 + " = ? AND " + EMAIL_COL_NAME + " = ? AND "
                 + PASSWORD_COL_NAME + " = ?");
-        prep.setString(COL_INT_NAME, name);
-        prep.setString(COL_INT_EMAIL, email);
-        prep.setString(COL_INT_PW, password);
+        prep.setString(1, name);
+        prep.setString(2, email);
+        prep.setString(3, password);
         prep.execute();
     }
-    */ //Not used yet
+
+    public static void resetPasswort(String username, String email, String password) throws SQLException, ClassNotFoundException {
+        if (con == null) {
+            getConnection();
+        }
+        PreparedStatement prep = con.prepareStatement("UPDATE "
+                + TABLE_NAME + " SET " + PASSWORD_COL_NAME + " = ? WHERE " + NAME_COL_NAME
+                + " = ? AND " + EMAIL_COL_NAME + " = ?");
+        prep.setString(1, password);
+        prep.setString(2, username);
+        prep.setString(3, email);
+        prep.execute();
+
+    }
+
     /*
     public static int getID(final String name, final String password)
             throws SQLException, ClassNotFoundException {

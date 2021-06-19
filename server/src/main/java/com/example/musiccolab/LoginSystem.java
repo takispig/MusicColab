@@ -1,5 +1,6 @@
 package main.java.com.example.musiccolab;
 
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 
@@ -34,7 +35,7 @@ public final class LoginSystem {
      * @throws SQLException if something goes wrong with SQL
      * @throws ClassNotFoundException if something goes wrong with driver
      */
-    public static boolean login(final String name, final String passwort,
+    public static Player login(final String name, final String passwort,
                                 final SocketChannel channel)
             throws SQLException, ClassNotFoundException, IOException {
         //check for registration
@@ -47,16 +48,23 @@ public final class LoginSystem {
             player.setLoggedIn();
             //add data to List
             Server.loggedInPlayers.put(res.getInt(COL_INT_ID), player);
-            Server.loggedInList.put(channel, player);
 
             player.state.setState(ClientState.loggedIn);
+            return player;
+        } else {
+            return null;
+        }
+
+    }
+    public static boolean loginWithoutChannel(final String name, final String passwort) throws SQLException, ClassNotFoundException {
+        if (checkLogin(name, passwort)) {
+            //create new player
+            ResultSet res = DataBase.getUserlogin(name, passwort);
             return true;
         } else {
             return false;
         }
-
     }
-
     /**
      * check if the player is registered and logged in,
      * if so delete player from loggedInPlayers and the game.
@@ -71,7 +79,6 @@ public final class LoginSystem {
         //check in list
         if (checkLogin(name, passwort)
                 & Server.loggedInPlayers.get(getId(name, passwort)) != null) {
-
             Player player = Server.loggedInPlayers.get(getId(name, passwort));
             int lobbyId = -1;
             if(player != null)
@@ -85,7 +92,6 @@ public final class LoginSystem {
                 }
                 player.state.setState(ClientState.loggedOut);
             }
-            //del player from list
             Server.loggedInPlayers.remove(getId(name, passwort));
             player = null;
             return true;
@@ -163,12 +169,11 @@ public final class LoginSystem {
         } else return -1;
     }
 
-    /**
-     * method to get the player from "on" the channel.
-     * @param channel from searched player
-     * @return Player which is on the channel
-     */
-    public static Player getPlayerByChannel(final SocketChannel channel) {
-        return Server.loggedInList.get(channel);
+    public static boolean forgotPassword(String username, String email,String password) throws SQLException, ClassNotFoundException {
+        if(checkForRegistration(username,email)){
+            DataBase.resetPasswort(username,email,password);
+            return true;
+        }
+        return false;
     }
 }

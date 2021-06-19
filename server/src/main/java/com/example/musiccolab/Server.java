@@ -11,6 +11,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.*;
+import java.sql.SQLException;
 import java.util.*;
 
 import static java.lang.System.exit;
@@ -23,8 +24,6 @@ public class Server {
     private InetSocketAddress serverAddress = null;
     private Selector selector = null;
 
-    private final Protocol protocol = new Protocol();
-
     private boolean running = true;
     private boolean finished = false;
 
@@ -33,7 +32,8 @@ public class Server {
 
     public static HashMap<Integer,Lobby> lobbyMap = new HashMap<>();
     public static HashMap<Integer,Player> loggedInPlayers = new HashMap<>();
-    public static HashMap<SocketChannel, Player> loggedInList = new HashMap<>();
+
+    private static Protocol protocol = new Protocol();
 
     public void setupServerAddress(String address, int port) throws IPAddressException {
         try {
@@ -87,24 +87,26 @@ public class Server {
      * handle the received action.
      */
     private void handleConnectionWhenReadable(SelectionKey key) throws IOException {
-        //int state = (Integer) key.attachment(); //To save the state of all clients. Integer --> Class
 
         SocketChannel clientChannel = (SocketChannel) key.channel();
         //Read the first 6 indexes. (Protocol name, Action and data length. 2 Bytes each)
-        Player disconnectedPlayer = LoginSystem.getPlayerByChannel(clientChannel);
+        Player disconnectedPlayer = (Player) key.attachment();
+
 
         short[] result = protocol.analyseMainBuffer(messageCharset, clientChannel);
         if(result[1] == -1) {
             protocol.sendResponseToClient(messageCharset, clientChannel, "You are not our customer.\r\n");
-            disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
-            loggedInList.remove(clientChannel);
+            if (disconnectedPlayer != null) {
+                disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
+            }
             clientChannel.close();
         }
         else if(result[1] == -2) {
             if(result[0] != 0) {
                 protocol.sendResponseToClient(messageCharset, clientChannel, "Action is not known.\r\n");
-                disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
-                loggedInList.remove(clientChannel);
+                if (disconnectedPlayer != null) {
+                    disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
+                }
                 clientChannel.close();
             }
         }
@@ -114,7 +116,6 @@ public class Server {
             if(disconnectedPlayer != null){
                 id = disconnectedPlayer.getLobbyId();
                 loggedInPlayers.remove(disconnectedPlayer.getId());
-                loggedInList.remove(clientChannel);
             }
             Lobby lobbyOfDisconnectedPlayer = null;
             if(id != -1) {
@@ -123,10 +124,13 @@ public class Server {
                 if(lobbyOfDisconnectedPlayer.isEmpty()) lobbyOfDisconnectedPlayer = null;
                 disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
             }
+
             clientChannel.close();
         }
         else if(result[1] != 0)
-            protocol.handleAction(messageCharset, clientChannel, result[1]);
+            protocol.handleAction(messageCharset, clientChannel, result[1], key);
+
+        protocol.resetProtocol();
     }
 
     public void handleConnection() throws IOException {
@@ -144,12 +148,7 @@ public class Server {
                     handleConnectionWhenAcceptable(key);
 
                 } else if (key.isReadable()) {
-                    long a = System.currentTimeMillis();
                     handleConnectionWhenReadable(key);
-                    long b = System.currentTimeMillis();
-                    System.out.println("before: " + a);
-                    System.out.println("after: " + b);
-                    System.out.println("duration: " + (b-a));
                 }
                 selectedKeys.remove();
             }
@@ -205,6 +204,7 @@ public class Server {
     public Selector getSelectorForTesting(){
         return selector;
     }
+    public void setSelector(Selector s){selector = s;}
 
     public ServerSocketChannel getServerChannelForTesting(){
         return serverChannel;
@@ -213,6 +213,7 @@ public class Server {
     public Charset getMessageCharsetForTesting(){
         return messageCharset;
     }
+    public void setMessageCharset(Charset m){messageCharset = m;}
 
     public CharsetDecoder getDecoderForTesting(){
         return decoder;
@@ -229,4 +230,8 @@ public class Server {
     public boolean isFinishedForTesting(){
         return finished;
     }
+
+    public void acceptForTest(SelectionKey key) throws IOException { handleConnectionWhenAcceptable(key);}
+
+    public void handleReadableForTest(SelectionKey key) throws IOException { handleConnectionWhenReadable(key);}
 }
