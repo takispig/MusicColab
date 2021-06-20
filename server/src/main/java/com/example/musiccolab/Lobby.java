@@ -69,7 +69,7 @@ public class Lobby {
             player.setLobbyId(-1);
             if (player.isAdmin()) {
                 if (!players.isEmpty()) {
-                    players.getFirst().setAdmin();
+                    setAdmin(players.getFirst());
                 }
                 else admin = null;
             }
