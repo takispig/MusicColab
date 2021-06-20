@@ -138,6 +138,8 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             } else {
                 networkThread.lobbyName = null;
                 toast("Connection timeout");
+                CommunicationHandling.wipeData(2, networkThread);
+                startActivity(new Intent(this, Login.class));
             }
             networkThread.confirmation = 0;
         }
@@ -198,6 +200,8 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             } else {
                 networkThread.lobbyID = -1;
                 toast("Connection timeout");
+                CommunicationHandling.wipeData(2, networkThread);
+                startActivity(new Intent(this, Login.class));
             }
             networkThread.confirmation = 0;
         }
@@ -225,6 +229,8 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                 startActivity(new Intent(this, Login.class));
             }else if (networkThread.confirmation == 0){
                 toast("Connection timeout - no response");
+                CommunicationHandling.wipeData(2, networkThread);
+                startActivity(new Intent(this, Login.class));
             } else if (networkThread.confirmation == 12) {
                 toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
                 networkThread.confirmation = 0;
@@ -278,6 +284,8 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                 startActivity(new Intent(this, Login.class));
             }else if (networkThread.confirmation == 0){
                 toast("Connection timeout - no response");
+                CommunicationHandling.wipeData(2, networkThread);
+                startActivity(new Intent(this, Login.class));
             } else if (networkThread.confirmation == 12) {
                 toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
                 networkThread.confirmation = 0;

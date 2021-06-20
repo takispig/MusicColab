@@ -77,6 +77,8 @@ public class ForgotPassword extends AppCompatActivity implements View.OnClickLis
                     startActivity(new Intent(this, Login.class));
                 } else if (networkThread.confirmation == 0) {
                     toast("Connection timeout");
+                    CommunicationHandling.wipeData(2, networkThread);
+                    startActivity(new Intent(this, Login.class));
                 } else if (networkThread.confirmation == 18) {
                     toast("Reset Password Failed\nUsername and Email doesn't match");
                 }

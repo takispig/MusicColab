@@ -84,6 +84,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                     networkThread.confirmation = 0;
                     startActivity(new Intent(this, PreLobby.class));
                 } else if (networkThread.confirmation == 0) {
+                    CommunicationHandling.wipeData(2, networkThread);
                     toast("Connection timeout");
                 } else if (networkThread.confirmation == 11) {
                     toast("Username/password wrong\nPlease try again");

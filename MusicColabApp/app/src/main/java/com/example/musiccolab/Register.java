@@ -76,6 +76,7 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
                     toast("Registration Successful");
                     startActivity(new Intent(this, Login.class));
                 } else if (networkThread.confirmation == 0) {
+                    CommunicationHandling.wipeData(2, networkThread);
                     toast("Connection timeout");
                 } else if (networkThread.confirmation == 13) {
                     toast("Registration Failed\nUsername already exists");

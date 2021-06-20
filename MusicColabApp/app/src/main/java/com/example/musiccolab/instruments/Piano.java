@@ -14,7 +14,7 @@ import java.util.List;
 
 public class Piano implements Instrument, View.OnClickListener {
 
-    private final Animation scaleDown;
+    //private final Animation scaleDown;
     private static final String INSTRUMENT_NAME = "Piano";
     private static final int FREEZE_DURATION_IN_MS = 300;
     List<Button> pianoKeys;
@@ -23,7 +23,7 @@ public class Piano implements Instrument, View.OnClickListener {
     public Piano(InstrumentGUIBox instrumentGUI, Lobby lobby, SoundPlayer sp) {
         pianoKeys = instrumentGUI.getPianoKeys();
 
-        scaleDown = AnimationUtils.loadAnimation(lobby, R.anim.scale_down);
+        //scaleDown = AnimationUtils.loadAnimation(lobby, R.anim.scale_down);
 
         for (int i = 0; i < pianoKeys.size(); i++) {
             Button btn = pianoKeys.get(i);
@@ -31,7 +31,7 @@ public class Piano implements Instrument, View.OnClickListener {
             btn.setOnTouchListener((v, event) -> {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
-                        btn.startAnimation(scaleDown);
+                        //btn.startAnimation(scaleDown);
                         sp.sendToneToServer("piano"+finalI);
                         instrumentGUI.setTextInCenter(btn.getText() + " pressed");
                         break;

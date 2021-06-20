@@ -214,6 +214,8 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
                 startActivity(new Intent(this, PreLobby.class));
             } else if (networkThread.confirmation == 0) {
                 toast("Connection timeout");
+                CommunicationHandling.wipeData(2, networkThread);
+                startActivity(new Intent(this, Login.class));
             } else if (networkThread.confirmation == 16) {
                 toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
             }
@@ -221,7 +223,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
 
         if (view.getId() == R.id.more_button) {
             TextView admin_text = findViewById(R.id.admin_boolean);
-            admin_text.setText(networkThread.admin ? "true" : "false");
+            admin_text.setText(Login.networkThread.admin ? "true" : "false");
             ConstraintLayout info = findViewById(R.id.info);
             visible = !visible;
             info.setVisibility(visible ? View.VISIBLE : View.GONE);
@@ -268,6 +270,8 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
                 startActivity(new Intent(this, PreLobby.class));
             } else if (networkThread.confirmation == 0) {
                 toast("Connection timeout");
+                CommunicationHandling.wipeData(2, networkThread);
+                startActivity(new Intent(this, Login.class));
             } else if (networkThread.confirmation == 16) {
                 toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
             }
