@@ -29,8 +29,8 @@ public class CommunicationHandling implements Runnable {
     public static final int PROTOCOL_BECAME_ADMIN = 9;
 
     // private static final String IP = "35.207.116.16";   130.149.80.94 // Google Server IP-Address
-    private static final String IP = "192.168.178.42";   // VM IP-Address
-    private static final int port = 1200;
+    private static final String IP = "10.0.2.2";   // VM IP-Address
+    private static final int port = 8080;
 
     public static final String CAN_NOT_READ_FROM_BUFFER = "Can not read from buffer.";
     public static final String CAN_NOT_WRITE_IN_BUFFER = "Can not write in buffer.";
