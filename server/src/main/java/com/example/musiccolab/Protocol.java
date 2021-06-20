@@ -24,13 +24,12 @@ public class Protocol {
     final private int leaveLobby = 6;
     final private int tone = 7;
     final private int passwordForgotten = 8;
-    // joined Lobby = 9 Nur von server an admin
-    // left Lobby = 19 Nur vom server an admin
+    final public static int becameAdmin = 9;
     final private int mutePlayer = 10;
 
 
     private short action;
-    private short responseAction;
+    public short responseAction;
 
     byte userNameSize;
     byte emailSize;
@@ -45,6 +44,7 @@ public class Protocol {
     final private String[][] responsesArray = { {"Client logged in", "error with login"},
                                           {"Client logged out", "error with logout"},
                                           {"Client registered", "Client is already registered."},
+                                          {"password reset","Error with rest password"},
                                           {"Client joined Lobby","Client left Lobby"}};
 
     public Protocol(){
@@ -153,8 +153,7 @@ public class Protocol {
         try {
             checkResponse = LoginSystem.forgotPassword(username, email, password);
             //Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-            responseAction = 8;
-            sendResponseToClient(messageCharset, clientChannel, checkResponse? "8":"18");
+            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action : action + 10, checkResponse));
         } catch (SQLException e) {
             System.out.println("Fehler passwort Reset");
             e.printStackTrace();
@@ -165,8 +164,7 @@ public class Protocol {
 
     }
 
-    private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel, SelectionKey key)
-            throws IOException {
+    private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel, SelectionKey key) throws IOException {
         boolean checkResponse = false;
 
         readSizes(messageCharset, clientChannel);
@@ -198,18 +196,14 @@ public class Protocol {
 
             } else if (action == login) {
                 Player player = LoginSystem.login(username, password, clientChannel);
-                if (player == null) checkResponse = false;
-                else {
-                    checkResponse = true;
-                    key.attach(player);
-                }
+                checkResponse = player != null;
+                if(checkResponse) key.attach(player);
 
             } else if (action == logout) {
                 checkResponse = key.attachment() != null && LoginSystem.logout(username, password);
             }
             Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-            return;
+            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse)); return;
         } catch (SQLException e) {
             System.out.println("ERROR: SQL");
         } catch (ClassNotFoundException e) {
@@ -240,8 +234,7 @@ public class Protocol {
             Lobby currentLobby = Server.lobbyMap.get(lobbyID);
             if(action == joinLobby){
                 boolean checkResponse = (currentLobby != null);
-                if(checkResponse)
-                    checkResponse = currentLobby.addPlayer(player);
+                if(checkResponse) checkResponse = currentLobby.addPlayer(player);
                 sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " --> you are in.," + currentLobby.getUsersNumber()));
                 //sendResponseToClient(messageCharset,currentLobby.getAdmin().getPlayerChannel(),getJoinResponse(true,player.getId()));
                 if(checkResponse) Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " JOINED LOBBY " + currentLobby.getLobby_id());
@@ -250,13 +243,18 @@ public class Protocol {
                 boolean checkResponse = (currentLobby != null);
                 if(checkResponse) {
                     currentLobby.removePlayer(player);
+                    if(player.isAdmin()) {
+                        player.disableAdmin();
+                        responseAction = becameAdmin + 10 ; sendResponseToClient(messageCharset, clientChannel, "You are no more admin.");
+                        if(currentLobby.getAdmin() != null){
+                        responseAction = becameAdmin; sendResponseToClient(messageCharset, currentLobby.getAdmin().getPlayerChannel(), "You are now admin.");}
+                    }
+
                     Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " LEFT LOBBY " + currentLobby.getLobby_id());
                 }
                 sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " you are out."));
                 //sendResponseToClient(messageCharset,currentLobby.getAdmin().getPlayerChannel(),getJoinResponse(false,player.getId()));
-                if(checkResponse && currentLobby.isEmpty()) {
-                    Server.lobbyMap.remove(currentLobby.getLobby_id());
-                }
+                if(checkResponse && currentLobby.isEmpty()) Server.lobbyMap.remove(currentLobby.getLobby_id());
             }
 
         }
@@ -380,6 +378,9 @@ public class Protocol {
         this.responseAction = (short) action;
         String IDs = "";
         if(action == 1) IDs = getAllLobbyIds(Server.lobbyMap);
+
+        if(action == 8 || action == 18)
+            return responsesArray[3][index];
         return responsesArray[action <= 10? action-1:action-11][index] + IDs;
     }
 

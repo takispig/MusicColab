@@ -49,8 +49,8 @@ public class Player {
     public SocketAddress getAddress() { return this.address; }
 
     public boolean isAdmin(){return admin;}
-
     public void setAdmin(){admin = true;}
+    public void disableAdmin(){admin = false;}
 
     public boolean isLoggedIn(){return loggedIn;}
 

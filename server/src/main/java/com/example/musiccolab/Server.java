@@ -121,12 +121,14 @@ public class Server {
             if(id != -1) {
                 lobbyOfDisconnectedPlayer = lobbyMap.get(id);
                 lobbyOfDisconnectedPlayer.removePlayer(disconnectedPlayer);
-                if(lobbyOfDisconnectedPlayer.isEmpty()) {
+                if (lobbyOfDisconnectedPlayer.isEmpty()) {
                     lobbyMap.remove(id);
+                } else {
+                    protocol.responseAction = 9;
+                    protocol.sendResponseToClient(messageCharset, lobbyOfDisconnectedPlayer.getAdmin().getPlayerChannel(), "You are now admin.");
                 }
                 disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
             }
-
             clientChannel.close();
         }
         else if(result[1] != 0)

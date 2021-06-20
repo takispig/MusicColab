@@ -1,5 +1,7 @@
 package main.java.com.example.musiccolab;
 
+import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -36,6 +38,7 @@ public class Lobby {
     public boolean setAdmin(Player player) {
         if (playerInLobby(player)) {
             this.admin = player;
+            player.setAdmin();
             return true;
         }
         return false;
@@ -61,14 +64,14 @@ public class Lobby {
     public void removePlayer(Player player) {
         if (playerInLobby(player)) {
             players.remove(player);
+            player.state.setState(ClientState.notInLobby);
             usersNumber--;
             player.setLobbyId(-1);
-            if (player.getId() == admin.getId()) {
+            if (player.isAdmin()) {
                 if (!players.isEmpty()) {
-                    admin = players.peek();
+                    players.getFirst().setAdmin();
                 }
                 else admin = null;
-                player.state.setState(ClientState.notInLobby);
             }
         }
     }
