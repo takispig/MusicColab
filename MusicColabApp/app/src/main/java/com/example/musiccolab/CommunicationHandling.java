@@ -26,11 +26,11 @@ public class CommunicationHandling implements Runnable {
     public static final int PROTOCOL_LEAVE_LOBBY_ACTION = 6;
     public static final int PROTOCOL_TONE_ACTION = 7;
     public static final int PROTOCOL_FORGOT_PASSWORD = 8;
-    public static final int PROTOCOL_ADMIN_LEFT = 9;
+    public static final int PROTOCOL_BECAME_ADMIN = 9;
 
     // private static final String IP = "35.207.116.16";   130.149.80.94 // Google Server IP-Address
-    private static final String IP = "10.0.2.2";   // VM IP-Address
-    private static final int port = 8080;
+    private static final String IP = "192.168.178.42";   // VM IP-Address
+    private static final int port = 1200;
 
     public static final String CAN_NOT_READ_FROM_BUFFER = "Can not read from buffer.";
     public static final String CAN_NOT_WRITE_IN_BUFFER = "Can not write in buffer.";
@@ -66,6 +66,8 @@ public class CommunicationHandling implements Runnable {
     public int confirmation;
     public boolean threadExist = false;
 
+    private boolean connected = false;
+
 
     public CommunicationHandling(Thread thread) {
         mainThread = thread;
@@ -95,12 +97,24 @@ public class CommunicationHandling implements Runnable {
                 clientChannel = (SocketChannel) key.channel();
                 ByteBuffer buffer;
                 if (key.isConnectable()) {
+                    if(connected){
+                        try{
+                            clientChannel.close();
+                            confirmation = action + 10;
+                            synchronized (mainThread) {
+                                mainThread.notify();
+                            }
+                            System.out.println("Server is disconnected.");
+                        }
+                        catch (IOException e) {System.out.println("Error with channel.close.");}
+                    }
                     buffer = ByteBuffer.allocate(100);
                     try {
                         clientChannel.finishConnect();
                         clientChannel.read(buffer);
                         buffer.flip();
                         System.out.println(messageCharset.decode(buffer));
+                        connected = true;
                     } catch (IOException e) {
                         System.out.println("Problem with finishConnect");
                     }
@@ -187,8 +201,17 @@ public class CommunicationHandling implements Runnable {
             }
         } else if (action == PROTOCOL_TONE_ACTION || action == 17) {
             getData(messageLength);
-        } else if (action == PROTOCOL_ADMIN_LEFT) {
-            admin=true;
+        } else if (action == PROTOCOL_BECAME_ADMIN || action == PROTOCOL_BECAME_ADMIN + 10) {
+            admin = action == PROTOCOL_BECAME_ADMIN;
+            try {
+                ByteBuffer adminBuffer = ByteBuffer.allocate(messageLength);
+                clientChannel.read(adminBuffer);
+                adminBuffer.flip();
+                result = messageCharset.decode(adminBuffer).toString();
+            }catch (IOException e){
+                System.out.println(CAN_NOT_WRITE_IN_BUFFER + " form adminBuffer.");
+            }
+            System.out.println(result);
         }
     }
 
