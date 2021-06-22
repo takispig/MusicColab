@@ -1,31 +1,20 @@
 package com.example.musiccolab.instruments;
 
-import android.app.usage.UsageEvents;
-import android.view.MotionEvent;
-import android.view.View;
-
-
-
-import com.example.musiccolab.Lobby;
+import android.widget.Button;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class PianoTest {
-    InstrumentGUIBox guiBox = mock(InstrumentGUIBox.class);
-    SoundPlayer sp = mock(SoundPlayer.class);
-    Lobby lobby = mock(Lobby.class);
-    Piano piano = new Piano(guiBox,lobby, sp);
-
-
-    @Test
-    public void test_Piano_c(){
-
-    }
+    private final InstrumentGUIBox guiBox = mock(InstrumentGUIBox.class);
+    private final SoundPlayer sp = mock(SoundPlayer.class);
+    private final Piano piano = new Piano(guiBox, sp);
 
     @Test
     public void test_getInstrumentName() {
@@ -63,35 +52,17 @@ public class PianoTest {
         assertEquals(expected, result);
     }
 
-    @Test
-    public void test_onClick(){
-        // arrange
-        View v= mock(View.class);
-        // act
-        piano.onClick(v);
-        // assert
-        assertTrue(true);
-    }
-
-    @Test
-    public void test_Action(){
-        // arrange
-        SensorEventAdapter sensorEventAdapter =mock(SensorEventAdapter.class);
-        // act
-        piano.action(sensorEventAdapter);
-        // assert
-        assertTrue(true);
-    }
-
-    @Test
-    public void test_reCalibrate(){
-        // arrange
-        SensorEventAdapter sensorEventAdapter =mock(SensorEventAdapter.class);
-        // act
-        piano.reCalibrate(sensorEventAdapter);
-        piano.reCalibrate();
-        // assert
-        assertTrue(true);
-    }
-
+//    @Test
+//    public void test_PianoKeys() {
+//        // arrange
+//        InstrumentGUIBox guiBox = mock(InstrumentGUIBox.class);
+//        List<Button> pianoKeys = new ArrayList<>();
+//        when(guiBox.getPianoKeys()).thenReturn(pianoKeys);
+//        SoundPlayer sp = mock(SoundPlayer.class);
+//        Piano piano = new Piano(guiBox, sp);
+//
+//        // act
+//
+//        // assert
+//    }
 }

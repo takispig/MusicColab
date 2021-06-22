@@ -2,6 +2,7 @@ package com.example.musiccolab.instruments;
 
 import android.view.View;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.Button;
@@ -22,6 +23,7 @@ public class InstrumentGUIBox {
     public static int instrumentType;
     private final TextView textInCenter;
     private final List<Button> pianoKeys = new ArrayList<>();
+    private final Animation scaleDown;
 
     private ImageView image4Drums;
     private ImageView image4Theremin;
@@ -30,6 +32,8 @@ public class InstrumentGUIBox {
     //constructor for the piano
     public InstrumentGUIBox(Lobby lobby, int textInCenterID, List<Integer> pianoKeysIDs) {
         textInCenter = lobby.findViewById(textInCenterID);
+
+        scaleDown = AnimationUtils.loadAnimation(lobby, R.anim.scale_down);
 
         //init
         image4Drums = lobby.findViewById(R.id.drumImageView);
@@ -143,5 +147,14 @@ public class InstrumentGUIBox {
 
     public List<Button> getPianoKeys() {
         return pianoKeys;
+    }
+
+    public void startAnimationForPianoKey(int i){
+        Button btn = pianoKeys.get(i);
+        btn.startAnimation(scaleDown);
+    }
+
+    public void clearAnimationForPianoKey(int i) {
+        pianoKeys.get(i).clearAnimation();
     }
 }
