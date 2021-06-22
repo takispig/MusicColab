@@ -1,6 +1,4 @@
-package test.com.example.musiccolab;
-
-//import com.example.musiccolab.instruments.SoundPlayer;
+package com.example.musiccolab;
 
 import java.io.*;
 import java.net.InetSocketAddress;

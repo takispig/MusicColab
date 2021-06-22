@@ -1,7 +1,7 @@
-package main.java.com.example.musiccolab;
+package com.example.musiccolab;
 
-import main.java.com.example.musiccolab.exceptions.IPAddressException;
-import main.java.com.example.musiccolab.exceptions.SocketBindException;
+import com.example.musiccolab.exceptions.IPAddressException;
+import com.example.musiccolab.exceptions.SocketBindException;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
