@@ -27,6 +27,7 @@ public class CommunicationHandling implements Runnable {
     public static final int PROTOCOL_TONE_ACTION = 7;
     public static final int PROTOCOL_FORGOT_PASSWORD = 8;
     public static final int PROTOCOL_BECAME_ADMIN = 9;
+    public static final int PROTOCOL_UPDATE_LOBBY_ID_LIST = 20;
 
     // private static final String IP = "35.207.116.16";   130.149.80.94 // Google Server IP-Address
     private static final String IP = "130.149.80.94";   // VM IP-Address
@@ -211,7 +212,27 @@ public class CommunicationHandling implements Runnable {
                 adminBuffer.flip();
                 result = messageCharset.decode(adminBuffer).toString();
             }catch (IOException e){
-                System.out.println(CAN_NOT_WRITE_IN_BUFFER + " form adminBuffer.");
+                System.out.println(CAN_NOT_WRITE_IN_BUFFER + " from adminBuffer.");
+            }
+            System.out.println(result);
+        } else if (action == PROTOCOL_UPDATE_LOBBY_ID_LIST) {
+            // delete the lobby IDs from the current list
+            IdList.clear();
+            // no update the list with the IDs we got from server
+            try {
+                // read buffer
+                ByteBuffer lobbyIdBuffer = ByteBuffer.allocate(messageLength);
+                clientChannel.read(lobbyIdBuffer);
+                lobbyIdBuffer.flip();
+                result = messageCharset.decode(lobbyIdBuffer).toString();
+                // split the lobbyIDs and extract them into IdList
+                String[] response = result.split(",");
+                for (int index = 0; index < response.length; index++) {
+                    //IdList.add(Character.getNumericValue(response[index].charAt(0)));
+                    IdList.add(Integer.parseInt(response[index]));
+                }
+            }catch (IOException e){
+                System.out.println(CAN_NOT_WRITE_IN_BUFFER + " from lobbyIdBuffer (action 20).");
             }
             System.out.println(result);
         }
