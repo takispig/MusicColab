@@ -1,0 +1,4 @@
+#!/bin/bash
+
+kill `cat /home/musiccolab/server/server_pid.txt`
+rm /home/musiccolab/server/server_pid.txt
