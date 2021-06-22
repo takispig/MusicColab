@@ -11,6 +11,7 @@
       <element id="extracted-dir" path="$PROJECT_DIR$/src/test/res/junit-jupiter-params-5.7.0.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/src/test/res/junit-jupiter-engine-5.7.0.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/src/test/res/junit-platform-engine-1.7.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/src/main/res/jar/sqlite-jdbc-3.34.0.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>
