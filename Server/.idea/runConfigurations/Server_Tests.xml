@@ -1,18 +1,18 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="MusicColab_Tests" type="JUnit" factoryName="JUnit">
+  <configuration default="false" name="Server-Tests" type="JUnit" factoryName="JUnit">
     <module name="Server" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="main.java.com.example.musiccolab.exceptions.*" />
+        <option name="PATTERN" value="com.example.musiccolab.exceptions.*" />
         <option name="ENABLED" value="true" />
         <option name="INCLUDE" value="false" />
       </pattern>
       <pattern>
-        <option name="PATTERN" value="main.java.com.example.musiccolab.*" />
+        <option name="PATTERN" value="com.example.musiccolab.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>
-    <option name="PACKAGE_NAME" value="test" />
+    <option name="PACKAGE_NAME" value="" />
     <option name="MAIN_CLASS_NAME" value="" />
     <option name="METHOD_NAME" value="" />
     <option name="TEST_OBJECT" value="package" />

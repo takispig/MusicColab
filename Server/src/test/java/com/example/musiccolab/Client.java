@@ -1,4 +1,4 @@
-package test.com.example.musiccolab;
+package com.example.musiccolab;
 
 
 public class Client implements Runnable{

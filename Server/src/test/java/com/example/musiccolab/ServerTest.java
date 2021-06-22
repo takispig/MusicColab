@@ -1,14 +1,10 @@
-package test.com.example.musiccolab;
+package com.example.musiccolab;
 
-import main.java.com.example.musiccolab.Lobby;
-import main.java.com.example.musiccolab.Player;
-import main.java.com.example.musiccolab.Protocol;
-import main.java.com.example.musiccolab.Server;
-import main.java.com.example.musiccolab.exceptions.IPAddressException;
+import com.example.musiccolab.exceptions.IPAddressException;
+import com.example.musiccolab.exceptions.SocketBindException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import main.java.com.example.musiccolab.exceptions.SocketBindException;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

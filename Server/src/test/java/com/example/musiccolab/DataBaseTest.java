@@ -1,7 +1,5 @@
-package test.com.example.musiccolab;
+package com.example.musiccolab;
 
-import main.java.com.example.musiccolab.DataBase;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;

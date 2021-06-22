@@ -1,7 +1,5 @@
-package test.com.example.musiccolab;
+package com.example.musiccolab;
 
-import main.java.com.example.musiccolab.DataBase;
-import main.java.com.example.musiccolab.LoginSystem;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 

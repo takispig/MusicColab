@@ -1,4 +1,4 @@
-package main.java.com.example.musiccolab;
+package com.example.musiccolab;
 
 import javax.xml.crypto.Data;
 import java.io.IOException;

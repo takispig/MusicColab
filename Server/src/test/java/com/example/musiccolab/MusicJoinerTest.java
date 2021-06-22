@@ -1,8 +1,5 @@
-package test.com.example.musiccolab;
+package com.example.musiccolab;
 
-import main.java.com.example.musiccolab.Lobby;
-import main.java.com.example.musiccolab.MusicJoiner;
-import main.java.com.example.musiccolab.Player;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.Test;
 

@@ -1,4 +1,4 @@
-package main.java.com.example.musiccolab;
+package com.example.musiccolab;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
