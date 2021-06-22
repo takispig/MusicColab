@@ -1,8 +1,4 @@
-package test;
-
-import test.CommunicationHandling;
-
-import java.sql.Time;
+package test.com.example.musiccolab;
 
 
 public class Client implements Runnable{

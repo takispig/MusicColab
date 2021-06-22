@@ -1,4 +1,4 @@
-package test;
+package test.com.example.musiccolab;
 
 //import com.example.musiccolab.instruments.SoundPlayer;
 

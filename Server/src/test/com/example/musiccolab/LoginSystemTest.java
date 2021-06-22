@@ -1,4 +1,4 @@
-package test;
+package test.com.example.musiccolab;
 
 import main.java.com.example.musiccolab.DataBase;
 import main.java.com.example.musiccolab.LoginSystem;

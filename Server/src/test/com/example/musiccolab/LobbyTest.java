@@ -1,4 +1,4 @@
-package test;
+package test.com.example.musiccolab;
 
 import main.java.com.example.musiccolab.Player;
 import main.java.com.example.musiccolab.Lobby;
