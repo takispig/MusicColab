@@ -27,8 +27,8 @@ public class CommunicationHandling implements Runnable {
     public static final int PROTOCOL_BECAME_ADMIN = 9;
     public static final int PROTOCOL_UPDATE_LOBBY_ID_LIST = 20;
 
-    // private static final String IP = "35.207.116.16";   130.149.80.94 // Google Server IP-Address
-    private static final String IP = "130.149.80.94";   // VM IP-Address
+    // private static final String IP = "35.207.116.16";   //130.149.80.94 // Google Server IP-Address
+    private static final String IP = "10.0.2.2";   // VM IP-Address
     private static final int port = 8080;
 
     public static final String CAN_NOT_READ_FROM_BUFFER = "Can not read from buffer.";
@@ -123,11 +123,11 @@ public class CommunicationHandling implements Runnable {
                     if (actionAndDataLength[1] > 0) {
                         confirmation = actionAndDataLength[0];
                         handleAction(actionAndDataLength[0], actionAndDataLength[1]);
-                    }
-                    // TODO: what are you doing exactly below?
-                    else if (actionAndDataLength[1] == 0 && actionAndDataLength[0] == (short) 20) {
-                        confirmation = actionAndDataLength[0];
-                        handleAction(actionAndDataLength[0], actionAndDataLength[1]);
+//                    }
+//                    // TODO: what are you doing exactly below?
+//                    else if (actionAndDataLength[1] == 0 && actionAndDataLength[0] == (short) 20) {
+//                        confirmation = actionAndDataLength[0];
+//                        handleAction(actionAndDataLength[0], actionAndDataLength[1]);
                     } else {
                         try {
                             clientChannel.read(ByteBuffer.allocate(1000));

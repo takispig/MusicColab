@@ -209,7 +209,8 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
 
             System.out.println("LeaveLobby conf-code: " + networkThread.confirmation);
             if (networkThread.confirmation == 6) {
-                // reset the sensitive user data after logout
+                // reset the sensitive user data after logout & clear LobbyNames
+                networkThread.LobbyList.clear();
                 CommunicationHandling.wipeData(6, networkThread);
                 toast("Logged out successfully");
                 startActivity(new Intent(this, PreLobby.class));
@@ -264,7 +265,8 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
 
             System.out.println("LeaveLobby conf-code: " + networkThread.confirmation);
             if (networkThread.confirmation == 6) {
-                // reset the sensitive user data after logout
+                // reset the sensitive user data after logout & clear LobbyNames
+                networkThread.LobbyList.clear();
                 CommunicationHandling.wipeData(6, networkThread);
                 toast("Logged out successfully");
                 startActivity(new Intent(this, PreLobby.class));
