@@ -235,7 +235,10 @@ public class Protocol {
             if(action == joinLobby){
                 boolean checkResponse = (currentLobby != null);
                 if(checkResponse) checkResponse = currentLobby.addPlayer(player);
-                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " --> you are in.," + currentLobby.getUsersNumber()));
+                byte lobbyUsers = 0;
+                if (checkResponse)
+                    lobbyUsers = currentLobby.getUsersNumber();
+                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " --> you are in.," + lobbyUsers));
                 //sendResponseToClient(messageCharset,currentLobby.getAdmin().getPlayerChannel(),getJoinResponse(true,player.getId()));
                 if(checkResponse) Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " JOINED LOBBY " + currentLobby.getLobby_id());
 
