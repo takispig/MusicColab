@@ -125,6 +125,9 @@ public class CommunicationHandling implements Runnable {
                     if (actionAndDataLength[1] > 0) {
                         confirmation = actionAndDataLength[0];
                         handleAction(actionAndDataLength[0], actionAndDataLength[1]);
+                    } else if (actionAndDataLength[1] == 0 && actionAndDataLength[0] == (short) 20) {
+                        confirmation = actionAndDataLength[0];
+                        handleAction(actionAndDataLength[0], actionAndDataLength[1]);
                     } else {
                         try {
                             clientChannel.read(ByteBuffer.allocate(1000));
@@ -229,7 +232,8 @@ public class CommunicationHandling implements Runnable {
                 String[] response = result.split(",");
                 for (int index = 0; index < response.length; index++) {
                     //IdList.add(Character.getNumericValue(response[index].charAt(0)));
-                    IdList.add(Integer.parseInt(response[index]));
+                    if (!response[index].equals(""))
+                        IdList.add(Integer.parseInt(response[index]));
                 }
             }catch (IOException e){
                 System.out.println(CAN_NOT_WRITE_IN_BUFFER + " from lobbyIdBuffer (action 20).");
