@@ -26,6 +26,7 @@ public class CommunicationHandling implements Runnable {
     public static final int PROTOCOL_FORGOT_PASSWORD = 8;
     public static final int PROTOCOL_BECAME_ADMIN = 9;
     public static final int PROTOCOL_UPDATE_LOBBY_ID_LIST = 20;
+    public static final int PROTOCOL_UPDATE_USERS = 21;             // NOT YET TESTED
 
     // private static final String IP = "35.207.116.16";   //130.149.80.94 // Google Server IP-Address
     private static final String IP = "10.0.2.2";   // VM IP-Address
@@ -124,7 +125,7 @@ public class CommunicationHandling implements Runnable {
                         confirmation = actionAndDataLength[0];
                         handleAction(actionAndDataLength[0], actionAndDataLength[1]);
 //                    }
-//                    // TODO: what are you doing exactly below?
+//                    // TODO: what are you doing exactly below? ** DON'T DELETE **
 //                    else if (actionAndDataLength[1] == 0 && actionAndDataLength[0] == (short) 20) {
 //                        confirmation = actionAndDataLength[0];
 //                        handleAction(actionAndDataLength[0], actionAndDataLength[1]);
@@ -199,14 +200,17 @@ public class CommunicationHandling implements Runnable {
                 }
             }
 
-        } else if (action == PROTOCOL_CREATE_LOBBY_ACTION || action == PROTOCOL_JOIN_LOBBY_ACTION || action == PROTOCOL_LEAVE_LOBBY_ACTION || action == 14 || action == 15 || action == 16) {
+        }
+        else if (action == PROTOCOL_CREATE_LOBBY_ACTION || action == PROTOCOL_JOIN_LOBBY_ACTION || action == PROTOCOL_LEAVE_LOBBY_ACTION || action == 14 || action == 15 || action == 16) {
             lobby(action, messageLength);
             synchronized (mainThread) {
                 mainThread.notify();
             }
-        } else if (action == PROTOCOL_TONE_ACTION || action == 17) {
+        }
+        else if (action == PROTOCOL_TONE_ACTION || action == 17) {
             getData(messageLength);
-        } else if (action == PROTOCOL_BECAME_ADMIN || action == PROTOCOL_BECAME_ADMIN + 10) {
+        }
+        else if (action == PROTOCOL_BECAME_ADMIN || action == PROTOCOL_BECAME_ADMIN + 10) {
             admin = action == PROTOCOL_BECAME_ADMIN;
             System.out.println(admin);
             try {
@@ -218,9 +222,9 @@ public class CommunicationHandling implements Runnable {
                 System.out.println(CAN_NOT_WRITE_IN_BUFFER + " from adminBuffer.");
             }
             System.out.println(result);
-        } else if (action == PROTOCOL_UPDATE_LOBBY_ID_LIST) {
+        }
+        else if (action == PROTOCOL_UPDATE_LOBBY_ID_LIST) {
             // delete the lobby IDs from the current list
-            // IdList.clear();
             LobbyList.clear();
             // no update the list with the IDs we got from server
             try {
@@ -232,13 +236,24 @@ public class CommunicationHandling implements Runnable {
                 // split the lobbyIDs and extract them into IdList
                 String[] response = result.split(",");
                 for (int index = 0; index < response.length; index++) {
-                    //IdList.add(Character.getNumericValue(response[index].charAt(0)));
                     if (!response[index].equals(""))
-                        //IdList.add(Integer.parseInt(response[index]));
                         LobbyList.add(response[index]);
                 }
-            }catch (IOException e){
+            } catch (IOException e){
                 System.out.println(CAN_NOT_WRITE_IN_BUFFER + " from lobbyIdBuffer (action 20).");
+            }
+            System.out.println(result);
+        }
+        else if (action == PROTOCOL_UPDATE_USERS) {
+            try {
+                ByteBuffer num_users = ByteBuffer.allocate(messageLength);
+                clientChannel.read(num_users);
+                num_users.flip();
+                result = messageCharset.decode(num_users).toString();
+                // update the number of users
+                users = Integer.parseInt(result);
+            }catch (IOException e){
+                System.out.println(CAN_NOT_WRITE_IN_BUFFER + " from adminBuffer.");
             }
             System.out.println(result);
         }
