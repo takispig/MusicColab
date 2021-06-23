@@ -55,7 +55,8 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
 
         // update 'more' text field in Lobby
         TextView lobby_nr = findViewById(R.id.server_number);
-        lobby_nr.setText(String.format("%s", Login.networkThread.lobbyID));
+        //lobby_nr.setText(String.format("%s", Login.networkThread.lobbyID));
+        lobby_nr.setText(String.format("%s", Login.networkThread.lobbyName));
         TextView instr = findViewById(R.id.instrument);
         instr.setText(String.format("%s", getIntent().getSerializableExtra(PreLobby.SELECTED_INSTRUMENT)));
         if (Login.networkThread.admin) {
@@ -249,7 +250,6 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         if (++counter == 1) {
             toast("Press again to Exit Lobby");
         } else {
-            // else remove the user from lobby
             // else remove the user from lobby
             networkThread.action = 6;
             try {

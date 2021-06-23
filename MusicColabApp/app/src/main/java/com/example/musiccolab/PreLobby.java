@@ -86,9 +86,9 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
     public void onClick(View view) {
 
         if (view.getId() == R.id.create_server) {
-            if ((networkThread.lobbyName != null) || (networkThread.lobbyID != -1)) {
-                System.out.println(networkThread.lobbyName + "  " + networkThread.lobbyID);
-                toast("You are already connected with a Lobby");
+            if (networkThread.lobbyName != null) {
+                System.out.println("LobbyName: " + networkThread.lobbyName);
+                toast("You are already connected with Lobby:\n" + networkThread.lobbyName);
                 return;
             }
             findViewById(R.id.create_server_popup).setVisibility(View.VISIBLE);
@@ -119,19 +119,17 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             }
 
             String output = networkThread.result;
-            lobbyID = networkThread.lobbyID;
+            System.out.println("Server's response: " + output);
 
             System.out.println("LobbyName: " + lobbyName + " with conf-code : " + networkThread.confirmation);
             if (networkThread.confirmation==4) {
                 // this means we successfully created a lobby -> set status Connected with server #Num
                 toast("Lobby Created Successfully\n");
                 TextView status_text = findViewById(R.id.server_status);
-                status_text.setText(String.format("Connected to Lobby #%s\nLobby name: %s", networkThread.lobbyID, lobbyName));
+                status_text.setText(String.format("Connected to Lobby \n%s", networkThread.lobbyName));
                 networkThread.confirmation = 0;
                 networkThread.admin = true;
                 networkThread.users = 1;
-                // uncomment the following line when we can keep track of the number of users
-                // networkThread.IdList.add(networkThread.lobbyID);    // add the lobby to the lobbies list
             } else if (networkThread.confirmation == 14) {
                 networkThread.lobbyName = null;
                 toast("Error while Creating the Lobby\nPlease try again");
@@ -150,30 +148,30 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
         }
 
         if (view.getId() == R.id.join_server) {
-            if ((networkThread.lobbyName != null) || (networkThread.lobbyID != -1)) {
-                System.out.println(networkThread.lobbyName + "  " + networkThread.lobbyID);
-                toast("You are already connected with a Lobby");
+            if (networkThread.lobbyName != null) {
+                System.out.println("LobbyName: " + networkThread.lobbyName);
+                toast("You are already connected to Lobby:\n" + networkThread.lobbyName);
                 return;
             }
-            if (networkThread.IdList.isEmpty()) {
-                toast("There are no active Lobbies to join\nCreate one to start rocking");
+            if (networkThread.LobbyList.isEmpty()) {
+                toast("There are no active Lobbies to join\nCreate one to start rocking!");
                 return;
             }
             TextView available_lobbies = findViewById(R.id.available_lobbyids);
-            available_lobbies.setText(String.format("Available Lobby IDs to join:\n %s", networkThread.IdList));
+            available_lobbies.setText(String.format("Available Lobbies to join:\n %s", networkThread.LobbyList));
             findViewById(R.id.join_server_popup).setVisibility(View.VISIBLE);
         }
 
         if (view.getId() == R.id.join) {
             EditText lobbyID_text = findViewById(R.id.lobbyID);
-            lobbyID = Integer.parseInt(lobbyID_text.getText().toString());
-            System.out.println("LobbyID: " + lobbyID);
+            lobbyName = lobbyID_text.getText().toString();  // new code testing
+            System.out.println("LobbyName: " + lobbyName);
             if (lobbyID_text.getText().toString().equals("")){
                 toast("Please enter server name");
                 return;
             }
             else {
-                networkThread.lobbyID = lobbyID;
+                networkThread.lobbyName = lobbyName;
                 networkThread.action = 5;
             }
             findViewById(R.id.join_server_popup).setVisibility(View.GONE);
@@ -187,18 +185,18 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                 System.out.println("Error with waiting of main thread.");
             }
 
-            System.out.println("LobbyID " + networkThread.lobbyID + " with conf-code: " + networkThread.confirmation);
+            System.out.println("LobbyName " + networkThread.lobbyName + " with conf-code: " + networkThread.confirmation);
             if (networkThread.confirmation==5) {
                 // this means we successfully created a lobby -> set status Connected with server #Num
-                toast("You joined Lobby #" + networkThread.lobbyID);
+                toast("You joined Lobby #" + networkThread.lobbyName);
                 TextView lobby = findViewById(R.id.server_status);
-                lobby.setText(String.format("Connected to Lobby #%s", networkThread.lobbyID));
+                lobby.setText(String.format("Connected to Lobby:\n%s", networkThread.lobbyName));
                 networkThread.confirmation = 0;
             } else if (networkThread.confirmation == 15) {
-                networkThread.lobbyID = -1;
+                networkThread.lobbyName = null;
                 toast("Error while Joining the Lobby\nIs the ID correct?");
             } else {
-                networkThread.lobbyID = -1;
+                networkThread.lobbyName = null;
                 toast("Connection timeout");
                 CommunicationHandling.wipeData(2, networkThread);
                 startActivity(new Intent(this, Login.class));
@@ -239,7 +237,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
 
 
         if (view.getId() == R.id.connect) {
-            if (networkThread.lobbyID < 0) {
+            if (networkThread.lobbyName == null) {
                 toast("You should create or join a server first");
                 return;
             }
@@ -277,6 +275,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             }
 
             String output = networkThread.result;
+            System.out.println(output);
 
             if (networkThread.confirmation==2){
                 // reset the sensitive user data after logout

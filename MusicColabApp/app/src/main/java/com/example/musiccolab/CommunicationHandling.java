@@ -1,7 +1,5 @@
 package com.example.musiccolab;
 
-import android.widget.TextView;
-
 import com.example.musiccolab.instruments.SoundPlayer;
 
 import java.io.*;
@@ -52,10 +50,9 @@ public class CommunicationHandling implements Runnable {
     public String username = null;
     public String password = null;
     public String lobbyName = null;
-    public int lobbyID = -1;
     public boolean admin = false;
     public int users = 0;
-    public List<Integer> IdList = new LinkedList<>();
+    public List<String> LobbyList = new LinkedList<String>();
 
     public byte toneAction;
     public byte toneType;
@@ -72,10 +69,11 @@ public class CommunicationHandling implements Runnable {
 
     public CommunicationHandling(Thread thread) {
         mainThread = thread;
-        for (short index = 1; index < 11; index++) {
+        for (short index = 1; index < 10; index++) {
             codesList.add(index);
             errorCodesList.add((short) (index + 10));
         }
+        codesList.add((short) 20);  // add the update lobby list action
     }
 
     @Override
@@ -125,7 +123,9 @@ public class CommunicationHandling implements Runnable {
                     if (actionAndDataLength[1] > 0) {
                         confirmation = actionAndDataLength[0];
                         handleAction(actionAndDataLength[0], actionAndDataLength[1]);
-                    } else if (actionAndDataLength[1] == 0 && actionAndDataLength[0] == (short) 20) {
+                    }
+                    // TODO: what are you doing exactly below?
+                    else if (actionAndDataLength[1] == 0 && actionAndDataLength[0] == (short) 20) {
                         confirmation = actionAndDataLength[0];
                         handleAction(actionAndDataLength[0], actionAndDataLength[1]);
                     } else {
@@ -168,7 +168,7 @@ public class CommunicationHandling implements Runnable {
                 if (action == PROTOCOL_CREATE_LOBBY_ACTION)
                     sendLobbyMessage(action, lobbyName);
                 else
-                    sendLobbyMessage(action, Integer.toString(lobbyID));
+                    sendLobbyMessage(action, lobbyName);
             } catch (IOException e) {
                 System.err.println(CAN_NOT_WRITE_IN_BUFFER);
             }
@@ -220,7 +220,8 @@ public class CommunicationHandling implements Runnable {
             System.out.println(result);
         } else if (action == PROTOCOL_UPDATE_LOBBY_ID_LIST) {
             // delete the lobby IDs from the current list
-            IdList.clear();
+            // IdList.clear();
+            LobbyList.clear();
             // no update the list with the IDs we got from server
             try {
                 // read buffer
@@ -233,7 +234,8 @@ public class CommunicationHandling implements Runnable {
                 for (int index = 0; index < response.length; index++) {
                     //IdList.add(Character.getNumericValue(response[index].charAt(0)));
                     if (!response[index].equals(""))
-                        IdList.add(Integer.parseInt(response[index]));
+                        //IdList.add(Integer.parseInt(response[index]));
+                        LobbyList.add(response[index]);
                 }
             }catch (IOException e){
                 System.out.println(CAN_NOT_WRITE_IN_BUFFER + " from lobbyIdBuffer (action 20).");
@@ -293,11 +295,11 @@ public class CommunicationHandling implements Runnable {
                 System.out.println("Result in lobby: " + result);
                 if (action == PROTOCOL_CREATE_LOBBY_ACTION || action == PROTOCOL_JOIN_LOBBY_ACTION) {
                     String[] a = result.split(" ");
-                    lobbyID = Integer.parseInt(a[1]);
+                    lobbyName = a[1];
                     if (action == PROTOCOL_JOIN_LOBBY_ACTION) {
                         users = Integer.parseInt(a[5].split(",")[1]);
                     }
-                    System.out.println("LobbyID: " + lobbyID + " and #users: " + users);
+                    System.out.println("Lobby: #" + lobbyName + " and #users: " + users);
                 }
             } catch (IOException e) {
                 System.err.println(CAN_NOT_READ_FROM_BUFFER);
@@ -343,10 +345,11 @@ public class CommunicationHandling implements Runnable {
                     response = messageCharset.decode(buffer).toString().split(",");
                     for (int index = 0; index < response.length; index++) {
                         if (index == 0)
-                            result = response[index];
+                            result = response[index];   // first value is not a lobbyName
                         else
                             //IdList.add(Character.getNumericValue(response[index].charAt(0)));
-                            IdList.add(Integer.parseInt(response[index]));
+                            //IdList.add(Integer.parseInt(response[index]));
+                            LobbyList.add(response[index]);
                     }
                 } else {
                     result = messageCharset.decode(buffer).toString();
@@ -500,7 +503,6 @@ public class CommunicationHandling implements Runnable {
         }
         networkThread.admin = false;
         networkThread.confirmation = 0;
-        networkThread.lobbyID = -1;
         networkThread.lobbyName = null;
     }
 }

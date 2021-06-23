@@ -251,7 +251,7 @@
             android:id="@+id/server_msg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/you_have_joined_server"
+            android:text="Lobby: "
             android:textAlignment="center"
             android:textSize="20sp"
             app:layout_constraintLeft_toLeftOf="parent"
