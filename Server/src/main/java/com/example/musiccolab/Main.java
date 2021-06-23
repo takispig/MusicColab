@@ -47,6 +47,14 @@ public class Main {
     private static long time = 0;
     private static int restart = 0;
 
+
+    ////
+    // for testing
+    static int genPlayer = 1;
+    static int genLobby = 1;
+
+    ////
+
     public static Logger logr = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     /**
@@ -259,21 +267,19 @@ public class Main {
     private static void createLobby() {
         Lobby lobby = null;
         try {
-            lobby = new Lobby(new Player("name", "passwort", "email", Server.createPlayerId(), null), "lobbyname", Server.createLobbyId());
+            lobby = new Lobby(new Player("Player-" + genPlayer, "password", "e@mail"+ (genPlayer++)+".com", Server.createPlayerId(), null), "Lobby-"+(genLobby++), Server.createLobbyId());
         } catch (IOException e) {
             e.printStackTrace();
         }
         Server.lobbyMap.put(lobby.getLobby_id(), lobby);
         Server.lobbyList.add(lobby);
+        currentServer.getProtocol().updateLobbyNameList();
     }
 
     private static void printLobbies() {
-        HashMap<Integer, Lobby> lobbies = currentServer.lobbyMap;
         System.out.print("Lobbies: ");
-        for (int i = 0; i < 50; i++) {
-            if (lobbies.get(i) != null) {
-                System.out.print(i  + ",");
-            }
+        for (Lobby l : Server.lobbyList) {
+            System.out.print(l.getLobbyName() + ", ");
         }
         System.out.println();
     }
