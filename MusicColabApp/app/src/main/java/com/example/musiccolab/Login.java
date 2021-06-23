@@ -34,6 +34,15 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         TextView forgot_password = (TextView) findViewById(R.id.forgot_password);
         forgot_password.setOnClickListener(this);
 
+        // IF user comes from Register activity, keep the data for him
+        password = getIntent().getStringExtra("password");
+        userName = getIntent().getStringExtra("username");
+        TextView username = findViewById(R.id.emaill);
+        TextView passwordd = findViewById(R.id.passwordl);
+        username.setText(userName);
+        passwordd.setText(password);
+
+
     }
 
     @Override
@@ -48,8 +57,8 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             startActivity(new Intent(this, ForgotPassword.class));
         } else if (view.getId() == R.id.login_submit) {
             // send the email + password in the server to check authorisation
-            userNameView = findViewById(R.id.email);
-            passView = findViewById(R.id.password);
+            userNameView = findViewById(R.id.emaill);
+            passView = findViewById(R.id.passwordl);
             userName = userNameView.getText().toString();
             password = passView.getText().toString();
 

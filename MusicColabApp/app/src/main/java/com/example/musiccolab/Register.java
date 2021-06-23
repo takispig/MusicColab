@@ -9,7 +9,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import static xdroid.toaster.Toaster.toast;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class Register extends AppCompatActivity implements View.OnClickListener {
 
@@ -69,12 +68,13 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
                     System.out.println("Error with waiting of main thread.");
                 }
 
-                String output = networkThread.result;
-
-                System.out.println("Confirmation-code after in Register.java is: " + networkThread.confirmation);
                 if (networkThread.confirmation == 3) {
-                    toast("Registration Successful");
-                    startActivity(new Intent(this, Login.class));
+                    toast("Registration Successful!\nRedirected to PreLobby");
+                    // send username and password to Login activity to make the login smoother
+                    Intent re = new Intent(this, Login.class);
+                    re.putExtra("username", username);
+                    re.putExtra("password", password);
+                    startActivity(re);
                 } else if (networkThread.confirmation == 0) {
                     CommunicationHandling.wipeData(2, networkThread);
                     toast("Connection timeout");

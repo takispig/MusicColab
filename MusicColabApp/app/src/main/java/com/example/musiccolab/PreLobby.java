@@ -27,7 +27,6 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
     public static String selectedInstrument = null;
     private final String[] instruments = {InstrumentType.THEREMIN, InstrumentType.DRUMS, InstrumentType.PIANO};
     public static String lobbyName = null;
-    public static int lobbyID = 0;
     private int counter = 0;
     CommunicationHandling networkThread;
 
