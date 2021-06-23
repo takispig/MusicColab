@@ -24,7 +24,8 @@ public class Player {
         this.email = email;
         this.id = id;
         this.channel = channel;
-        this.address = channel.getRemoteAddress();
+        if (channel != null)
+            this.address = channel.getRemoteAddress();
         this.muted = false;
     }
 

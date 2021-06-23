@@ -237,6 +237,9 @@ public class Main {
                     case "updateLobbies":
                         currentServer.getProtocol().updateLobbyIDList();
                         break;
+                    case "createLobby":
+                        createLobby();
+                        break;
                     case "players":
                         System.out.println(currentServer.playersLoggedin);
                         break;
@@ -250,6 +253,17 @@ public class Main {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    // for testing
+    private static void createLobby() {
+        Lobby lobby = null;
+        try {
+            lobby = new Lobby(new Player("name", "passwort", "email", Server.createPlayerId(), null), "lobbyname", Server.createLobbyId());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Server.lobbyMap.put(lobby.getLobby_id(), lobby);
     }
 
     private static void printLobbies() {
