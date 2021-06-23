@@ -41,8 +41,6 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
         create_server.setOnClickListener(this);
         TextView join_server = (TextView) findViewById(R.id.join_server);
         join_server.setOnClickListener(this);
-        TextView connect = (TextView) findViewById(R.id.connect);
-        connect.setOnClickListener(this);
         ImageButton logout = findViewById(R.id.logout);
         logout.setOnClickListener(this);
         Button create = findViewById(R.id.create);
@@ -124,11 +122,10 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             if (networkThread.confirmation==4) {
                 // this means we successfully created a lobby -> set status Connected with server #Num
                 toast("Lobby Created Successfully\n");
-                TextView status_text = findViewById(R.id.server_status);
-                status_text.setText(String.format("Connected to Lobby \n%s", networkThread.lobbyName));
                 networkThread.confirmation = 0;
                 networkThread.admin = true;
                 networkThread.users = 1;
+                selectInstrAndGo();
             } else if (networkThread.confirmation == 14) {
                 networkThread.lobbyName = null;
                 toast("Error while Creating the Lobby\nPlease try again");
@@ -187,10 +184,9 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             System.out.println("LobbyName " + networkThread.lobbyName + " with conf-code: " + networkThread.confirmation);
             if (networkThread.confirmation==5) {
                 // this means we successfully created a lobby -> set status Connected with server #Num
-                toast("You joined Lobby #" + networkThread.lobbyName);
-                TextView lobby = findViewById(R.id.server_status);
-                lobby.setText(String.format("Connected to Lobby:\n%s", networkThread.lobbyName));
+                toast("You joined Lobby:\n" + networkThread.lobbyName);
                 networkThread.confirmation = 0;
+                selectInstrAndGo();
             } else if (networkThread.confirmation == 15) {
                 networkThread.lobbyName = null;
                 toast("Error while Joining the Lobby\nIs the ID correct?");
@@ -233,26 +229,21 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                 networkThread.confirmation = 0;
             }
         }
+    }
 
-
-        if (view.getId() == R.id.connect) {
-            if (networkThread.lobbyName == null) {
-                toast("You should create or join a server first");
-                return;
-            }
-            Intent lobbyIntent = new Intent(this, Lobby.class);
-            if (selectedInstrument.equals(InstrumentType.THEREMIN)) {
-                lobbyIntent.putExtra(SELECTED_INSTRUMENT, InstrumentType.THEREMIN);
-                startActivity(lobbyIntent);
-            } else if (selectedInstrument.equals(InstrumentType.DRUMS)) {
-                lobbyIntent.putExtra(SELECTED_INSTRUMENT, InstrumentType.DRUMS);
-                startActivity(lobbyIntent);
-            } else if (selectedInstrument.equals(InstrumentType.PIANO)) {
-                lobbyIntent.putExtra(SELECTED_INSTRUMENT, InstrumentType.PIANO);
-                startActivity(lobbyIntent);
-            } else {
-                Toast.makeText(getApplicationContext(), "No such Instrument: \"" + selectedInstrument + "\". Try again.", Toast.LENGTH_SHORT).show();
-            }
+    public void selectInstrAndGo() {
+        Intent lobbyIntent = new Intent(this, Lobby.class);
+        if (selectedInstrument.equals(InstrumentType.THEREMIN)) {
+            lobbyIntent.putExtra(SELECTED_INSTRUMENT, InstrumentType.THEREMIN);
+            startActivity(lobbyIntent);
+        } else if (selectedInstrument.equals(InstrumentType.DRUMS)) {
+            lobbyIntent.putExtra(SELECTED_INSTRUMENT, InstrumentType.DRUMS);
+            startActivity(lobbyIntent);
+        } else if (selectedInstrument.equals(InstrumentType.PIANO)) {
+            lobbyIntent.putExtra(SELECTED_INSTRUMENT, InstrumentType.PIANO);
+            startActivity(lobbyIntent);
+        } else {
+            Toast.makeText(getApplicationContext(), "No such Instrument: \"" + selectedInstrument + "\". Try again.", Toast.LENGTH_SHORT).show();
         }
     }
 
