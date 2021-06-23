@@ -91,6 +91,7 @@ public final class LoginSystem {
                 lobbyOfPlayer.removePlayer(player);
                 if(lobbyOfPlayer.isEmpty()){
                     Server.lobbyMap.remove(lobbyOfPlayer.getLobby_id());
+                    Server.lobbyList.remove(lobbyOfPlayer);
                     lobbyOfPlayer = null;
                 }
                 player.state.setState(ClientState.loggedOut);

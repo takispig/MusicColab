@@ -7,6 +7,11 @@ import java.util.Random;
 
 public class Lobby {
     private int lobby_id;
+
+    public String getLobbyName() {
+        return lobbyName;
+    }
+
     private String lobbyName;
     private int MAX_PLAYERS = 7;
     private LinkedList<Player> players;

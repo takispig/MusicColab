@@ -235,7 +235,7 @@ public class Main {
                         printLobbies();
                         break;
                     case "updateLobbies":
-                        currentServer.getProtocol().updateLobbyIDList();
+                        currentServer.getProtocol().updateLobbyNameList();
                         break;
                     case "createLobby":
                         createLobby();
@@ -264,6 +264,7 @@ public class Main {
             e.printStackTrace();
         }
         Server.lobbyMap.put(lobby.getLobby_id(), lobby);
+        Server.lobbyList.add(lobby);
     }
 
     private static void printLobbies() {

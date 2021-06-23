@@ -226,12 +226,22 @@ public class Protocol {
             int id = Server.createLobbyId();
             Lobby lobby = new Lobby(player, lobbyName, id);
             Server.lobbyMap.put(id,lobby);
+            //
+            Server.lobbyList.add(lobby);
             sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(true, lobby, " created by client."));
             Main.logr.log(Level.INFO, "LOBBY " + lobby.getLobby_id() + " CREATED BY CLIENT " + playerAddress.toString());
         }
         else if((action == joinLobby || action == leaveLobby) && player != null){
-            int lobbyID = Integer.parseInt(messageCharset.decode(lobbyBuffer).toString());
-            Lobby currentLobby = Server.lobbyMap.get(lobbyID);
+            int lobbyID;
+            String nameId = "";
+            Lobby currentLobby = null;
+            try {
+                nameId = messageCharset.decode(lobbyBuffer).toString();
+                lobbyID = Integer.parseInt(nameId);
+                currentLobby = Server.lobbyMap.get(lobbyID);
+            } catch (NumberFormatException e) {
+                currentLobby = Server.getLobbyByName(nameId);
+            }
             if(action == joinLobby){
                 boolean checkResponse = (currentLobby != null);
                 if(checkResponse) checkResponse = currentLobby.addPlayer(player);
@@ -257,7 +267,11 @@ public class Protocol {
                 }
                 sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " you are out."));
                 //sendResponseToClient(messageCharset,currentLobby.getAdmin().getPlayerChannel(),getJoinResponse(false,player.getId()));
-                if(checkResponse && currentLobby.isEmpty()) Server.lobbyMap.remove(currentLobby.getLobby_id());
+                if(checkResponse && currentLobby.isEmpty()) {
+                    Server.lobbyMap.remove(currentLobby.getLobby_id());
+                    //
+                    Server.lobbyList.remove(currentLobby);
+                }
             }
 
         }
@@ -272,6 +286,31 @@ public class Protocol {
         lobbyBuffer.clear();
     }
 
+    private String getAllLobbyNames() {
+        String temp = "";
+        String lobbyNames = "";
+        for (Lobby l : Server.lobbyList) {
+            temp += (l.getLobbyName() + ",");
+        }
+        if (temp.length() > 0) {
+            lobbyNames = temp.substring(0, temp.length() - 1);
+        }
+        return lobbyNames;
+    }
+
+    public void updateLobbyNameList() {
+        String lobbyNames = getAllLobbyNames();
+
+        if (lobbyNames == null)
+            return;
+
+        for (Player p : Server.playersLoggedin) {
+            System.out.println("send...");
+            sendToAllClients(p.getPlayerChannel(), lobbyNames);
+        }
+
+    }
+
     public void updateLobbyIDList() {
         String IDs = getAllLobbyIds(Server.lobbyMap);
 
@@ -283,11 +322,11 @@ public class Protocol {
 
         for (Player p : Server.playersLoggedin) {
             System.out.println("send...");
-            sendLobbyIDsToClient(p.getPlayerChannel(), IDs);
+            sendToAllClients(p.getPlayerChannel(), IDs);
         }
     }
 
-    private void sendLobbyIDsToClient(SocketChannel clientChannel, String IDs) {
+    private void sendToAllClients(SocketChannel clientChannel, String IDs) {
 
         short actionResponse = 20;
 
@@ -364,10 +403,11 @@ public class Protocol {
             playerAddress = clientChannel.getRemoteAddress();
             if(action == login || action == logout || action == register){
                 parseBufferForLoginSystem(messageCharset, clientChannel, key);
+                updateLobbyNameList();
             }
             else if(action == createLobby || action == joinLobby || action == leaveLobby){
                 parseBufferForLobbyOrGame(messageCharset, clientChannel, bufferSize, key);
-                updateLobbyIDList();
+                updateLobbyNameList();
             }
             else if(action == tone){
                 parseBufferForMusicJoiner(messageCharset, clientChannel, bufferSize, key);
