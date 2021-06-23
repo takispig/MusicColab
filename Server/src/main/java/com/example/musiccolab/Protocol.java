@@ -468,7 +468,7 @@ public class Protocol {
     private String getLobbyResponse(boolean result, Lobby lobby, String additionPart){
         String message;
         if(result){
-            message = "Lobby "+ lobby.getLobby_id() + additionPart;
+            message = "Lobby "+ lobby.getLobbyName() + additionPart;
             responseAction = action;
         }
         else{
