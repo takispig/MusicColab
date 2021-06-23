@@ -226,16 +226,29 @@ public class Protocol {
             int id = Server.createLobbyId();
             Lobby lobby = new Lobby(player, lobbyName, id);
             Server.lobbyMap.put(id,lobby);
+            //
+            Server.lobbyList.add(lobby);
             sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(true, lobby, " created by client."));
             Main.logr.log(Level.INFO, "LOBBY " + lobby.getLobby_id() + " CREATED BY CLIENT " + playerAddress.toString());
         }
         else if((action == joinLobby || action == leaveLobby) && player != null){
-            int lobbyID = Integer.parseInt(messageCharset.decode(lobbyBuffer).toString());
-            Lobby currentLobby = Server.lobbyMap.get(lobbyID);
+            int lobbyID;
+            String nameId = "";
+            Lobby currentLobby = null;
+            try {
+                nameId = messageCharset.decode(lobbyBuffer).toString();
+                lobbyID = Integer.parseInt(nameId);
+                currentLobby = Server.lobbyMap.get(lobbyID);
+            } catch (NumberFormatException e) {
+                currentLobby = Server.getLobbyByName(nameId);
+            }
             if(action == joinLobby){
                 boolean checkResponse = (currentLobby != null);
                 if(checkResponse) checkResponse = currentLobby.addPlayer(player);
-                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " --> you are in.," + currentLobby.getUsersNumber()));
+                byte lobbyUsers = 0;
+                if (checkResponse)
+                    lobbyUsers = currentLobby.getUsersNumber();
+                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " --> you are in.," + lobbyUsers));
                 //sendResponseToClient(messageCharset,currentLobby.getAdmin().getPlayerChannel(),getJoinResponse(true,player.getId()));
                 if(checkResponse) Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " JOINED LOBBY " + currentLobby.getLobby_id());
 
@@ -254,7 +267,11 @@ public class Protocol {
                 }
                 sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " you are out."));
                 //sendResponseToClient(messageCharset,currentLobby.getAdmin().getPlayerChannel(),getJoinResponse(false,player.getId()));
-                if(checkResponse && currentLobby.isEmpty()) Server.lobbyMap.remove(currentLobby.getLobby_id());
+                if(checkResponse && currentLobby.isEmpty()) {
+                    Server.lobbyMap.remove(currentLobby.getLobby_id());
+                    //
+                    Server.lobbyList.remove(currentLobby);
+                }
             }
 
         }
@@ -267,6 +284,68 @@ public class Protocol {
         }
          */
         lobbyBuffer.clear();
+    }
+
+    private String getAllLobbyNames() {
+        String temp = "";
+        String lobbyNames = "";
+        for (Lobby l : Server.lobbyList) {
+            temp += (l.getLobbyName() + ",");
+        }
+        if (temp.length() > 0) {
+            lobbyNames = temp.substring(0, temp.length() - 1);
+        }
+        return lobbyNames;
+    }
+
+    public void updateLobbyNameList() {
+        String lobbyNames = getAllLobbyNames();
+
+        if (lobbyNames == null)
+            return;
+
+        for (Player p : Server.playersLoggedin) {
+            System.out.println("send...");
+            sendToAllClients(p.getPlayerChannel(), lobbyNames);
+        }
+
+    }
+
+    public void updateLobbyIDList() {
+        String IDs = getAllLobbyIds(Server.lobbyMap);
+
+        if (IDs == null)
+            return;
+
+        if (IDs.length() > 0 && IDs.charAt(0) == ',')
+            IDs = IDs.substring(1);
+
+        for (Player p : Server.playersLoggedin) {
+            System.out.println("send...");
+            sendToAllClients(p.getPlayerChannel(), IDs);
+        }
+    }
+
+    private void sendToAllClients(SocketChannel clientChannel, String IDs) {
+
+        short actionResponse = 20;
+
+        short dataLength = (short) IDs.length();
+        ByteBuffer messageBuffer = ByteBuffer.allocate(6 + dataLength);
+
+        messageBuffer.put(convertShortToByte(protocolName));
+        messageBuffer.put(convertShortToByte(actionResponse));
+        messageBuffer.put(convertShortToByte(dataLength));
+        messageBuffer.put(IDs.getBytes(StandardCharsets.US_ASCII));
+        messageBuffer.flip();
+
+        try {
+            clientChannel.write(messageBuffer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        messageBuffer.clear();
+        return;
     }
 
 
@@ -324,9 +403,11 @@ public class Protocol {
             playerAddress = clientChannel.getRemoteAddress();
             if(action == login || action == logout || action == register){
                 parseBufferForLoginSystem(messageCharset, clientChannel, key);
+                updateLobbyNameList();
             }
             else if(action == createLobby || action == joinLobby || action == leaveLobby){
                 parseBufferForLobbyOrGame(messageCharset, clientChannel, bufferSize, key);
+                updateLobbyNameList();
             }
             else if(action == tone){
                 parseBufferForMusicJoiner(messageCharset, clientChannel, bufferSize, key);

@@ -35,7 +35,8 @@ public class MusicJoiner {
         messageBuffer.flip();
 
         try {
-            clientChannel.write(messageBuffer);
+            if (clientChannel != null)
+                clientChannel.write(messageBuffer);
         } catch (IOException e) {
             return -1;
         }
