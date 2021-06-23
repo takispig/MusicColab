@@ -32,6 +32,12 @@ public class Server {
 
     public static HashMap<Integer,Lobby> lobbyMap = new HashMap<>();
     public static HashMap<Integer,Player> loggedInPlayers = new HashMap<>();
+    public static ArrayList<Player> playersLoggedin = new ArrayList<>();
+    public static ArrayList<Lobby> lobbyList = new ArrayList<>();
+
+    public static Protocol getProtocol() {
+        return protocol;
+    }
 
     private static Protocol protocol = new Protocol();
 
@@ -51,6 +57,11 @@ public class Server {
     }
 
     public void OpenSelectorAndSetupSocket() throws IOException, SocketBindException {
+
+        lobbyMap.clear();
+        loggedInPlayers.clear();
+        playersLoggedin.clear();
+        lobbyList.clear();
 
         selector = Selector.open();
 
@@ -116,6 +127,9 @@ public class Server {
             if(disconnectedPlayer != null){
                 id = disconnectedPlayer.getLobbyId();
                 loggedInPlayers.remove(disconnectedPlayer.getId());
+                //
+                playersLoggedin.remove(disconnectedPlayer);
+                //
             }
             Lobby lobbyOfDisconnectedPlayer = null;
             if(id != -1) {
@@ -123,6 +137,8 @@ public class Server {
                 lobbyOfDisconnectedPlayer.removePlayer(disconnectedPlayer);
                 if (lobbyOfDisconnectedPlayer.isEmpty()) {
                     lobbyMap.remove(id);
+                    //
+                    lobbyList.remove(lobbyOfDisconnectedPlayer);
                 } else {
                     protocol.responseAction = 9;
                     protocol.sendResponseToClient(messageCharset, lobbyOfDisconnectedPlayer.getAdmin().getPlayerChannel(), "You are now admin.");
@@ -130,6 +146,7 @@ public class Server {
                 disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
             }
             clientChannel.close();
+            protocol.updateLobbyNameList();
         }
         else if(result[1] != 0)
             protocol.handleAction(messageCharset, clientChannel, result[1], key);
@@ -192,6 +209,14 @@ public class Server {
                 exception.printStackTrace();
             }
         }
+    }
+
+    public static Lobby getLobbyByName(String name) {
+        for (Lobby l : lobbyList) {
+            if (l.getLobbyName().equals(name))
+                return l;
+        }
+        return null;
     }
 
     public void setFinishedTrue() {
