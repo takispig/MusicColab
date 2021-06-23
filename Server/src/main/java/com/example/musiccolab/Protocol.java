@@ -269,6 +269,43 @@ public class Protocol {
         lobbyBuffer.clear();
     }
 
+    public void updateLobbyIDList() {
+        String IDs = getAllLobbyIds(Server.lobbyMap);
+
+        if (IDs == null)
+            return;
+
+        if (IDs.length() > 0 && IDs.charAt(0) == ',')
+            IDs = IDs.substring(1);
+
+        for (Player p : Server.playersLoggedin) {
+            System.out.println("send...");
+            sendLobbyIDsToClient(p.getPlayerChannel(), IDs);
+        }
+    }
+
+    private void sendLobbyIDsToClient(SocketChannel clientChannel, String IDs) {
+
+        short actionResponse = 20;
+
+        short dataLength = (short) IDs.length();
+        ByteBuffer messageBuffer = ByteBuffer.allocate(6 + dataLength);
+
+        messageBuffer.put(convertShortToByte(protocolName));
+        messageBuffer.put(convertShortToByte(actionResponse));
+        messageBuffer.put(convertShortToByte(dataLength));
+        messageBuffer.put(IDs.getBytes(StandardCharsets.US_ASCII));
+        messageBuffer.flip();
+
+        try {
+            clientChannel.write(messageBuffer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        messageBuffer.clear();
+        return;
+    }
+
 
 
     private void parseBufferForMusicJoiner(Charset messageCharset, SocketChannel clientChannel, int dataSize, SelectionKey key) throws IOException {
@@ -327,6 +364,7 @@ public class Protocol {
             }
             else if(action == createLobby || action == joinLobby || action == leaveLobby){
                 parseBufferForLobbyOrGame(messageCharset, clientChannel, bufferSize, key);
+                updateLobbyIDList();
             }
             else if(action == tone){
                 parseBufferForMusicJoiner(messageCharset, clientChannel, bufferSize, key);

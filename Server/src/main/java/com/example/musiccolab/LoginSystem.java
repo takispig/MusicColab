@@ -48,6 +48,9 @@ public final class LoginSystem {
             player.setLoggedIn();
             //add data to List
             Server.loggedInPlayers.put(res.getInt(COL_INT_ID), player);
+            //
+            Server.playersLoggedin.add(player);
+            //
 
             player.state.setState(ClientState.loggedIn);
             return player;
@@ -93,6 +96,9 @@ public final class LoginSystem {
                 player.state.setState(ClientState.loggedOut);
             }
             Server.loggedInPlayers.remove(getId(name, passwort));
+            //
+            Server.playersLoggedin.remove(player);
+            //
             player = null;
             return true;
         } else {

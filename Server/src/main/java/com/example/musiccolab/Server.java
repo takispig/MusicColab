@@ -32,6 +32,11 @@ public class Server {
 
     public static HashMap<Integer,Lobby> lobbyMap = new HashMap<>();
     public static HashMap<Integer,Player> loggedInPlayers = new HashMap<>();
+    public static ArrayList<Player> playersLoggedin = new ArrayList<>();
+
+    public static Protocol getProtocol() {
+        return protocol;
+    }
 
     private static Protocol protocol = new Protocol();
 
@@ -51,6 +56,10 @@ public class Server {
     }
 
     public void OpenSelectorAndSetupSocket() throws IOException, SocketBindException {
+
+        lobbyMap.clear();
+        loggedInPlayers.clear();
+        playersLoggedin.clear();
 
         selector = Selector.open();
 
@@ -116,6 +125,9 @@ public class Server {
             if(disconnectedPlayer != null){
                 id = disconnectedPlayer.getLobbyId();
                 loggedInPlayers.remove(disconnectedPlayer.getId());
+                //
+                playersLoggedin.remove(disconnectedPlayer);
+                //
             }
             Lobby lobbyOfDisconnectedPlayer = null;
             if(id != -1) {
@@ -130,6 +142,7 @@ public class Server {
                 disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
             }
             clientChannel.close();
+            protocol.updateLobbyIDList();
         }
         else if(result[1] != 0)
             protocol.handleAction(messageCharset, clientChannel, result[1], key);

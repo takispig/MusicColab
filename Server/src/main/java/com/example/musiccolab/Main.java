@@ -5,6 +5,7 @@ import com.example.musiccolab.exceptions.SocketBindException;
 
 import java.io.IOException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.HashMap;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -12,7 +13,7 @@ import java.util.logging.Logger;
 public class Main {
 
     // DEFAULT VALUES //
-    private static final String DEFAULT_ADDRESS = "130.149.80.94"; // vm: 130.149.80.94
+    private static final String DEFAULT_ADDRESS = "10.1.1.1"; // vm: 130.149.80.94
     private static final int DEFAULT_PORT = 8080;
     // // // // // // //
 
@@ -230,6 +231,15 @@ public class Main {
                         closeServer();
                         exit = true;
                         break;
+                    case "lobbies":
+                        printLobbies();
+                        break;
+                    case "updateLobbies":
+                        currentServer.getProtocol().updateLobbyIDList();
+                        break;
+                    case "players":
+                        System.out.println(currentServer.playersLoggedin);
+                        break;
                     default:
                         System.out.println("Undefined input");
                         break;
@@ -240,6 +250,17 @@ public class Main {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void printLobbies() {
+        HashMap<Integer, Lobby> lobbies = currentServer.lobbyMap;
+        System.out.print("Lobbies: ");
+        for (int i = 0; i < 50; i++) {
+            if (lobbies.get(i) != null) {
+                System.out.print(i  + ",");
+            }
+        }
+        System.out.println();
     }
 
     /**
