@@ -75,6 +75,7 @@ public class CommunicationHandling implements Runnable {
             errorCodesList.add((short) (index + 10));
         }
         codesList.add((short) 20);  // add the update lobby list action
+        codesList.add((short) 21);  // add the update number of users in lobby action
     }
 
     @Override
@@ -124,11 +125,10 @@ public class CommunicationHandling implements Runnable {
                     if (actionAndDataLength[1] > 0) {
                         confirmation = actionAndDataLength[0];
                         handleAction(actionAndDataLength[0], actionAndDataLength[1]);
-//                    }
-//                    // TODO: what are you doing exactly below? ** DON'T DELETE **
-//                    else if (actionAndDataLength[1] == 0 && actionAndDataLength[0] == (short) 20) {
-//                        confirmation = actionAndDataLength[0];
-//                        handleAction(actionAndDataLength[0], actionAndDataLength[1]);
+                    }
+                    // if message length == 0 and action == 20, then just delete all Lobbies
+                    else if (actionAndDataLength[1] == 0 && actionAndDataLength[0] == (short) 20) {
+                        LobbyList.clear();
                     } else {
                         try {
                             clientChannel.read(ByteBuffer.allocate(1000));
