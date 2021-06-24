@@ -35,7 +35,7 @@ public class Theremin implements Instrument {
             lastSensorValue = event.getValues()[0];
             String toneToServer = "therm";
             StringBuilder sb = new StringBuilder();
-            float x = (max - 5) / 8;
+            float x = (max-1) / 8;
             if (event.getValues()[0] < x) {
                 stringToDisplay = "c Theremin";
                 toneToServer += "0";
