@@ -68,7 +68,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedInstrument = instruments[position]; // set the selected Instrument to the global variable Instrument
-                Toast.makeText(getApplicationContext(), "Instrument: " + instruments[position], Toast.LENGTH_SHORT).show();
+                // Toast.makeText(getApplicationContext(), "Instrument: " + instruments[position], Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -218,6 +218,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
 
             if (networkThread.confirmation==2){
                 // reset the sensitive user data after logout
+                toast("Logged Out");
                 CommunicationHandling.wipeData(2, networkThread);
                 startActivity(new Intent(this, Login.class));
             }else if (networkThread.confirmation == 0){
@@ -242,8 +243,6 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
         } else if (selectedInstrument.equals(InstrumentType.PIANO)) {
             lobbyIntent.putExtra(SELECTED_INSTRUMENT, InstrumentType.PIANO);
             startActivity(lobbyIntent);
-        } else {
-            Toast.makeText(getApplicationContext(), "No such Instrument: \"" + selectedInstrument + "\". Try again.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -269,6 +268,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
 
             if (networkThread.confirmation==2){
                 // reset the sensitive user data after logout
+                toast("Logged Out");
                 CommunicationHandling.wipeData(2, networkThread);
                 startActivity(new Intent(this, Login.class));
             }else if (networkThread.confirmation == 0){

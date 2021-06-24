@@ -212,7 +212,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
                 // reset the sensitive user data after logout & clear LobbyNames
                 networkThread.LobbyList.clear();
                 CommunicationHandling.wipeData(6, networkThread);
-                toast("Logged out successfully");
+                toast("Left Lobby successfully");
                 startActivity(new Intent(this, PreLobby.class));
             } else if (networkThread.confirmation == 0) {
                 toast("Connection timeout");
