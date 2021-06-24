@@ -41,8 +41,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         TextView passwordd = findViewById(R.id.passwordl);
         username.setText(userName);
         passwordd.setText(password);
-
-
+        if(!username.getText().toString().equals(""))login.performClick();
     }
 
     @Override

@@ -69,7 +69,7 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
                 }
 
                 if (networkThread.confirmation == 3) {
-                    toast("Registration Successful!\nRedirected to PreLobby");
+                    toast("Registration Successful!");
                     // send username and password to Login activity to make the login smoother
                     Intent re = new Intent(this, Login.class);
                     re.putExtra("username", username);
@@ -90,5 +90,6 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
             startActivity(new Intent(this, About.class));
         }
     }
+
 
 }
