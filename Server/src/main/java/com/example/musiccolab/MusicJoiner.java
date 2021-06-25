@@ -9,15 +9,16 @@ public class MusicJoiner {
     public static short playersNumber;
 
 
-    public static int handleToneData(Charset messageCharset, Lobby lobby, byte toneAction, byte toneType, String toneData, short action) {
+    public static int handleToneData(Charset messageCharset, Lobby lobby, byte toneAction, byte toneType, String toneData, Player sender , short action) {
         if(lobby != null) {
             playersNumber = (short) lobby.getMax_players();
             System.out.println("Get tone data: " + toneData);
             for (Player player : lobby.getPlayers()) {
-                if (player.state.getState() == ClientState.inLobby)
-                    if (sendTonToClient(messageCharset, player.getPlayerChannel(), toneData + "," + toneType + "," + toneAction, action) == -1){
+                if (player.state.getState() == ClientState.inLobby && !player.equals(sender)) {
+                    if (sendTonToClient(messageCharset, player.getPlayerChannel(), toneData + "," + toneType + "," + toneAction, action) == -1) {
                         return -2;
                     }
+                }
             }
             return 0;
         }

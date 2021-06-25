@@ -304,50 +304,16 @@ public class Protocol {
         if (lobbyNames == null)
             return;
 
-        for (Player p : Server.playersLoggedin) {
-            System.out.println("send...");
-            sendToAllClients(p.getPlayerChannel(), lobbyNames);
-        }
+        short responseActionTemp = responseAction;
 
-    }
-
-    public void updateLobbyIDList() {
-        String IDs = getAllLobbyIds(Server.lobbyMap);
-
-        if (IDs == null)
-            return;
-
-        if (IDs.length() > 0 && IDs.charAt(0) == ',')
-            IDs = IDs.substring(1);
+        responseAction = (short) 20;
 
         for (Player p : Server.playersLoggedin) {
             System.out.println("send...");
-            sendToAllClients(p.getPlayerChannel(), IDs);
+            sendResponseToClient(StandardCharsets.US_ASCII, p.getPlayerChannel(), lobbyNames);
         }
+        responseAction = responseActionTemp;
     }
-
-    private void sendToAllClients(SocketChannel clientChannel, String IDs) {
-
-        short actionResponse = 20;
-
-        short dataLength = (short) IDs.length();
-        ByteBuffer messageBuffer = ByteBuffer.allocate(6 + dataLength);
-
-        messageBuffer.put(convertShortToByte(protocolName));
-        messageBuffer.put(convertShortToByte(actionResponse));
-        messageBuffer.put(convertShortToByte(dataLength));
-        messageBuffer.put(IDs.getBytes(StandardCharsets.US_ASCII));
-        messageBuffer.flip();
-
-        try {
-            clientChannel.write(messageBuffer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        messageBuffer.clear();
-        return;
-    }
-
 
 
     private void parseBufferForMusicJoiner(Charset messageCharset, SocketChannel clientChannel, int dataSize, SelectionKey key) throws IOException {
@@ -379,7 +345,7 @@ public class Protocol {
                 responseAction = action;
 
                 int i;
-                if ((i = MusicJoiner.handleToneData(messageCharset, clientLobby, toneAction, toneType, toneData, responseAction)) != 0) {
+                if ((i = MusicJoiner.handleToneData(messageCharset, clientLobby, toneAction, toneType, toneData, sender, responseAction)) != 0) {
                     // for testing
                     if (i == -1)
                         System.out.println("Fehler in MusicJoiner -1");
