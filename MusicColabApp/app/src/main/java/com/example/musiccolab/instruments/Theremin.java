@@ -12,6 +12,7 @@ public class Theremin implements Instrument {
     private final InstrumentGUIBox instrumentGUI;
     private static final int DEFAULT_SENSOR = Sensor.TYPE_LIGHT;
     String stringToDisplay;
+    String lastTone="";
 
     public Theremin(InstrumentGUIBox instrumentGUI, SoundPlayer sp) {
         this.instrumentGUI = instrumentGUI;
@@ -72,7 +73,10 @@ public class Theremin implements Instrument {
                 stringToDisplay = "0 Theremin";
                 instrumentGUI.setThereminAlpha(7);
             }
-            sp.sendToneToServer(toneToServer);
+            if(!lastTone.equals(toneToServer)){
+                sp.sendToneToServer(toneToServer,1);
+                lastTone=toneToServer;
+            }
             sb.append("Light intensity:");
             sb.append(event.getValues()[0]);
             sb.append(" (");

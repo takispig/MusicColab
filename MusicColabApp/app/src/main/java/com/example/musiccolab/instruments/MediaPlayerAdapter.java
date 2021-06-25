@@ -20,4 +20,17 @@ public class MediaPlayerAdapter {
             mp.start();
         }
     }
+
+    public void stop() {
+        if (!testingMode) {
+            try {
+                if(mp.isPlaying()) {
+                    mp.stop();
+                    mp.prepare();
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
 }

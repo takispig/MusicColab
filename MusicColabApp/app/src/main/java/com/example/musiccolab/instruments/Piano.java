@@ -27,11 +27,12 @@ public class Piano implements Instrument {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
                         instrumentGUI.startAnimationForPianoKey(index);
-                        sp.sendToneToServer("piano" + index);
+                        sp.sendToneToServer("piano" + index, 1);
                         break;
                     case MotionEvent.ACTION_UP:
                         freeze();
                         instrumentGUI.clearAnimationForPianoKey(index);
+                        sp.sendToneToServer("piano" + index, 0);
                         break;
                     default:
                         break;

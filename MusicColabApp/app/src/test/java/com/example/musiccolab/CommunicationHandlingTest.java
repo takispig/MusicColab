@@ -52,8 +52,7 @@ public class CommunicationHandlingTest {
         // send tone
         // arrange
         ch.soundPlayer = mock(SoundPlayer.class);
-        ch.toneType = (byte) 8;
-        ch.toneAction = (byte) 10;
+        ch.toneAction = (byte) 1;
         ch.data = "piano0";
         // act
         ch.action = 7;

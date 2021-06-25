@@ -29,7 +29,7 @@ public class SoundPlayerTest {
         // arrange
 
         // act
-        sp.sendToneToServer(expectedTone);
+        sp.sendToneToServer(expectedTone,1);
 
         // assert
         assertEquals(expectedTone, dummy.data);

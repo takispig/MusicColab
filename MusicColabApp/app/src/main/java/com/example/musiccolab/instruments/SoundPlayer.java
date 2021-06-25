@@ -10,8 +10,6 @@ import java.util.Optional;
 
 public class SoundPlayer {
     private static final short NETWORK_THREAD_ACTION_SEND_TONE = 7;
-    public static final byte NETWORK_THREAD_DEFAULT_TONE_TYPE = (byte) 8;
-    public static final byte NETWORK_THREAD_DEFAULT_TONE_ACTION = (byte) 10;
     public static CommunicationHandling NETWORK_THREAD = Login.networkThread;
     private final Lobby lobby;
     private HashMap<String, MediaPlayerAdapter> sounds;
@@ -49,17 +47,19 @@ public class SoundPlayer {
         sounds.put("therm7", new MediaPlayerAdapter(lobby, R.raw.c2, testingMode));
     }
 
-    public void sendToneToServer(String toneAsString) {
-        Optional<MediaPlayerAdapter> tone = Optional.ofNullable(sounds.get(toneAsString));
-        tone.ifPresent(MediaPlayerAdapter::start);
+    public void sendToneToServer(String toneAsString, int toneAction) {
+        playTone(toneAsString,toneAction);
         NETWORK_THREAD.action = NETWORK_THREAD_ACTION_SEND_TONE;
-        NETWORK_THREAD.toneType = NETWORK_THREAD_DEFAULT_TONE_TYPE;
-        NETWORK_THREAD.toneAction = NETWORK_THREAD_DEFAULT_TONE_ACTION;
+        NETWORK_THREAD.toneAction = (byte) toneAction;
         NETWORK_THREAD.data = toneAsString;
     }
 
-    public void playToneFromServer(String toneAsString) {
+    public void playTone(String toneAsString,int toneAction) {
         Optional<MediaPlayerAdapter> tone = Optional.ofNullable(sounds.get(toneAsString));
-        tone.ifPresent(MediaPlayerAdapter::start);
+        if(toneAsString.startsWith("therm")){
+            sounds.forEach((t,mp)->{ if(t.startsWith("therm"))mp.stop();});
+        }
+        if(toneAction==1) tone.ifPresent(MediaPlayerAdapter::start);
+        else if(toneAction==0) tone.ifPresent(MediaPlayerAdapter::stop);
     }
 }

@@ -94,18 +94,18 @@ public class Drums implements Instrument {
     private void checkAndHandleTwoValues(double force_1, double force_2) {
         if (forceWithinLimits(force_2)) {
             instrumentGUI.setTextInCenter("DRUM_A");
-            sp.sendToneToServer("drums0");
+            sp.sendToneToServer("drums0",1);
             instrumentGUI.setDrumsNormal();
             instrumentGUI.setDrumsRotateVert();
         } else if (forceWithinLimits(force_1)) {
             if (force_1 < 0) {
                 instrumentGUI.setTextInCenter("DRUM_B");
-                sp.sendToneToServer("drums1");
+                sp.sendToneToServer("drums1",1);
                 instrumentGUI.setDrumsNormal();
                 instrumentGUI.setDrumsRotateRight();
             } else {
                 instrumentGUI.setTextInCenter("DRUM_C");
-                sp.sendToneToServer("drums2");
+                sp.sendToneToServer("drums2",1);
                 instrumentGUI.setDrumsNormal();
                 instrumentGUI.setDrumsRotateLeft();
             }
