@@ -12,8 +12,8 @@ import static xdroid.toaster.Toaster.toast;
 
 public class Register extends AppCompatActivity implements View.OnClickListener {
 
-    public static String email, password, username;
-    EditText emailView, passView, userView;
+    public static String email, password, username, question; //VH - 22.06
+    EditText emailView, passView, userView, questionView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,9 +40,11 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
             password = passView.getText().toString();
             userView = findViewById(R.id.username);
             username = userView.getText().toString();
+            questionView = findViewById(R.id.question); //VH - 22.06
+            question = questionView.getText().toString(); //VH - 22.06
 
             // check data validity (no empty input)
-            if (email.isEmpty() || password.isEmpty() || username.isEmpty()) {
+            if (email.isEmpty() || password.isEmpty() || username.isEmpty() || question.isEmpty()) { //VH - 22.06
                 toast("All fields must be filled");
             }
             else {
@@ -51,6 +53,7 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
                 networkThread.username = username;
                 networkThread.password = password;
                 networkThread.email = email;
+                networkThread.question = question; //VH - 27.06
                 networkThread.action = 3;
 
                 if (networkThread.threadExist) {
