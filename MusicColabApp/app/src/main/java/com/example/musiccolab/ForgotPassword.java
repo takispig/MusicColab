@@ -13,8 +13,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class ForgotPassword extends AppCompatActivity implements View.OnClickListener {
 
-    public static String email, password, username;
-    EditText emailView, passView, userView;
+    public static String email, password, username, question;
+    EditText emailView, passView, userView, questionView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,9 +41,11 @@ public class ForgotPassword extends AppCompatActivity implements View.OnClickLis
             password = passView.getText().toString();
             userView = findViewById(R.id.username);
             username = userView.getText().toString();
+            questionView = findViewById(R.id.questionForgot);
+            question = questionView.getText().toString();
 
             // check data validity (no empty input)
-            if (email.isEmpty() || password.isEmpty() || username.isEmpty()) {
+            if (email.isEmpty() || password.isEmpty() || username.isEmpty()  || question.isEmpty()) {
                 toast("All fields must be filled");
             }
             else {
@@ -52,6 +54,7 @@ public class ForgotPassword extends AppCompatActivity implements View.OnClickLis
                 networkThread.username = username;
                 networkThread.password = password;
                 networkThread.email = email;
+                networkThread.question = question;
                 networkThread.action = 8;
 
                 if (networkThread.threadExist) {
