@@ -38,6 +38,9 @@ public class Protocol {
     String username, password, email = "";
     String lobbyName = "";
 
+    byte toneAction;
+    byte toneType;
+    String toneData = "";
 
 
 
@@ -358,18 +361,18 @@ public class Protocol {
         toneBuffer = ByteBuffer.allocate(1);
         clientChannel.read(toneBuffer);
         toneBuffer.flip();
-        byte toneAction = messageCharset.decode(toneBuffer).toString().getBytes()[0];
+        toneAction = messageCharset.decode(toneBuffer).toString().getBytes()[0];
         toneBuffer.clear();
 
         clientChannel.read(toneBuffer);
         toneBuffer.flip();
-        byte toneType = messageCharset.decode(toneBuffer).toString().getBytes()[0];
+        toneType = messageCharset.decode(toneBuffer).toString().getBytes()[0];
         toneBuffer.clear();
 
         toneBuffer = ByteBuffer.allocate(dataSize - 2);
         clientChannel.read(toneBuffer);
         toneBuffer.flip();
-        String toneData= messageCharset.decode(toneBuffer).toString();
+        toneData = messageCharset.decode(toneBuffer).toString();
         toneBuffer.clear();
 
         sender = (Player) key.attachment();
@@ -521,6 +524,7 @@ public class Protocol {
     public void getParseLogin(Charset m, SocketChannel c, SelectionKey k) throws IOException {parseBufferForLoginSystem(m, c, k);}
     public void getParseLobby(Charset m, SocketChannel c, SelectionKey k) throws IOException {parseBufferForLobbyOrGame(m, c, 7, k);}
     public void getSize(Charset c, SocketChannel s) throws IOException {readSizes(c, s);}
+    public void getParseMusicJoiner(Charset m, SocketChannel c, SelectionKey k) throws IOException {parseBufferForMusicJoiner(m,c,14,k);}
 
     public String getEmail(){return email;}
     public String getUsername(){return username;}
@@ -529,4 +533,7 @@ public class Protocol {
     public byte getEmailSize(){return emailSize;}
     public byte getUserNameSize(){return userNameSize;}
     public byte getPasswordSize(){return passwordSize;}
+    public byte getToneAction(){return toneAction;}
+    public byte getToneType(){return toneType;}
+    public String getToneData(){return toneData;}
 }

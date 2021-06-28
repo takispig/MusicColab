@@ -88,7 +88,7 @@ public class CommunicationHandling implements Runnable {
         else if(test == 5)
             port = 1205;
 
-        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_LOGIN_ACTION || test == 4) {
+        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_LOGIN_ACTION || test == 4 || test == 77) {
             buildConnection();
             connectToServer();
         }
@@ -161,7 +161,7 @@ public class CommunicationHandling implements Runnable {
                 action = 0;
 
 
-                if(test == 0 || test == 3 || test == 4 || test == 5){
+                if(test == 0 || test == 3 || test == 4 || test == 5 || test == 77){
                     synchronized (mainThread) {
                         mainThread.notify();
                     }
