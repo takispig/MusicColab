@@ -272,7 +272,6 @@ public class CommunicationHandlingMusicJoiner implements Runnable {
         dataLength += 2;
         ByteBuffer buffer = ByteBuffer.allocate(6 + 2 + dataLength);
 
-        System.out.println("protocolName in sendTone: " + protocolName);
         buffer.put(convertShortToByte(protocolName));
         buffer.put(convertShortToByte(action));
         buffer.put(convertShortToByte(dataLength));
@@ -412,8 +411,6 @@ public class CommunicationHandlingMusicJoiner implements Runnable {
             mainBuffer.flip();
 
             short nameOfProtocol = getShort(messageCharset.decode(mainBuffer).toString().getBytes(messageCharset));
-            System.out.println("nameOfProtocol: " + nameOfProtocol);
-            System.out.println("protocolName: " + protocolName);
             if (protocolName == nameOfProtocol) {
                 mainBuffer.clear();
 
@@ -432,7 +429,7 @@ public class CommunicationHandlingMusicJoiner implements Runnable {
                     return new short[]{action, 0};
                 }
             } else {
-                System.err.println("Response is not from Server.");
+                // System.err.println("Response is not from Server.");
                 return new short[]{action, 0};
             }
         } catch (IOException e) {

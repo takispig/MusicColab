@@ -20,9 +20,9 @@ public class ClientMusicJoiner implements Runnable {
             client = new CommunicationHandlingMusicJoiner(Thread.currentThread(), test);
         else
             client = new CommunicationHandlingMusicJoiner(mainThread, test);
-        client.username = "zead";
+        client.username = "leon";
         client.password = "123";
-        client.email = "zead@gmail.com";
+        client.email = "leon@gmail.com";
         client.toneAction = 1;
         client.toneType = 1;
         client.data = "dataExample2";
