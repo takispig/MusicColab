@@ -1,54 +1,45 @@
 package com.example.musiccolab.instruments;
 
 import android.annotation.SuppressLint;
-import android.hardware.SensorEvent;
 import android.view.MotionEvent;
-import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
-
-import com.example.musiccolab.Lobby;
-import com.example.musiccolab.R;
 
 import java.util.List;
 
-public class Piano implements Instrument, View.OnClickListener {
+public class Piano implements Instrument {
 
-    private final Animation scaleDown;
     private static final String INSTRUMENT_NAME = "Piano";
     private static final int FREEZE_DURATION_IN_MS = 300;
+    private final List<Button> pianoKeys;
+
+    public Piano(InstrumentGUIBox instrumentGUI, SoundPlayer sp) {
+        pianoKeys = instrumentGUI.getPianoKeys();
+        createPianoKeys(instrumentGUI, sp);
+        instrumentGUI.setPianoKeysVisible();
+    }
 
     @SuppressLint("ClickableViewAccessibility")
-    public Piano(InstrumentGUIBox instrumentGUI, Lobby lobby, SoundPlayer sp) {
-        List<Button> pianoKeys = instrumentGUI.getPianoKeys();
-
-        scaleDown = AnimationUtils.loadAnimation(lobby, R.anim.scale_down);
-
+    private void createPianoKeys(InstrumentGUIBox instrumentGUI, SoundPlayer sp) {
         for (int i = 0; i < pianoKeys.size(); i++) {
             Button btn = pianoKeys.get(i);
-            int finalI = i;
+            int index = i;
             btn.setOnTouchListener((v, event) -> {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
-                        btn.startAnimation(scaleDown);
-                        sp.sendToneToServer("piano" + finalI);
-                        instrumentGUI.setTextInCenter(btn.getText() + " pressed");
+                        instrumentGUI.startAnimationForPianoKey(index);
+                        sp.sendToneToServer("piano" + index, 1);
                         break;
                     case MotionEvent.ACTION_UP:
                         freeze();
-                        btn.clearAnimation();
-                        //   sp.pause("piano" + finalI);
-                        instrumentGUI.setTextInCenter(btn.getText() + " released");
+                        instrumentGUI.clearAnimationForPianoKey(index);
+                        sp.sendToneToServer("piano" + index, 0);
                         break;
                     default:
-                        //      instrumentGUI.setTextInCenter("no key pressed");
                         break;
                 }
                 return true;
             });
         }
-        instrumentGUI.setPianoKeysVisible();
     }
 
     private void freeze() {
@@ -60,7 +51,7 @@ public class Piano implements Instrument, View.OnClickListener {
     }
 
     @Override
-    public void reCalibrate(SensorEvent event) {
+    public void reCalibrate(SensorEventAdapter event) {
         // do nothing, or maybe changing landscape from vertical to horizontal?
     }
 
@@ -70,7 +61,7 @@ public class Piano implements Instrument, View.OnClickListener {
     }
 
     @Override
-    public void action(SensorEvent event) {
+    public void action(SensorEventAdapter event) {
         // do nothing
     }
 
@@ -87,10 +78,5 @@ public class Piano implements Instrument, View.OnClickListener {
     @Override
     public int getSensorType() {
         return 0;
-    }
-
-    @Override
-    public void onClick(View v) {
-        // do nothing
     }
 }

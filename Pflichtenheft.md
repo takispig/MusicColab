@@ -39,6 +39,7 @@ Und MusicColab ist simpel: einloggen, Instrument wählen und sobald alle bereit 
 	- Authentifizierung via Login-Daten -> Datenbank mit registrierten Clients
 	- prüft ob Authentifizierung vorliegt
 - - -
+
 ### 2.2 Optionale Features (Hauptprogramm):
 1. Server fungiert als Observer -> Man kann über den Server mithören ohne mitzuspielen
 2. Server bietet Verwaltung von Lobby

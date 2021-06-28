@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if ps -ef | grep "[j]ava -jar server.jar" > /dev/null 2>&1
+then
+    echo "already running"
+else
+# v01_2021.06.08
+# v02_2021.06.15
+# v03_2021.06.18
+# v04_2021.06.20
+# v05_2021.06.21
+    cd /home/musiccolab/server/v05_2021.06.21
+    nohup java -jar Server.jar > /home/musiccolab/server.log 2>&1 &
+    echo $! > /home/musiccolab/server/server_pid.txt
+fi

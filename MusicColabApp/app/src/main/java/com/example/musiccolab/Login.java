@@ -34,6 +34,14 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         TextView forgot_password = (TextView) findViewById(R.id.forgot_password);
         forgot_password.setOnClickListener(this);
 
+        // IF user comes from Register activity, keep the data for him
+        password = getIntent().getStringExtra("password");
+        userName = getIntent().getStringExtra("username");
+        TextView username = findViewById(R.id.emaill);
+        TextView passwordd = findViewById(R.id.passwordl);
+        username.setText(userName);
+        passwordd.setText(password);
+        if(!username.getText().toString().equals(""))login.performClick();
     }
 
     @Override
@@ -48,8 +56,8 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             startActivity(new Intent(this, ForgotPassword.class));
         } else if (view.getId() == R.id.login_submit) {
             // send the email + password in the server to check authorisation
-            userNameView = findViewById(R.id.email);
-            passView = findViewById(R.id.password);
+            userNameView = findViewById(R.id.emaill);
+            passView = findViewById(R.id.passwordl);
             userName = userNameView.getText().toString();
             password = passView.getText().toString();
 
@@ -72,7 +80,8 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
 
                 try {
                     synchronized (Thread.currentThread()) {
-                        Thread.currentThread().wait();
+                        // Set as connection timeout 2 seconds
+                        Thread.currentThread().wait(2000);
                     }
                 } catch (InterruptedException e) {
                     System.out.println("Error with waiting of main thread.");
@@ -83,9 +92,11 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                     networkThread.confirmation = 0;
                     startActivity(new Intent(this, PreLobby.class));
                 } else if (networkThread.confirmation == 0) {
+                    CommunicationHandling.wipeData(2, networkThread);
                     toast("Connection timeout");
                 } else if (networkThread.confirmation == 11) {
                     toast("Username/password wrong\nPlease try again");
+                    networkThread.confirmation = 0;
                 }
             }
         }

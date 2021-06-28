@@ -1,16 +1,14 @@
 package com.example.musiccolab.instruments;
 
-
-import android.animation.ObjectAnimator;
-import android.annotation.SuppressLint;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.example.musiccolab.Lobby;
 import com.example.musiccolab.R;
 
@@ -25,6 +23,7 @@ public class InstrumentGUIBox {
     public static int instrumentType;
     private final TextView textInCenter;
     private final List<Button> pianoKeys = new ArrayList<>();
+    private final Animation scaleDown;
 
     private ImageView image4Drums;
     private ImageView image4Theremin;
@@ -34,12 +33,14 @@ public class InstrumentGUIBox {
     public InstrumentGUIBox(Lobby lobby, int textInCenterID, List<Integer> pianoKeysIDs) {
         textInCenter = lobby.findViewById(textInCenterID);
 
+        scaleDown = AnimationUtils.loadAnimation(lobby, R.anim.scale_down);
+
         //init
         image4Drums = lobby.findViewById(R.id.drumImageView);
-        image4Theremin = (ImageView) lobby.findViewById(R.id.thereminView);
-        defaultBlack = (ImageView) lobby.findViewById(R.id.blackView);
+        image4Theremin = lobby.findViewById(R.id.thereminView);
+        defaultBlack = lobby.findViewById(R.id.blackView);
 
-        if(instrumentType==0){ //PIANO
+        if (instrumentType == 0) { //PIANO
             this.setDrumsInvisible();
             this.setThereminInvisible();
 
@@ -47,25 +48,24 @@ public class InstrumentGUIBox {
                 pianoKeys.add(lobby.findViewById(id));
             }
             setPianoKeysInvisible();
-        }else if(instrumentType==1){ //DRUMS
+        } else if (instrumentType == 1) { //DRUMS
             this.setPianoKeysInvisible();
             this.setThereminInvisible();
 
             image4Drums = lobby.findViewById(R.id.drumImageView);
             image4Drums.setVisibility(View.VISIBLE);
-        }else if(instrumentType==2){//THEREMIN
+        } else if (instrumentType == 2) {//THEREMIN
             this.setPianoKeysInvisible();
             this.setDrumsInvisible();
 
             setPianoKeysInvisible();
 
-            image4Theremin = (ImageView) lobby.findViewById(R.id.thereminView);
-            defaultBlack = (ImageView) lobby.findViewById(R.id.blackView);
+            image4Theremin = lobby.findViewById(R.id.thereminView);
+            defaultBlack = lobby.findViewById(R.id.blackView);
 
             image4Theremin.setVisibility(View.VISIBLE);
             defaultBlack.setVisibility(View.VISIBLE);
         }
-
     }
 
     public void setPianoKeysVisible() {
@@ -145,12 +145,16 @@ public class InstrumentGUIBox {
         defaultBlack.setImageAlpha(alphaScale);
     }
 
-
-
-
     public List<Button> getPianoKeys() {
         return pianoKeys;
     }
 
+    public void startAnimationForPianoKey(int i){
+        Button btn = pianoKeys.get(i);
+        btn.startAnimation(scaleDown);
+    }
 
+    public void clearAnimationForPianoKey(int i) {
+        pianoKeys.get(i).clearAnimation();
+    }
 }
