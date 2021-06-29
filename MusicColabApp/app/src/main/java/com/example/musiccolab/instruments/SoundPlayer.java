@@ -7,18 +7,36 @@ import com.example.musiccolab.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
 
-public class SoundPlayer {
+ public class SoundPlayer {
     private static final short NETWORK_THREAD_ACTION_SEND_TONE = 7;
     public static CommunicationHandling NETWORK_THREAD = Login.networkThread;
     private final Lobby lobby;
     private boolean testingMode = false;
     private ArrayList<MediaPlayerAdapter> currentlyPlaying = new ArrayList<>();
+    private HashMap<String,Integer> sounds =new HashMap<>();
 
     public SoundPlayer(Lobby lobby) {
         this.lobby = lobby;
+        sounds.put("piano0",R.raw.piano0_c4);
+        sounds.put("piano1",R.raw.piano1_d4);
+        sounds.put("piano2",R.raw.piano2_e4);
+        sounds.put("piano3",R.raw.piano3_f4);
+        sounds.put("piano4",R.raw.piano4_g4);
+        sounds.put("piano5",R.raw.piano5_a4);
+        sounds.put("piano6",R.raw.piano6_h4);
+        sounds.put("piano7",R.raw.piano7_c5);
+        sounds.put("drums0",R.raw.drum_a);
+        sounds.put("drums1",R.raw.drum_b);
+        sounds.put("drums2",R.raw.drum_c);
+        sounds.put("therm0",R.raw.theremin0_c4);
+        sounds.put("therm1",R.raw.theremin1_d4);
+        sounds.put("therm2",R.raw.theremin2_e4);
+        sounds.put("therm3",R.raw.theremin3_f4);
+        sounds.put("therm4",R.raw.theremin4_g4);
+        sounds.put("therm5",R.raw.theremin5_a4);
+        sounds.put("therm6",R.raw.theremin6_h4);
+        sounds.put("therm7",R.raw.theremin7_c5);
     }
 
     public void activateTestingMode(CommunicationHandling dummyNetworkThread) {
@@ -36,11 +54,11 @@ public class SoundPlayer {
 
     public void playTone(String toneAsString,String user, int toneAction) {
         if(toneAction==1){
-            MediaPlayerAdapter tone = getMediaPlayerAdapter(toneAsString,user);
-            if(tone==null){
+            if(sounds.get(toneAsString)==null){
                 System.out.println("Wrong tone data");
                 return;
             }
+            MediaPlayerAdapter tone = new MediaPlayerAdapter(lobby,sounds.get(toneAsString),testingMode,user,toneAsString);
             if(toneAsString.startsWith("therm")){
                 MediaPlayerAdapter playing=null;
                 for (MediaPlayerAdapter mp:currentlyPlaying){
@@ -68,69 +86,4 @@ public class SoundPlayer {
         }
     }
 
-    public MediaPlayerAdapter getMediaPlayerAdapter(String toneAsString,String user){
-        int soundFile;
-        switch (toneAsString){
-            case "piano0":
-                soundFile = R.raw.piano0_c4;
-                break;
-            case "piano1":
-                soundFile = R.raw.piano1_d4;
-                break;
-            case "piano2":
-                soundFile = R.raw.piano2_e4;
-                break;
-            case "piano3":
-                soundFile = R.raw.piano3_f4;
-                break;
-            case "piano4":
-                soundFile = R.raw.piano4_g4;
-                break;
-            case "piano5":
-                soundFile = R.raw.piano5_a4;
-                break;
-            case "piano6":
-                soundFile = R.raw.piano6_h4;
-                break;
-            case "piano7":
-                soundFile = R.raw.piano7_c5;
-                break;
-            case "drums0":
-                soundFile = R.raw.drum_a;
-                break;
-            case "drums1":
-                soundFile = R.raw.drum_b;
-                break;
-            case "drums2":
-                soundFile = R.raw.drum_c;
-                break;
-            case "therm0":
-                soundFile = R.raw.theremin0_c4;
-                break;
-            case "therm1":
-                soundFile = R.raw.theremin1_d4;
-                break;
-            case "therm2":
-                soundFile = R.raw.theremin2_e4;
-                break;
-            case "therm3":
-                soundFile = R.raw.theremin3_f4;
-                break;
-            case "therm4":
-                soundFile = R.raw.theremin4_g4;
-                break;
-            case "therm5":
-                soundFile = R.raw.theremin5_a4;
-                break;
-            case "therm6":
-                soundFile = R.raw.theremin6_h4;
-                break;
-            case "therm7":
-                soundFile = R.raw.theremin7_c5;
-                break;
-            default:
-                return null;
-        }
-        return new MediaPlayerAdapter(lobby,soundFile,testingMode,user,toneAsString);
-    }
 }
