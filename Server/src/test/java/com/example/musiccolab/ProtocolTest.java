@@ -44,7 +44,7 @@ class ProtocolTest {
     @Test
     void analyseMainBuffer() throws IPAddressException, IOException, SocketBindException {
 
-        setupServerAddress("192.168.178.42", 1200);
+        setupServerAddress("localhost", 1199);
         defineCharType();
         OpenSelectorAndSetupSocket();
 
@@ -87,14 +87,16 @@ class ProtocolTest {
     }
 
     @Test
-    void ParseForLoginSystem() throws IPAddressException, IOException, SocketBindException {
+    void ParseForLoginSystemRegister() throws IPAddressException, IOException, SocketBindException {
         resetProperties();
 
-        setupServerAddress("192.168.178.42", 1203);
+        setupServerAddress("localhost", 1203);
         defineCharType();
         OpenSelectorAndSetupSocket();
 
         int action = 3;
+        protocol.setAction((short) action);
+
         Client thread = new Client(3, Thread.currentThread(), (short)action);
         thread.start();
 
@@ -109,12 +111,15 @@ class ProtocolTest {
 
                 if (key.isAcceptable()) {
                     handleConnectionWhenAcceptable(key);
+                    counter = 1;
 
                 } else if (key.isReadable()) {
+                    protocol.analyseMainBuffer(messageCharset, (SocketChannel) key.channel());
                     protocol.getParseLogin(messageCharset, (SocketChannel) key.channel(), key);
                     assert protocol.getEmail().equals("zead@gmail.com");
                     assert protocol.getUsername().equals("zead");
                     assert protocol.getPassword().equals("123");
+                    counter = 2;
                 }
                 selectedKeys.remove();
             }
@@ -128,19 +133,115 @@ class ProtocolTest {
                     System.out.println("Error with waiting of main thread.");
                 }
             }
-            counter++;
         }
     }
 
     @Test
-    void ParseForLobby() throws IPAddressException, IOException, SocketBindException {
+    void ParseForLoginSystemLogin() throws IPAddressException, IOException, SocketBindException {
         resetProperties();
 
-        setupServerAddress("192.168.178.42", 1204);
+        setupServerAddress("localhost", 1210);
+        defineCharType();
+        OpenSelectorAndSetupSocket();
+
+        int action = 1;
+        protocol.setAction((short) action);
+        Client thread = new Client(10, Thread.currentThread(), (short)action);
+        thread.start();
+
+        int counter = 0;
+        while (counter < 2) {
+            selector.select();
+
+            Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
+
+            while (selectedKeys.hasNext()) {
+                SelectionKey key = (SelectionKey) selectedKeys.next();
+
+                if (key.isAcceptable()) {
+                    handleConnectionWhenAcceptable(key);
+                    counter = 1;
+
+                } else if (key.isReadable()) {
+                    protocol.analyseMainBuffer(messageCharset, (SocketChannel) key.channel());
+                    protocol.getParseLogin(messageCharset, (SocketChannel) key.channel(), key);
+                    assert protocol.getUsername().equals("zead");
+                    assert protocol.getPassword().equals("123");
+                    counter = 2;
+                }
+                selectedKeys.remove();
+            }
+
+            if(counter == 1) {
+                try {
+                    synchronized (Thread.currentThread()) {
+                        Thread.currentThread().wait();
+                    }
+                } catch (InterruptedException e) {
+                    System.out.println("Error with waiting of main thread.");
+                }
+            }
+        }
+    }
+
+    @Test
+    void ParseForLoginSystemLogout() throws IPAddressException, IOException, SocketBindException {
+        resetProperties();
+
+        setupServerAddress("localhost", 1211);
+        defineCharType();
+        OpenSelectorAndSetupSocket();
+
+        int action = 2;
+        protocol.setAction((short) action);
+        Client thread = new Client(11, Thread.currentThread(), (short)action);
+        thread.start();
+
+        int counter = 0;
+        while (counter < 2) {
+            selector.select();
+
+            Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
+
+            while (selectedKeys.hasNext()) {
+                SelectionKey key = (SelectionKey) selectedKeys.next();
+
+                if (key.isAcceptable()) {
+                    handleConnectionWhenAcceptable(key);
+                    counter = 1;
+
+                } else if (key.isReadable()) {
+                    protocol.analyseMainBuffer(messageCharset, (SocketChannel) key.channel());
+                    protocol.getParseLogin(messageCharset, (SocketChannel) key.channel(), key);
+                    assert protocol.getUsername().equals("zead");
+                    assert protocol.getPassword().equals("123");
+                    counter = 2;
+                }
+                selectedKeys.remove();
+            }
+
+            if(counter == 1) {
+                try {
+                    synchronized (Thread.currentThread()) {
+                        Thread.currentThread().wait();
+                    }
+                } catch (InterruptedException e) {
+                    System.out.println("Error with waiting of main thread.");
+                }
+            }
+        }
+    }
+
+    @Test
+    void ParseForCreatLobby() throws IPAddressException, IOException, SocketBindException {
+        resetProperties();
+
+        setupServerAddress("localhost", 1204);
         defineCharType();
         OpenSelectorAndSetupSocket();
 
         int action = 4;
+        protocol.setAction((short) action);
         Client thread = new Client(4, Thread.currentThread(), (short)action);
         thread.start();
 
@@ -155,10 +256,14 @@ class ProtocolTest {
 
                 if (key.isAcceptable()) {
                     handleConnectionWhenAcceptable(key);
+                    counter = 1;
 
                 } else if (key.isReadable()) {
+                    protocol.analyseMainBuffer(messageCharset, (SocketChannel) key.channel());
+                    protocol.setPlayer(new Player("test", "test", "test", -2, (SocketChannel) key.channel()));
                     protocol.getParseLobby(messageCharset, (SocketChannel) key.channel(), key);
                     assert protocol.getLobbyName().equals("example");
+                    counter =2;
                 }
                 selectedKeys.remove();
             }
@@ -172,7 +277,101 @@ class ProtocolTest {
                     System.out.println("Error with waiting of main thread.");
                 }
             }
-            counter++;
+        }
+    }
+
+    @Test
+    void ParseForJoinLobby() throws IPAddressException, IOException, SocketBindException {
+        resetProperties();
+
+        setupServerAddress("localhost", 1212);
+        defineCharType();
+        OpenSelectorAndSetupSocket();
+
+        int action = 5;
+        protocol.setAction((short) action);
+        Client thread = new Client(12, Thread.currentThread(), (short)action);
+        thread.start();
+
+        int counter = 0;
+        while (counter < 2) {
+            selector.select();
+
+            Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
+
+            while (selectedKeys.hasNext()) {
+                SelectionKey key = (SelectionKey) selectedKeys.next();
+
+                if (key.isAcceptable()) {
+                    handleConnectionWhenAcceptable(key);
+                    counter = 1;
+
+                } else if (key.isReadable()) {
+                    protocol.analyseMainBuffer(messageCharset, (SocketChannel) key.channel());
+                    protocol.setPlayer(new Player("test", "test", "test", -2, (SocketChannel) key.channel()));
+                    protocol.getParseLobby(messageCharset, (SocketChannel) key.channel(), key);
+                    assert protocol.getLobbyID() == 1;
+                    counter =2;
+                }
+                selectedKeys.remove();
+            }
+
+            if(counter == 1) {
+                try {
+                    synchronized (Thread.currentThread()) {
+                        Thread.currentThread().wait();
+                    }
+                } catch (InterruptedException e) {
+                    System.out.println("Error with waiting of main thread.");
+                }
+            }
+        }
+    }
+
+    @Test
+    void ParseForLeaveLobby() throws IPAddressException, IOException, SocketBindException {
+        resetProperties();
+
+        setupServerAddress("localhost", 1213);
+        defineCharType();
+        OpenSelectorAndSetupSocket();
+
+        int action = 6;
+        protocol.setAction((short) action);
+        Client thread = new Client(13, Thread.currentThread(), (short)action);
+        thread.start();
+
+        int counter = 0;
+        while (counter < 2) {
+            selector.select();
+
+            Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
+
+            while (selectedKeys.hasNext()) {
+                SelectionKey key = (SelectionKey) selectedKeys.next();
+
+                if (key.isAcceptable()) {
+                    handleConnectionWhenAcceptable(key);
+                    counter = 1;
+
+                } else if (key.isReadable()) {
+                    protocol.analyseMainBuffer(messageCharset, (SocketChannel) key.channel());
+                    protocol.setPlayer(new Player("test", "test", "test", -2, (SocketChannel) key.channel()));
+                    protocol.getParseLobby(messageCharset, (SocketChannel) key.channel(), key);
+                    counter =2;
+                }
+                selectedKeys.remove();
+            }
+
+            try {
+                synchronized (Thread.currentThread()) {
+                    Thread.currentThread().wait();
+                    if(counter == 2)
+                        assert result.substring(result.indexOf("e")).equals("either lobby is full or lobbyId is wrong or you are already in.");
+                }
+            } catch (InterruptedException e) {
+                System.out.println("Error with waiting of main thread.");
+            }
         }
     }
 
@@ -180,7 +379,7 @@ class ProtocolTest {
     void readSizes() throws IPAddressException, IOException, SocketBindException {
         resetProperties();
 
-        setupServerAddress("192.168.178.42", 1205);
+        setupServerAddress("localhost", 1205);
         defineCharType();
         OpenSelectorAndSetupSocket();
 
@@ -199,12 +398,15 @@ class ProtocolTest {
 
                 if (key.isAcceptable()) {
                     handleConnectionWhenAcceptable(key);
+                    counter = 1;
 
                 } else if (key.isReadable()) {
+                    protocol.analyseMainBuffer(messageCharset, (SocketChannel) key.channel());
                     protocol.getSize(messageCharset, (SocketChannel) key.channel());
                     assert protocol.getEmailSize() == 14;
                     assert protocol.getUserNameSize() == 4;
                     assert protocol.getPasswordSize() == 3;
+                    counter = 2;
                 }
                 selectedKeys.remove();
             }
@@ -218,7 +420,6 @@ class ProtocolTest {
                     System.out.println("Error with waiting of main thread.");
                 }
             }
-            counter++;
         }
     }
 
