@@ -51,6 +51,7 @@ public class CommunicationHandling implements Runnable {
     public String username = null;
     public String password = null;
     public String lobbyName = null;
+    public String question = null; //VH - 27.06
     public boolean admin = false;
     public int users = 0;
     public List<String> LobbyList = new LinkedList<String>();
@@ -160,7 +161,7 @@ public class CommunicationHandling implements Runnable {
     private void sendMessageByAction(short action) {
         if (action == PROTOCOL_LOGIN_ACTION || action == PROTOCOL_LOGOUT_ACTION || action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD) {
             try {
-                sendLoginSystemMessage(action, email, username, password);
+                sendLoginSystemMessage(action, email, username, password, question);
             } catch (IOException e) {
                 System.err.println(CAN_NOT_WRITE_IN_BUFFER);
             }
@@ -376,9 +377,10 @@ public class CommunicationHandling implements Runnable {
         }
     }
 
-    private void sendLoginSystemMessage(short action, String email, String username, String password) throws IOException {
+        private void sendLoginSystemMessage(short action, String email, String username, String password, String question) throws IOException {
         short dataLength;
         byte emailLength, userNameLength, passwordLength, size = 2;
+        byte questionLength = 0;
         emailLength = 0;
 
         String message = "";
@@ -386,23 +388,31 @@ public class CommunicationHandling implements Runnable {
 
         if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD) {
             emailLength = (byte) email.length();
+            questionLength = (byte) question.length();
             message = email;
-            size = 3;
+            size = 4;
         }
         userNameLength = (byte) username.length();
         passwordLength = (byte) password.length();
         message += username + password;
+        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD) {
+            message += question;
+        }
         dataLength = (short) message.length();
         buffer = ByteBuffer.allocate(6 + size + dataLength);
 
         buffer.put(convertShortToByte(protocolName));
         buffer.put(convertShortToByte(action));
         buffer.put(convertShortToByte(dataLength));
-        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD) buffer.put(emailLength);
+        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD) {
+            buffer.put(emailLength);
+        }
         buffer.put(userNameLength);
         buffer.put(passwordLength);
+        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD) {
+            buffer.put(questionLength);
+        }
         buffer.put(message.getBytes(messageCharset));
-
         buffer.flip();
         clientChannel.write(buffer);
         buffer.clear();
@@ -514,6 +524,7 @@ public class CommunicationHandling implements Runnable {
             networkThread.username = null;
             networkThread.email = null;
             networkThread.password = null;
+            networkThread.question = null;
         }
         networkThread.admin = false;
         networkThread.confirmation = 0;
