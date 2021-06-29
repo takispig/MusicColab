@@ -379,34 +379,40 @@ public class CommunicationHandling implements Runnable {
 
         private void sendLoginSystemMessage(short action, String email, String username, String password, String question) throws IOException {
         short dataLength;
-        byte emailLength, userNameLength, passwordLength, size = 2, questionLength;
+        byte emailLength, userNameLength, passwordLength, size = 2;
+        byte questionLength = 0;
         emailLength = 0;
-        questionLength = 0;
 
         String message = "";
         ByteBuffer buffer;
 
         if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD) {
             emailLength = (byte) email.length();
+            questionLength = (byte) question.length();
             message = email;
-            size = 3;
+            size = 4;
         }
         userNameLength = (byte) username.length();
         passwordLength = (byte) password.length();
-        questionLength = (byte) question.length(); //VH - 27.05
-        message += username + password + question; //VH - 27.06
+        message += username + password;
+        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD) {
+            message += question;
+        }
         dataLength = (short) message.length();
         buffer = ByteBuffer.allocate(6 + size + dataLength);
 
         buffer.put(convertShortToByte(protocolName));
         buffer.put(convertShortToByte(action));
         buffer.put(convertShortToByte(dataLength));
-        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD) buffer.put(emailLength);
+        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD) {
+            buffer.put(emailLength);
+        }
         buffer.put(userNameLength);
         buffer.put(passwordLength);
-        buffer.put(questionLength); //VH - 27.06
+        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD) {
+            buffer.put(questionLength);
+        }
         buffer.put(message.getBytes(messageCharset));
-
         buffer.flip();
         clientChannel.write(buffer);
         buffer.clear();
