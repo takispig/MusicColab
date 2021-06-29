@@ -158,10 +158,7 @@ public class Protocol {
             checkResponse = LoginSystem.forgotPassword(username, email, password);
             //Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
             sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action : action + 10, checkResponse));
-        } catch (SQLException e) {
-            System.out.println("Fehler passwort Reset");
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             System.out.println("Fehler passwort Reset");
             e.printStackTrace();
         }
@@ -255,7 +252,8 @@ public class Protocol {
                 sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " --> you are in.," + lobbyUsers));
                 //sendResponseToClient(messageCharset,currentLobby.getAdmin().getPlayerChannel(),getJoinResponse(true,player.getId()));
                 if(checkResponse) Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " JOINED LOBBY " + currentLobby.getLobby_id());
-
+                action = 21;
+                handleAction(messageCharset, clientChannel, lobbyNameIsSize, key);
             } else if(action == leaveLobby){
                 boolean checkResponse = (currentLobby != null);
                 if(checkResponse) {
@@ -276,6 +274,8 @@ public class Protocol {
                     //
                     Server.lobbyList.remove(currentLobby);
                 }
+                action = 21;
+                handleAction(messageCharset, clientChannel, lobbyNameIsSize, key);
             }
 
         }
@@ -402,7 +402,7 @@ public class Protocol {
         }
     }
 
-    private void SendPlayersInLobby(Charset messageCharset, SocketChannel clientChannel, int lobbyNameIsSize, SelectionKey key) throws IOException {
+    private void SendPlayersInLobby(Charset messageCharset, SocketChannel clientChannel, int lobbyNameIsSize) throws IOException {
 
         Lobby currentLobby;
         int lobbyID;
@@ -417,15 +417,19 @@ public class Protocol {
             currentLobby = Server.getLobbyByName(nameId);
         }
 
-        assert currentLobby != null;
-        short numOfPlayers = currentLobby.getUsersNumber();
-
-        lobbyBuffer.put(convertShortToByte(numOfPlayers));
-        lobbyBuffer.flip();
-        if (clientChannel != null) {
-            clientChannel.write(lobbyBuffer);
+        if (currentLobby != null){
+            LinkedList<Player> players = currentLobby.getPlayers();
+            String playerStr = "";
+            for (Player player : players){
+                playerStr += player.getName() + ",";
+            }
+            responseAction = (short) 21;
+            sendResponseToClient(messageCharset, clientChannel, playerStr);
+        } else{
+            responseAction = (short) 21 + 10;
+            sendResponseToClient(messageCharset, clientChannel, "ERROR Lobby is null");
         }
-        lobbyBuffer.clear();
+
     }
 
     public void handleAction(Charset messageCharset, SocketChannel clientChannel, int bufferSize, SelectionKey key) throws IOException {
@@ -449,7 +453,7 @@ public class Protocol {
                 parseBufferIfMutePlayer(messageCharset, clientChannel);
             }
             else if (action == sendPlayersInLobby){
-
+                SendPlayersInLobby(messageCharset, clientChannel, bufferSize);
             }
         }
     }
