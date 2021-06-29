@@ -65,8 +65,8 @@ public class ForgotPassword extends AppCompatActivity implements View.OnClickLis
 
                 try {
                     synchronized (Thread.currentThread()) {
-                        // Set as connection timeout 2 seconds
-                        Thread.currentThread().wait(2000);
+                        // Set as connection timeout 5 seconds
+                        Thread.currentThread().wait(5000);
                     }
                 } catch (InterruptedException e) {
                     System.out.println("Error with waiting of main thread.");
