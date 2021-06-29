@@ -26,6 +26,7 @@ public class Protocol {
     final private int passwordForgotten = 8;
     final public static int becameAdmin = 9;
     final private int mutePlayer = 10;
+    final private int sendPlayersInLobby = 21;
 
 
     private short action;
@@ -401,6 +402,32 @@ public class Protocol {
         }
     }
 
+    private void SendPlayersInLobby(Charset messageCharset, SocketChannel clientChannel, int lobbyNameIsSize, SelectionKey key) throws IOException {
+
+        Lobby currentLobby;
+        int lobbyID;
+        String nameId = "";
+        ByteBuffer lobbyBuffer = ByteBuffer.allocate(lobbyNameIsSize);
+
+        try {
+            nameId = messageCharset.decode(lobbyBuffer).toString();
+            lobbyID = Integer.parseInt(nameId);
+            currentLobby = Server.lobbyMap.get(lobbyID);
+        } catch (NumberFormatException e) {
+            currentLobby = Server.getLobbyByName(nameId);
+        }
+
+        assert currentLobby != null;
+        short numOfPlayers = currentLobby.getUsersNumber();
+
+        lobbyBuffer.put(convertShortToByte(numOfPlayers));
+        lobbyBuffer.flip();
+        if (clientChannel != null) {
+            clientChannel.write(lobbyBuffer);
+        }
+        lobbyBuffer.clear();
+    }
+
     public void handleAction(Charset messageCharset, SocketChannel clientChannel, int bufferSize, SelectionKey key) throws IOException {
         if(bufferSize != 0){
             playerAddress = clientChannel.getRemoteAddress();
@@ -420,6 +447,9 @@ public class Protocol {
             }
             else if (action == mutePlayer){
                 parseBufferIfMutePlayer(messageCharset, clientChannel);
+            }
+            else if (action == sendPlayersInLobby){
+
             }
         }
     }

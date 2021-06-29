@@ -77,8 +77,6 @@ class MusicJoinerTest {
             }
             counter++;
         }
-
-
     }
 
     @Test
