@@ -128,7 +128,7 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                 selectInstrAndGo();
             } else if (networkThread.confirmation == 14) {
                 networkThread.lobbyName = null;
-                toast("Error while Creating the Lobby\nPlease try again");
+                toast("Name already exists\nPlease try another one");
             } else {
                 networkThread.lobbyName = null;
                 toast("Connection timeout");

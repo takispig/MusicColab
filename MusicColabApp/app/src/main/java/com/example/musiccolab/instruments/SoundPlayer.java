@@ -37,14 +37,14 @@ public class SoundPlayer {
         sounds.put("drums0", new MediaPlayerAdapter(lobby, R.raw.drum_a, testingMode));
         sounds.put("drums1", new MediaPlayerAdapter(lobby, R.raw.drum_b, testingMode));
         sounds.put("drums2", new MediaPlayerAdapter(lobby, R.raw.drum_c, testingMode));
-        sounds.put("therm0", new MediaPlayerAdapter(lobby, R.raw.c, testingMode));
-        sounds.put("therm1", new MediaPlayerAdapter(lobby, R.raw.d, testingMode));
-        sounds.put("therm2", new MediaPlayerAdapter(lobby, R.raw.e, testingMode));
-        sounds.put("therm3", new MediaPlayerAdapter(lobby, R.raw.f, testingMode));
-        sounds.put("therm4", new MediaPlayerAdapter(lobby, R.raw.g, testingMode));
-        sounds.put("therm5", new MediaPlayerAdapter(lobby, R.raw.a, testingMode));
-        sounds.put("therm6", new MediaPlayerAdapter(lobby, R.raw.h, testingMode));
-        sounds.put("therm7", new MediaPlayerAdapter(lobby, R.raw.c2, testingMode));
+        sounds.put("therm0", new MediaPlayerAdapter(lobby, R.raw.theremin0_c4, testingMode));
+        sounds.put("therm1", new MediaPlayerAdapter(lobby, R.raw.theremin1_d4, testingMode));
+        sounds.put("therm2", new MediaPlayerAdapter(lobby, R.raw.theremin2_e4, testingMode));
+        sounds.put("therm3", new MediaPlayerAdapter(lobby, R.raw.theremin3_f4, testingMode));
+        sounds.put("therm4", new MediaPlayerAdapter(lobby, R.raw.theremin4_g4, testingMode));
+        sounds.put("therm5", new MediaPlayerAdapter(lobby, R.raw.theremin5_a4, testingMode));
+        sounds.put("therm6", new MediaPlayerAdapter(lobby, R.raw.theremin6_h4, testingMode));
+        sounds.put("therm7", new MediaPlayerAdapter(lobby, R.raw.theremin7_c5, testingMode));
     }
 
     public void sendToneToServer(String toneAsString, int toneAction) {
