@@ -255,6 +255,9 @@ public class Server {
     public boolean isRunningForTesting(){
         return running;
     }
+    public void setRunningForTesting(boolean b){
+        running = b;
+    }
 
     public boolean isFinishedForTesting(){
         return finished;

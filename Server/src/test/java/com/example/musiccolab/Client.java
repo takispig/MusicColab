@@ -4,7 +4,7 @@ package com.example.musiccolab;
 public class Client implements Runnable{
 
     private Thread mainThread;
-    private Thread thread = null;
+    public Thread thread = null;
     CommunicationHandling client;
     short action;
     public int test;
@@ -28,7 +28,7 @@ public class Client implements Runnable{
         client.toneType = 1;
         client.data = "dataExample2";
         client.lobbyName = "example";
-        client.lobbyID = 0;
+        client.lobbyID = 1;
 
         client.action = action;
 
@@ -50,15 +50,7 @@ public class Client implements Runnable{
             synchronized (mainThread) {
                 mainThread.notify();
             }
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            client.stop();
         }
-
-        Thread.currentThread().stop();
     }
 
     public void start(){

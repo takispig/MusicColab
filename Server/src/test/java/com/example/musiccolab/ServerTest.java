@@ -45,15 +45,29 @@ class ServerTest {
     Server server = new Server();
 
     @Test
-    void setupServerAddress() throws IPAddressException {
+    void protocolFromServer(){
+        assert server.getProtocol() != null;
+    }
+
+    @Test
+    void setupServerCorrectAddress() throws IPAddressException {
         server.setupServerAddress("localhost", 1200);
         assertNotNull(server.getServerAddressForTesting());
 
     }
 
     @Test
+    void setupServerIncorrectAddress() {
+        try {
+            server.setupServerAddress("-1", -2);
+        }catch (IPAddressException e) {
+            assertNull(server.getServerAddressForTesting());
+        }
+
+    }
+
+    @Test
     void defineCharTypeTest() throws IPAddressException {
-        Server server = new Server();
         server.setupServerAddress("localhost", 1200);
         server.defineCharType();
         assertNotNull(server.getMessageCharsetForTesting());
@@ -62,11 +76,23 @@ class ServerTest {
     }
 
     @Test
-    void openSelectorAndSetupSocket() throws IPAddressException, IOException, SocketBindException {
-        Server server = new Server();
+    void openSelectorAndSetupSocketCorrect() throws IPAddressException, IOException, SocketBindException {
         server.setupServerAddress("localhost", 1200);
         server.defineCharType();
         server.OpenSelectorAndSetupSocket();
+        assertNotNull(server.getSelectorForTesting());
+        assertNotNull(server.getServerChannelForTesting());
+    }
+
+    @Test
+    void openSelectorAndSetupSocketIncorrect() throws IPAddressException, IOException, SocketBindException {
+        server.setupServerAddress("local", 1200);
+        server.defineCharType();
+        try {
+            server.OpenSelectorAndSetupSocket();
+        }catch (SocketBindException e){
+            assertNull(server.getServerChannelForTesting().getLocalAddress());
+        }
         assertNotNull(server.getSelectorForTesting());
         assertNotNull(server.getServerChannelForTesting());
     }
@@ -76,7 +102,7 @@ class ServerTest {
 
         resetProperties();
 
-        setupServerAddress("192.168.178.42", 1201);
+        setupServerAddress("localhost", 1201);
         defineCharType();
         OpenSelectorAndSetupSocket();
         server.setSelector(selector);
@@ -102,19 +128,22 @@ class ServerTest {
         try {
             synchronized (Thread.currentThread()) {
                 Thread.currentThread().wait();
+                Thread.currentThread().wait(2000);
             }
         } catch (InterruptedException e) {
             System.out.println("Error with waiting of main thread.");
         }
         System.out.println(result);
         assert result.equals("Welcome in MusicCoLab Server.\r\n");
+        thread.client.communicationThread.stop();
+        thread.thread.stop();
     }
 
     @Test
-    void handleConnectionWhenReadable() throws IPAddressException, IOException, SocketBindException {
+    void handleConnectionWhenReadableWrongProtocolName() throws IPAddressException, IOException, SocketBindException {
         resetProperties();
 
-        setupServerAddress("192.168.178.42", 1202);
+        setupServerAddress("localhost", 1202);
         defineCharType();
         OpenSelectorAndSetupSocket();
         server.setSelector(selector);
@@ -146,7 +175,7 @@ class ServerTest {
         }
         try {
             synchronized (Thread.currentThread()) {
-                Thread.currentThread().wait(2000);
+                Thread.currentThread().wait();
             }
         } catch (InterruptedException e) {
             System.out.println("Error with waiting of main thread.");
@@ -156,10 +185,138 @@ class ServerTest {
     }
 
     @Test
-    void handleConnection(){
-        Server server = new Server();
-        assert(server.isRunningForTesting());
-        assert(!server.isFinishedForTesting());
+    void handleConnectionWhenReadableWrongAction() throws IPAddressException, IOException, SocketBindException {
+        resetProperties();
+
+        setupServerAddress("localhost", 1206);
+        defineCharType();
+        OpenSelectorAndSetupSocket();
+        server.setSelector(selector);
+        server.setMessageCharset(messageCharset);
+
+        int action = 50;
+        protocolName = 12845;
+        Client thread = new Client(6, Thread.currentThread(), (short)action);
+        thread.start();
+
+        int counter = 0;
+        while (counter < 2) {
+            selector.select();
+
+            Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
+
+            while (selectedKeys.hasNext()) {
+                SelectionKey key = (SelectionKey) selectedKeys.next();
+
+                if (key.isAcceptable()) {
+                    server.acceptForTest(key);
+                    counter = 1;
+                } else if (key.isReadable()) {
+                    server.handleReadableForTest(key);
+                    counter = 2;
+                }
+                selectedKeys.remove();
+            }
+        }
+        try {
+            synchronized (Thread.currentThread()) {
+                Thread.currentThread().wait();
+            }
+        } catch (InterruptedException e) {
+            System.out.println("Error with waiting of main thread.");
+        }
+        System.out.println(result);
+        assert result.substring(result.indexOf("A")).equals("Action is not known.\r\n");
+    }
+
+    @Test
+    void handleConnectionWhenReadableDisconnectClient() throws IPAddressException, IOException, SocketBindException {
+        resetProperties();
+        SelectionKey key = null;
+
+        setupServerAddress("localhost", 1207);
+        defineCharType();
+        OpenSelectorAndSetupSocket();
+        server.setSelector(selector);
+        server.setMessageCharset(messageCharset);
+
+        int action = 3;
+        protocolName = 12845;
+        Client thread = new Client(7, Thread.currentThread(), (short)action);
+        thread.start();
+
+        int counter = 0;
+        while (counter < 2) {
+            selector.select();
+
+            Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
+
+            while (selectedKeys.hasNext()) {
+                key = (SelectionKey) selectedKeys.next();
+
+                if (key.isAcceptable()) {
+                    server.acceptForTest(key);
+                    counter = 1;
+                } else if (key.isReadable()) {
+                    server.handleReadableForTest(key);
+                    counter = 2;
+                }
+                selectedKeys.remove();
+            }
+        }
+        System.out.println(result);
+        assert !key.channel().isOpen();
+    }
+
+    @Test
+    void handleConnection() throws IPAddressException, IOException, SocketBindException {
+
+        resetProperties();
+        SelectionKey key = null;
+
+        setupServerAddress("localhost", 1208);
+        defineCharType();
+        OpenSelectorAndSetupSocket();
+        server.setSelector(selector);
+        server.setMessageCharset(messageCharset);
+
+        int action = 3;
+        protocolName = 12845;
+        Client thread = new Client(8, Thread.currentThread(), (short)action);
+        thread.start();
+
+        CommunicationHandling.server = server;
+        server.handleConnection();
+
+        assert(!server.isRunningForTesting());
+        assert(server.isFinishedForTesting());
+    }
+
+    @Test
+    void finishServer() throws IPAddressException, IOException, SocketBindException {
+
+        resetProperties();
+        SelectionKey key = null;
+
+        setupServerAddress("localhost", 1209);
+        defineCharType();
+        OpenSelectorAndSetupSocket();
+        server.setSelector(selector);
+        server.setMessageCharset(messageCharset);
+
+        int action = 3;
+        protocolName = 12845;
+        Client thread = new Client(9, Thread.currentThread(), (short)action);
+        thread.start();
+
+
+        CommunicationHandling.server = server;
+        server.handleConnection();
+        server.finishServer();
+
+        assert !server.isRunningForTesting();
+        assert server.getServerChannelForTesting() == null;
+        assert !server.getSelectorForTesting().isOpen();
     }
 
     @Test
@@ -180,6 +337,23 @@ class ServerTest {
         assert(!Ids.isEmpty());
         for(byte index = 0; index < 10; index++)
             assert(Ids.get(index) >= 0);
+    }
+
+    @Test
+    void setFinishTrue(){
+        server.setFinishedTrue();
+        assert server.isFinishedForTesting();
+    }
+
+    @Test
+    void getLobbyNameNull(){
+        assertNull(Server.getLobbyByName("lobby"));
+    }
+
+    @Test
+    void getLobbyName() throws IOException {
+        Server.lobbyList.add(new Lobby(new Player("player", "1", "1", 1, null), "lobby", 0));
+        assertNotNull(Server.getLobbyByName("lobby"));
     }
 
     public void setupServerAddress(String address, int port) throws IPAddressException {

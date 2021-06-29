@@ -38,6 +38,8 @@ class ProtocolTest {
     public static HashMap<Integer, Player> loggedInPlayers = new HashMap<>();
     public static HashMap<SocketChannel, Player> loggedInList = new HashMap<>();
 
+    public static String result = "";
+
 
     @Test
     void analyseMainBuffer() throws IPAddressException, IOException, SocketBindException {
