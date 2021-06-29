@@ -20,7 +20,7 @@ public class SoundPlayerTest {
         Lobby lobby = new Lobby();
         sp = new SoundPlayer(lobby);
         sp.activateTestingMode(dummy);
-        sp.generateToneList();
+        //sp.generateToneList();
     }
 
     @ParameterizedTest
