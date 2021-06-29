@@ -149,14 +149,17 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         switch (selectedInstrumentFromPreLobby) {
             case InstrumentType.THEREMIN:
                 selectedInstrument = new Theremin(instrumentGUI, sp);
+                findViewById(R.id.calibrate).setVisibility(View.VISIBLE);
                 break;
             case InstrumentType.DRUMS:
                 selectedInstrument = new Drums(instrumentGUI, sp);
+                findViewById(R.id.calibrate).setVisibility(View.VISIBLE);
                 break;
             case InstrumentType.PIANO:
                 // delete previous text from Theremin or Drums
                 TextView lobby_default_text = findViewById(R.id.iva_text_1);
                 lobby_default_text.setText("");
+                findViewById(R.id.calibrate).setVisibility(View.INVISIBLE);
 
                 selectedInstrument = new Piano(instrumentGUI, sp);
                 break;
