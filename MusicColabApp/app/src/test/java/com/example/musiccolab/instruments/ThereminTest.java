@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ThereminTest {
+    public static final int THEREMIN_INIT_VALUE = 81;
     InstrumentGUIBox guiBox = mock(InstrumentGUIBox.class);
     SoundPlayer sp = mock(SoundPlayer.class);
     Theremin theremin = new Theremin(guiBox, sp);
@@ -54,7 +55,7 @@ public class ThereminTest {
     public void test_action_c() throws Exception {
         // arrange
         when(sensor.getType()).thenReturn(sensor.TYPE_LIGHT);
-        SensorEventAdapter event = new SensorEventAdapter(new float[]{85}, sensor);
+        SensorEventAdapter event = new SensorEventAdapter(new float[]{THEREMIN_INIT_VALUE}, sensor);
         theremin.reCalibrate();//Useless but for 100% coverage
         theremin.reCalibrate(event);
 
@@ -69,7 +70,7 @@ public class ThereminTest {
     public void test_action_d() throws Exception {
         // arrange
         when(sensor.getType()).thenReturn(sensor.TYPE_LIGHT);
-        SensorEventAdapter event = new SensorEventAdapter(new float[]{85}, sensor);
+        SensorEventAdapter event = new SensorEventAdapter(new float[]{THEREMIN_INIT_VALUE}, sensor);
         theremin.reCalibrate();//Useless but for 100% coverage
         theremin.reCalibrate(event);
         event = new SensorEventAdapter(new float[]{10}, sensor);
@@ -78,11 +79,12 @@ public class ThereminTest {
         // assert
         assertEquals("d Theremin", theremin.stringToDisplay);
     }
+
     @Test
     public void test_action_e() throws Exception {
         // arrange
         when(sensor.getType()).thenReturn(sensor.TYPE_LIGHT);
-        SensorEventAdapter event = new SensorEventAdapter(new float[]{85}, sensor);
+        SensorEventAdapter event = new SensorEventAdapter(new float[]{THEREMIN_INIT_VALUE}, sensor);
         theremin.reCalibrate();//Useless but for 100% coverage
         theremin.reCalibrate(event);
         event = new SensorEventAdapter(new float[]{20}, sensor);
@@ -91,11 +93,12 @@ public class ThereminTest {
         // assert
         assertEquals("e Theremin", theremin.stringToDisplay);
     }
+
     @Test
     public void test_action_f() throws Exception {
         // arrange
         when(sensor.getType()).thenReturn(sensor.TYPE_LIGHT);
-        SensorEventAdapter event = new SensorEventAdapter(new float[]{85}, sensor);
+        SensorEventAdapter event = new SensorEventAdapter(new float[]{THEREMIN_INIT_VALUE}, sensor);
         theremin.reCalibrate();//Useless but for 100% coverage
         theremin.reCalibrate(event);
         event = new SensorEventAdapter(new float[]{30}, sensor);
@@ -104,11 +107,12 @@ public class ThereminTest {
         // assert
         assertEquals("f Theremin", theremin.stringToDisplay);
     }
+
     @Test
     public void test_action_g() throws Exception {
         // arrange
         when(sensor.getType()).thenReturn(sensor.TYPE_LIGHT);
-        SensorEventAdapter event = new SensorEventAdapter(new float[]{85}, sensor);
+        SensorEventAdapter event = new SensorEventAdapter(new float[]{THEREMIN_INIT_VALUE}, sensor);
         theremin.reCalibrate();//Useless but for 100% coverage
         theremin.reCalibrate(event);
         event = new SensorEventAdapter(new float[]{40}, sensor);
@@ -117,11 +121,12 @@ public class ThereminTest {
         // assert
         assertEquals("g Theremin", theremin.stringToDisplay);
     }
+
     @Test
     public void test_action_a() throws Exception {
         // arrange
         when(sensor.getType()).thenReturn(sensor.TYPE_LIGHT);
-        SensorEventAdapter event = new SensorEventAdapter(new float[]{85}, sensor);
+        SensorEventAdapter event = new SensorEventAdapter(new float[]{THEREMIN_INIT_VALUE}, sensor);
         theremin.reCalibrate();//Useless but for 100% coverage
         theremin.reCalibrate(event);
         event = new SensorEventAdapter(new float[]{50}, sensor);
@@ -130,11 +135,12 @@ public class ThereminTest {
         // assert
         assertEquals("a Theremin", theremin.stringToDisplay);
     }
+
     @Test
     public void test_action_h() throws Exception {
         // arrange
         when(sensor.getType()).thenReturn(sensor.TYPE_LIGHT);
-        SensorEventAdapter event = new SensorEventAdapter(new float[]{85}, sensor);
+        SensorEventAdapter event = new SensorEventAdapter(new float[]{THEREMIN_INIT_VALUE}, sensor);
         theremin.reCalibrate();//Useless but for 100% coverage
         theremin.reCalibrate(event);
         event = new SensorEventAdapter(new float[]{60}, sensor);
@@ -143,11 +149,12 @@ public class ThereminTest {
         // assert
         assertEquals("h Theremin", theremin.stringToDisplay);
     }
+
     @Test
     public void test_action_c2() throws Exception {
         // arrange
         when(sensor.getType()).thenReturn(sensor.TYPE_LIGHT);
-        SensorEventAdapter event = new SensorEventAdapter(new float[]{85}, sensor);
+        SensorEventAdapter event = new SensorEventAdapter(new float[]{THEREMIN_INIT_VALUE}, sensor);
         theremin.reCalibrate();//Useless but for 100% coverage
         theremin.reCalibrate(event);
         event = new SensorEventAdapter(new float[]{70}, sensor);
@@ -156,11 +163,12 @@ public class ThereminTest {
         // assert
         assertEquals("c2 Theremin", theremin.stringToDisplay);
     }
+
     @Test
     public void test_action_0() throws Exception {
         // arrange
         when(sensor.getType()).thenReturn(sensor.TYPE_LIGHT);
-        SensorEventAdapter event = new SensorEventAdapter(new float[]{85}, sensor);
+        SensorEventAdapter event = new SensorEventAdapter(new float[]{THEREMIN_INIT_VALUE}, sensor);
         theremin.reCalibrate();//Useless but for 100% coverage
         theremin.reCalibrate(event);
         event = new SensorEventAdapter(new float[]{80}, sensor);
