@@ -75,7 +75,6 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         more.setOnClickListener(this);
 
         SoundPlayer sp = new SoundPlayer(this);
-        sp.generateToneList();
         Login.networkThread.soundPlayer = sp;
         sensorManager = (SensorManager) getSystemService(Service.SENSOR_SERVICE);
 

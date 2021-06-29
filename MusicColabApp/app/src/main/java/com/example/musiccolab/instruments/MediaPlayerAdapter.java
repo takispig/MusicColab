@@ -7,29 +7,29 @@ public class MediaPlayerAdapter {
 
     private MediaPlayer mp;
     private final boolean testingMode;
+    public String user;
+    public String tone;
 
-    public MediaPlayerAdapter(Context context, int id, boolean testingMode) {
+    public MediaPlayerAdapter(Context context, int id, boolean testingMode,String user,String tone) {
         this.testingMode = testingMode;
         if (!this.testingMode) {
             mp = MediaPlayer.create(context, id);
+            this.user=user;
+            this.tone=tone;
         }
     }
 
     public void start() {
         if (!testingMode) {
-            mp.start();
+            mp.setOnPreparedListener(MediaPlayer::start);
         }
     }
 
+
     public void stop() {
         if (!testingMode) {
-            try {
-                if(mp.isPlaying()) {
-                    mp.stop();
-                    mp.prepare();
-                }
-            }catch (Exception e){
-                e.printStackTrace();
+            if(mp.isPlaying()) {
+                mp.pause();
             }
         }
     }

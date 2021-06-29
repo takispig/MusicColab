@@ -266,7 +266,7 @@ public class CommunicationHandling implements Runnable {
     private void sendToneToSoundPlayer() {
         if (soundPlayer != null) {
             String[] results = result.split(",");
-            soundPlayer.playTone(results[0],Integer.parseInt(results[2]));
+            soundPlayer.playTone(results[0],results[1],Integer.parseInt(results[2]));
         }
     }
 
@@ -293,6 +293,7 @@ public class CommunicationHandling implements Runnable {
         buffer.put(convertShortToByte(action));
         buffer.put(convertShortToByte(dataLength));
         buffer.put(toneAction);
+        buffer.put((byte) 10);
         buffer.put(data.getBytes(messageCharset));
 
         buffer.flip();
