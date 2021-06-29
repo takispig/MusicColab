@@ -222,7 +222,7 @@ public class Protocol {
             Just for testing.
             Please uncomment the fowling line if you run the tests.
         */
-        player = this.player; //For testing
+        //player = this.player; //For testing
 
         ByteBuffer lobbyBuffer;
 
