@@ -211,7 +211,7 @@ public class Protocol {
         } catch (ClassNotFoundException e) {
             System.out.println("ERROR: ClassNotFound");
         }
-        Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(action + 10, false));
+        if(playerAddress != null) Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(action + 10, false));
         sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(action + 10, false));
     }
 
