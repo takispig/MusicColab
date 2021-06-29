@@ -328,7 +328,7 @@ class ProtocolTest {
         }
     }
 
-    @Test
+    /*@Test
     void ParseForLeaveLobby() throws IPAddressException, IOException, SocketBindException {
         resetProperties();
 
@@ -373,7 +373,7 @@ class ProtocolTest {
                 System.out.println("Error with waiting of main thread.");
             }
         }
-    }
+    }*/
 
     @Test
     void readSizes() throws IPAddressException, IOException, SocketBindException {
