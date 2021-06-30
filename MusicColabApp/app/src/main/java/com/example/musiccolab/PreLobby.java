@@ -56,13 +56,18 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
         // Update the Username from the CommunicationHandling Class (data are stored from login)
         TextView username = (TextView) findViewById(R.id.username);
         username.setText(networkThread.username);
+        getSpinner();
 
+    }
+
+
+    public void getSpinner(){
         // Drop-Down Menu (Spinner) -> now idea what happens here, i took the pieces from some tutorials
         Spinner mySpinner = (Spinner) findViewById(R.id.spinner);
         ArrayAdapter<String> p = new ArrayAdapter<String>(PreLobby.this, android.R.layout.simple_spinner_item, instruments);
         p.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mySpinner.setAdapter(p);
-        
+
         mySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
             @Override
