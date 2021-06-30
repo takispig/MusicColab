@@ -393,8 +393,8 @@ public class CommunicationHandling implements Runnable {
 
         private void sendLoginSystemMessage(short action, String email, String username, String password, String question) throws IOException {
         short dataLength;
-        byte emailLength, userNameLength, passwordLength, size = 2;
-        byte questionLength = 0;
+        byte emailLength, userNameLength, passwordLength, size = 2, questionLength;
+        questionLength = 0;
         emailLength = 0;
 
         String message = "";
@@ -402,7 +402,6 @@ public class CommunicationHandling implements Runnable {
 
         if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD) {
             emailLength = (byte) email.length();
-            questionLength = (byte) question.length();
             message = email;
             size = 4;
         }
@@ -423,9 +422,6 @@ public class CommunicationHandling implements Runnable {
         }
         buffer.put(userNameLength);
         buffer.put(passwordLength);
-        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD) {
-            buffer.put(questionLength);
-        }
         buffer.put(message.getBytes(messageCharset));
         buffer.flip();
         clientChannel.write(buffer);
