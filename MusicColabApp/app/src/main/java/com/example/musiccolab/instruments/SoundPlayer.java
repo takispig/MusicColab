@@ -95,4 +95,11 @@ import java.util.HashMap;
         }
     }
 
+     public void stopEverything(){
+         synchronized (currentlyPlaying){
+             currentlyPlaying.forEach(mp-> mp.stop());
+             currentlyPlaying.clear();
+         }
+     }
+
 }

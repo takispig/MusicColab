@@ -197,6 +197,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         // this is the Leave Lobby function and not a Disconnect
         if (view.getId() == R.id.disconnect) {
             networkThread.action = 6;
+            networkThread.soundPlayer.stopEverything();
             //networkThread.lobbyID = Login.networkThread.lobbyID;
             try {
                 synchronized (Thread.currentThread()) {
@@ -255,6 +256,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         } else {
             // else remove the user from lobby
             networkThread.action = 6;
+            networkThread.soundPlayer.stopEverything();
             try {
                 synchronized (Thread.currentThread()) {
                     // Set as connection timeout 5 seconds
