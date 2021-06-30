@@ -14,6 +14,7 @@ public class MediaPlayerAdapter {
         this.testingMode = testingMode;
         if (!this.testingMode) {
             mp = MediaPlayer.create(context, id);
+            mp.setOnErrorListener((mp, what, extra) -> true);
             this.user=user;
             this.tone=tone;
         }
@@ -21,7 +22,7 @@ public class MediaPlayerAdapter {
 
     public void start() {
         if (!testingMode) {
-            mp.setOnPreparedListener(MediaPlayer::start);
+            mp.start();
         }
     }
 
@@ -30,6 +31,8 @@ public class MediaPlayerAdapter {
         if (!testingMode) {
             if(mp.isPlaying()) {
                 mp.pause();
+                mp.reset();
+                mp.release();
             }
         }
     }

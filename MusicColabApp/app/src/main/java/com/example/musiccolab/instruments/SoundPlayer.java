@@ -54,29 +54,38 @@ import java.util.HashMap;
 
     public void playTone(String toneAsString,String user, int toneAction) {
         if(toneAction==1){
+            if(toneAsString.equals("therm")){
+                stopTheremin(user);
+                return;
+            }
             if(sounds.get(toneAsString)==null){
                 System.out.println("Wrong tone data");
                 return;
             }
             MediaPlayerAdapter tone = new MediaPlayerAdapter(lobby,sounds.get(toneAsString),testingMode,user,toneAsString);
-            if(toneAsString.startsWith("therm")){
-                MediaPlayerAdapter playing=null;
-                for (MediaPlayerAdapter mp:currentlyPlaying){
-                    if(mp.tone.startsWith("therm")&&mp.user.equals(user)) {
+            if(toneAsString.startsWith("therm")) stopTheremin(user);
+            currentlyPlaying.add(tone);
+            tone.start();
+        }
+        else if(toneAction==0){
+            synchronized (currentlyPlaying) {
+                MediaPlayerAdapter playing = null;
+                for (MediaPlayerAdapter mp : currentlyPlaying) {
+                    if (mp.tone.equals(toneAsString) && mp.user.equals(user)) {
                         mp.stop();
-                        playing=mp;
+                        playing = mp;
                         break;
                     }
                 }
                 currentlyPlaying.remove(playing);
             }
-            currentlyPlaying.add(tone);
-            tone.start();
         }
-        else if(toneAction==0){
+    }
+    public void stopTheremin(String user){
+        synchronized (currentlyPlaying){
             MediaPlayerAdapter playing=null;
             for (MediaPlayerAdapter mp:currentlyPlaying){
-                if(mp.tone.equals(toneAsString)&&mp.user.equals(user)) {
+                if(mp.tone.startsWith("therm")&&mp.user.equals(user)) {
                     mp.stop();
                     playing=mp;
                     break;
