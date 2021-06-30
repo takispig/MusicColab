@@ -73,13 +73,15 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         disconnect.setOnClickListener(this);
         ImageButton more = findViewById(R.id.more_button);
         more.setOnClickListener(this);
-
         SoundPlayer sp = new SoundPlayer(this);
         Login.networkThread.soundPlayer = sp;
         sensorManager = (SensorManager) getSystemService(Service.SENSOR_SERVICE);
 
         callInstrument(sp);
+        getSpinner(sp);
+    }
 
+    private void getSpinner(SoundPlayer sp){
         // Drop-Down Menu (Spinner)
         Spinner mySpinner = (Spinner) findViewById(R.id.spinner);
         ArrayAdapter<String> p = new ArrayAdapter<String>(Lobby.this, android.R.layout.simple_spinner_item, instruments);
@@ -97,9 +99,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
                 mySpinner.setSelection(2);
                 break;
         }
-
         mySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (counter2 == 0) {
@@ -117,17 +117,10 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
                 // refresh text in more
                 TextView instr = findViewById(R.id.instrument);
                 instr.setText(String.format("%s", getIntent().getSerializableExtra(PreLobby.SELECTED_INSTRUMENT)));
-
                 callInstrument(sp);
             }
-
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-
+            public void onNothingSelected(AdapterView<?> parent) {}});
     }
 
     private void createInstrumentGUIBox() {
