@@ -198,16 +198,20 @@ public class CommunicationHandling implements Runnable {
             }
 
             if (codesList.contains(action) || (test == 6 && action != 0)) {
-                sendMessageByAction(action);
-                action = 0;
-
-
                 if(test == 7) {
                     synchronized (mainThread) {
                         mainThread.notify();
                     }
+                    try {
+                        clientChannel.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     Thread.currentThread().stop();
                 }
+
+                sendMessageByAction(action);
+                action = 0;
 
                 if(test == 0 || test == 3 || test == 4 || test == 5 || test == 10 || test == 11 || test == 12 || test == 13 || test == 14 || test == 15 || test == 16 || test == 17 || test == 18 || test == 19){
                     synchronized (mainThread) {
