@@ -140,8 +140,9 @@ class ServerTest {
     }
 
     @Test
-    void handleConnectionWhenReadableWrongProtocolName() throws IPAddressException, IOException, SocketBindException {
+    void handleConnectionWhenReadableWrongProtocolName() throws IPAddressException, IOException, SocketBindException, InterruptedException {
         resetProperties();
+        Thread.sleep(3000);
 
         setupServerAddress("localhost", 1202);
         defineCharType();

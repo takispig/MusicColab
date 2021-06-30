@@ -41,6 +41,9 @@ public class Protocol {
     Player player = null;
     int lobbyID;
 
+    String toneData = "";
+    boolean testCorrect = false;
+
 
 
     final private String[][] responsesArray = { {"Client logged in", "error with login"},
@@ -222,7 +225,7 @@ public class Protocol {
             Just for testing.
             Please uncomment the fowling line if you run the tests.
         */
-        //player = this.player; //For testing
+        player = this.player; //For testing
 
         ByteBuffer lobbyBuffer;
 
@@ -365,7 +368,7 @@ public class Protocol {
         toneBuffer = ByteBuffer.allocate(dataSize - 2);
         clientChannel.read(toneBuffer);
         toneBuffer.flip();
-        String toneData= messageCharset.decode(toneBuffer).toString();
+        toneData= messageCharset.decode(toneBuffer).toString();
         toneBuffer.clear();
 
         sender = (Player) key.attachment();
@@ -400,19 +403,24 @@ public class Protocol {
             if(action == login || action == logout || action == register){
                 parseBufferForLoginSystem(messageCharset, clientChannel, key);
                 updateLobbyNameList();
+                testCorrect = true;
             }
             else if(action == createLobby || action == joinLobby || action == leaveLobby){
                 parseBufferForLobbyOrGame(messageCharset, clientChannel, bufferSize, key);
                 updateLobbyNameList();
+                testCorrect = true;
             }
             else if(action == tone){
                 parseBufferForMusicJoiner(messageCharset, clientChannel, bufferSize, key);
+                testCorrect = true;
             }
             else if (action == passwordForgotten) {
                 parseBufferIfPasswordForgotten(messageCharset, clientChannel);
+                testCorrect = true;
             }
             else if (action == mutePlayer){
                 parseBufferIfMutePlayer(messageCharset, clientChannel);
+                testCorrect = true;
             }
         }
     }
@@ -519,6 +527,7 @@ public class Protocol {
 
     public void getParseLogin(Charset m, SocketChannel c, SelectionKey k) throws IOException {parseBufferForLoginSystem(m, c, k);}
     public void getParseLobby(Charset m, SocketChannel c, SelectionKey k) throws IOException {parseBufferForLobbyOrGame(m, c, 7, k);}
+    public void getParseMusicJoiner(Charset m, SocketChannel c, SelectionKey k) throws IOException {parseBufferForMusicJoiner(m, c, 14, k);}
     public void getSize(Charset c, SocketChannel s) throws IOException {readSizes(c, s);}
 
     public String getEmail(){return email;}
@@ -528,6 +537,8 @@ public class Protocol {
     public byte getEmailSize(){return emailSize;}
     public byte getUserNameSize(){return userNameSize;}
     public byte getPasswordSize(){return passwordSize;}
+    public String getToneData(){return toneData;}
+    public boolean test(){return testCorrect;}
 
     public int getLobbyID(){return lobbyID;}
 }

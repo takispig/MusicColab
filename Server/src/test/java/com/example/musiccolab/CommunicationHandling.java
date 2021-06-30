@@ -104,8 +104,20 @@ public class CommunicationHandling implements Runnable {
             port = 1212;
         else if(test == 13)
             port = 1213;
+        else if(test == 14)
+            port = 1214;
+        else if(test == 15)
+            port = 1215;
+        else if(test == 16)
+            port = 1216;
+        else if(test == 17)
+            port = 1217;
+        else if(test == 18)
+            port = 1218;
+        else if(test == 19)
+            port = 1219;
 
-        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_LOGIN_ACTION || test == 4 || test == 6 || test == 11 || test == 12 || test == 13) {
+        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_LOGIN_ACTION || test == 4 || test == 6 || test == 11 || test == 12 || test == 13 || test == 14 || test == 15 || test == 16 || test == 17 || test == 18 || test == 19) {
             buildConnection();
             connectToServer();
         }
@@ -134,6 +146,7 @@ public class CommunicationHandling implements Runnable {
                         ServerTest.result = null;
                         result = messageCharset.decode(buffer).toString();
 
+
                         if(test == 1) {
                             ServerTest.result = result;
                             System.out.println(result);
@@ -150,12 +163,7 @@ public class CommunicationHandling implements Runnable {
                     if (actionAndDataLength[1] > 0) {
                         confirmation = actionAndDataLength[0];
                         handleAction(actionAndDataLength[0], actionAndDataLength[1]);
-                        if(test == 13) {
-                            ProtocolTest.result = result;
-                            synchronized (mainThread) {
-                                mainThread.notify();
-                            }
-                        }
+                        ProtocolTest.result = result;
                     } else {
                         try {
                             ByteBuffer errorBuffer = ByteBuffer.allocate(100);
@@ -171,6 +179,14 @@ public class CommunicationHandling implements Runnable {
                                     mainThread.notify();
                                 }
                             }
+
+                            if(test == 13) {
+                                ProtocolTest.result = result;
+                                synchronized (mainThread) {
+                                    mainThread.notify();
+                                }
+                            }
+
                             clientChannel.close();
                         } catch (IOException | InterruptedException e) {
                             System.err.println("Error with empty channel.");
@@ -180,9 +196,11 @@ public class CommunicationHandling implements Runnable {
                 }
                 selectedKeys.remove();
             }
+
             if (codesList.contains(action) || (test == 6 && action != 0)) {
                 sendMessageByAction(action);
                 action = 0;
+
 
                 if(test == 7) {
                     synchronized (mainThread) {
@@ -191,7 +209,7 @@ public class CommunicationHandling implements Runnable {
                     Thread.currentThread().stop();
                 }
 
-                if(test == 0 || test == 3 || test == 4 || test == 5 || test == 10 || test == 11 || test == 12 || test == 13){
+                if(test == 0 || test == 3 || test == 4 || test == 5 || test == 10 || test == 11 || test == 12 || test == 13 || test == 14 || test == 15 || test == 16 || test == 17 || test == 18 || test == 19){
                     synchronized (mainThread) {
                         mainThread.notify();
                     }
