@@ -10,11 +10,13 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.*;
-import java.sql.SQLException;
-import java.util.*;
-
-import static java.lang.System.exit;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class Server {
     private Charset messageCharset = null;
@@ -173,9 +175,36 @@ public class Server {
                 }
                 selectedKeys.remove();
             }
+            updatePlayersAndLobbies();
         }
 
         finished = true;
+    }
+
+    private void updatePlayersAndLobbies() {
+        var entrySet = loggedInPlayers.entrySet();
+        Player p = null;
+        boolean somethingChanged = false;
+        for (var k : entrySet) {
+            int lobbyID = -1;
+            if ((p = k.getValue()).getPlayerChannel() == null) {
+                lobbyID = p.getLobbyId();
+                if (lobbyID != -1) {
+                    Lobby l = lobbyMap.get(lobbyID);
+                    l.removePlayer(p);
+                    if (l.isEmpty()) {
+                        lobbyMap.remove(lobbyID);
+                        lobbyList.remove(l);
+                    }
+                }
+                loggedInPlayers.remove(p.getId());
+                playersLoggedin.remove(p);
+                somethingChanged = true;
+            }
+        }
+        if (somethingChanged) {
+            protocol.updateLobbyNameList();
+        }
     }
 
     public static int createLobbyId(){
