@@ -55,6 +55,7 @@ public class CommunicationHandling implements Runnable {
     public boolean admin = false;
     public int users = 0;
     public List<String> LobbyList = new LinkedList<String>();
+    public List<String> UsernameList = new LinkedList<String>();
 
     public byte toneAction;
     public byte toneType;
@@ -130,14 +131,15 @@ public class CommunicationHandling implements Runnable {
                     // if message length == 0 and action == 20, then just delete all Lobbies
                     else if (actionAndDataLength[1] == 0 && actionAndDataLength[0] == (short) 20) {
                         LobbyList.clear();
+                    } else if (actionAndDataLength[1] == 0 && actionAndDataLength[0] == (short) 21) {
+                        UsernameList.clear();
                     } else {
-                        try {
-                            clientChannel.read(ByteBuffer.allocate(1000));
-                        } catch (IOException e) {
-                            System.err.println("Error with empty channel.");
-                        }
+                            try {
+                                clientChannel.read(ByteBuffer.allocate(1000));
+                            } catch (IOException e) {
+                                System.err.println("Error with empty channel.");
+                            }
                     }
-
                 }
                 selectedKeys.remove();
             }
@@ -247,12 +249,23 @@ public class CommunicationHandling implements Runnable {
         }
         else if (action == PROTOCOL_UPDATE_USERS) {
             try {
+                System.out.println("Action: 21 (update num_users and usernames)");
                 ByteBuffer num_users = ByteBuffer.allocate(messageLength);
                 clientChannel.read(num_users);
                 num_users.flip();
                 result = messageCharset.decode(num_users).toString();
+                System.out.println("Result: " + result);
+                // clear previous list of users
+                UsernameList.clear();
+                // receive list of users
+                String[] u_names = result.split(",");
+                for (int index = 0; index < u_names.length; index++) {
+                    if (!u_names[index].equals(""))
+                        UsernameList.add(u_names[index]);
+                }
                 // update the number of users
-                users = Integer.parseInt(result);
+                users = UsernameList.size();
+                System.out.println("Num_Users: " + users + ", UserNames: " + UsernameList);
             }catch (IOException e){
                 System.out.println(CAN_NOT_WRITE_IN_BUFFER + " from adminBuffer.");
             }
