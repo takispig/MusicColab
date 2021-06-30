@@ -536,6 +536,11 @@ public class CommunicationHandling implements Runnable {
             networkThread.email = null;
             networkThread.password = null;
             networkThread.question = null;
+            try {
+                networkThread.clientChannel.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         networkThread.admin = false;
         networkThread.confirmation = 0;

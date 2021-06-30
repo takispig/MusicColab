@@ -42,8 +42,9 @@ class ProtocolTest {
 
 
     @Test
-    void analyseMainBuffer() throws IPAddressException, IOException, SocketBindException {
+    void analyseMainBuffer() throws IPAddressException, IOException, SocketBindException, InterruptedException {
 
+        Thread.sleep(3000);
         setupServerAddress("localhost", 1199);
         defineCharType();
         OpenSelectorAndSetupSocket();
@@ -87,8 +88,9 @@ class ProtocolTest {
     }
 
     @Test
-    void ParseForLoginSystemRegister() throws IPAddressException, IOException, SocketBindException {
+    void ParseForLoginSystemRegister() throws IPAddressException, IOException, SocketBindException, InterruptedException {
         resetProperties();
+        Thread.sleep(3000);
 
         setupServerAddress("localhost", 1203);
         defineCharType();
@@ -137,8 +139,9 @@ class ProtocolTest {
     }
 
     @Test
-    void ParseForLoginSystemLogin() throws IPAddressException, IOException, SocketBindException {
+    void ParseForLoginSystemLogin() throws IPAddressException, IOException, SocketBindException, InterruptedException {
         resetProperties();
+        Thread.sleep(3000);
 
         setupServerAddress("localhost", 1210);
         defineCharType();
@@ -185,8 +188,9 @@ class ProtocolTest {
     }
 
     @Test
-    void ParseForLoginSystemLogout() throws IPAddressException, IOException, SocketBindException {
+    void ParseForLoginSystemLogout() throws IPAddressException, IOException, SocketBindException, InterruptedException {
         resetProperties();
+        Thread.sleep(3000);
 
         setupServerAddress("localhost", 1211);
         defineCharType();
@@ -233,8 +237,9 @@ class ProtocolTest {
     }
 
     @Test
-    void ParseForCreatLobby() throws IPAddressException, IOException, SocketBindException {
+    void ParseForCreatLobby() throws IPAddressException, IOException, SocketBindException, InterruptedException {
         resetProperties();
+        Thread.sleep(3000);
 
         setupServerAddress("localhost", 1204);
         defineCharType();
@@ -281,8 +286,9 @@ class ProtocolTest {
     }
 
     @Test
-    void ParseForJoinLobby() throws IPAddressException, IOException, SocketBindException {
+    void ParseForJoinLobby() throws IPAddressException, IOException, SocketBindException, InterruptedException {
         resetProperties();
+        Thread.sleep(3000);
 
         setupServerAddress("localhost", 1212);
         defineCharType();
@@ -328,9 +334,10 @@ class ProtocolTest {
         }
     }
 
-    /*@Test
-    void ParseForLeaveLobby() throws IPAddressException, IOException, SocketBindException {
+    @Test
+    void ParseForLeaveLobby() throws IPAddressException, IOException, SocketBindException, InterruptedException {
         resetProperties();
+        Thread.sleep(3000);
 
         setupServerAddress("localhost", 1213);
         defineCharType();
@@ -373,11 +380,202 @@ class ProtocolTest {
                 System.out.println("Error with waiting of main thread.");
             }
         }
-    }*/
+    }
 
     @Test
-    void readSizes() throws IPAddressException, IOException, SocketBindException {
+    void parseBufferForMusicJoiner() throws IPAddressException, IOException, SocketBindException, InterruptedException {
         resetProperties();
+        Thread.sleep(3000);
+
+        setupServerAddress("localhost", 1214);
+        defineCharType();
+        OpenSelectorAndSetupSocket();
+
+        int action = 7;
+        protocol.setAction((short) action);
+        Client thread = new Client(14, Thread.currentThread(), (short)action);
+        thread.start();
+
+        int counter = 0;
+        while (counter < 2) {
+            selector.select();
+
+            Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
+
+            while (selectedKeys.hasNext()) {
+                SelectionKey key = (SelectionKey) selectedKeys.next();
+
+                if (key.isAcceptable()) {
+                    handleConnectionWhenAcceptable(key);
+                    counter = 1;
+
+                } else if (key.isReadable()) {
+                    protocol.analyseMainBuffer(messageCharset, (SocketChannel) key.channel());
+                    protocol.setPlayer(new Player("test", "test", "test", -2, (SocketChannel) key.channel()));
+                    protocol.getParseMusicJoiner(messageCharset, (SocketChannel) key.channel(), key);
+                    assert protocol.getToneData().equals("dataExample2");
+                    counter = 2;
+                }
+                selectedKeys.remove();
+            }
+
+            if(counter == 1) {
+                try {
+                    synchronized (Thread.currentThread()) {
+                        Thread.currentThread().wait();
+                    }
+                } catch (InterruptedException e) {
+                    System.out.println("Error with waiting of main thread.");
+                }
+            }
+        }
+    }
+
+    @Test
+    void handleActionLogin() throws IOException, IPAddressException, SocketBindException, InterruptedException {
+        resetProperties();
+        Thread.sleep(3000);
+
+        setupServerAddress("localhost", 1215);
+        defineCharType();
+        OpenSelectorAndSetupSocket();
+
+        int action = 1;
+        protocol.setAction((short) action);
+        Client thread = new Client(15, Thread.currentThread(), (short)action);
+        thread.start();
+
+        int counter = 0;
+        while (counter < 2) {
+            selector.select();
+
+            Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
+
+            while (selectedKeys.hasNext()) {
+                SelectionKey key = (SelectionKey) selectedKeys.next();
+
+                if (key.isAcceptable()) {
+                    handleConnectionWhenAcceptable(key);
+                    counter = 1;
+
+                } else if (key.isReadable()) {
+                   protocol.handleAction(messageCharset, (SocketChannel) key.channel(), 7, key);
+                   assert protocol.test();
+                    counter = 2;
+                }
+                selectedKeys.remove();
+            }
+
+            if(counter == 1) {
+                try {
+                    synchronized (Thread.currentThread()) {
+                        Thread.currentThread().wait();
+                    }
+                } catch (InterruptedException e) {
+                    System.out.println("Error with waiting of main thread.");
+                }
+            }
+        }
+    }
+
+    @Test
+    void handleActionCreateLobby() throws IOException, IPAddressException, SocketBindException, InterruptedException {
+        resetProperties();
+        Thread.sleep(3000);
+
+        setupServerAddress("localhost", 1216);
+        defineCharType();
+        OpenSelectorAndSetupSocket();
+
+        int action = 4;
+        protocol.setAction((short) action);
+        Client thread = new Client(16, Thread.currentThread(), (short)action);
+        thread.start();
+
+        int counter = 0;
+        while (counter < 2) {
+            selector.select();
+
+            Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
+
+            while (selectedKeys.hasNext()) {
+                SelectionKey key = (SelectionKey) selectedKeys.next();
+
+                if (key.isAcceptable()) {
+                    handleConnectionWhenAcceptable(key);
+                    counter = 1;
+
+                } else if (key.isReadable()) {
+                    protocol.handleAction(messageCharset, (SocketChannel) key.channel(), 7, key);
+                    assert protocol.test();
+                    counter = 2;
+                }
+                selectedKeys.remove();
+            }
+
+            if(counter == 1) {
+                try {
+                    synchronized (Thread.currentThread()) {
+                        Thread.currentThread().wait();
+                    }
+                } catch (InterruptedException e) {
+                    System.out.println("Error with waiting of main thread.");
+                }
+            }
+        }
+    }
+
+    @Test
+    void handleActionMusicJoiner() throws IOException, IPAddressException, SocketBindException, InterruptedException {
+        resetProperties();
+        Thread.sleep(3000);
+
+        setupServerAddress("localhost", 1217);
+        defineCharType();
+        OpenSelectorAndSetupSocket();
+
+        int action = 7;
+        protocol.setAction((short) action);
+        Client thread = new Client(17, Thread.currentThread(), (short)action);
+        thread.start();
+
+        int counter = 0;
+        while (counter < 2) {
+            selector.select();
+
+            Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
+
+            while (selectedKeys.hasNext()) {
+                SelectionKey key = (SelectionKey) selectedKeys.next();
+
+                if (key.isAcceptable()) {
+                    handleConnectionWhenAcceptable(key);
+                    counter = 1;
+
+                } else if (key.isReadable()) {
+                    protocol.handleAction(messageCharset, (SocketChannel) key.channel(), 7, key);
+                    assert protocol.test();
+                    counter = 2;
+                }
+                selectedKeys.remove();
+            }
+
+            if(counter == 1) {
+                try {
+                    synchronized (Thread.currentThread()) {
+                        Thread.currentThread().wait();
+                    }
+                } catch (InterruptedException e) {
+                    System.out.println("Error with waiting of main thread.");
+                }
+            }
+        }
+    }
+
+    @Test
+    void readSizes() throws IPAddressException, IOException, SocketBindException, InterruptedException {
+        resetProperties();
+        Thread.sleep(3000);
 
         setupServerAddress("localhost", 1205);
         defineCharType();
@@ -429,10 +627,6 @@ class ProtocolTest {
         byte[] returnValue = protocol.convertShortToByte(value);
         for(byte b : returnValue)
             assert b >= 0;
-    }
-
-    @Test
-    void sendResponseToClient() {
     }
 
     public void setupServerAddress(String address, int port) throws IPAddressException {

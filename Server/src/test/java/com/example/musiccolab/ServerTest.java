@@ -140,8 +140,9 @@ class ServerTest {
     }
 
     @Test
-    void handleConnectionWhenReadableWrongProtocolName() throws IPAddressException, IOException, SocketBindException {
+    void handleConnectionWhenReadableWrongProtocolName() throws IPAddressException, IOException, SocketBindException, InterruptedException {
         resetProperties();
+        Thread.sleep(3000);
 
         setupServerAddress("localhost", 1202);
         defineCharType();
@@ -230,7 +231,7 @@ class ServerTest {
     }
 
     @Test
-    void handleConnectionWhenReadableDisconnectClient() throws IPAddressException, IOException, SocketBindException {
+    void handleConnectionWhenReadableDisconnectClient() throws IPAddressException, IOException, SocketBindException, InterruptedException {
         resetProperties();
         SelectionKey key = null;
 
@@ -258,6 +259,7 @@ class ServerTest {
                     server.acceptForTest(key);
                     counter = 1;
                 } else if (key.isReadable()) {
+                    Thread.sleep(1000);
                     server.handleReadableForTest(key);
                     counter = 2;
                 }

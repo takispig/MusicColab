@@ -5,7 +5,6 @@ import com.example.musiccolab.exceptions.SocketBindException;
 
 import java.io.IOException;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.HashMap;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -249,7 +248,7 @@ public class Main {
                         createLobby();
                         break;
                     case "players":
-                        System.out.println(currentServer.playersLoggedin);
+                        printPlayers();
                         break;
                     default:
                         System.out.println("Undefined input");
@@ -280,6 +279,19 @@ public class Main {
         System.out.print("Lobbies: ");
         for (Lobby l : Server.lobbyList) {
             System.out.print(l.getLobbyName() + ", ");
+        }
+        System.out.println();
+    }
+
+    private static void printPlayers() {
+        System.out.println(currentServer.playersLoggedin);
+        for (Player p : currentServer.playersLoggedin) {
+            System.out.print(p.getName() + ", ");
+        }
+        System.out.println();
+        var entrySet = currentServer.loggedInPlayers.entrySet();
+        for (var k : entrySet) {
+            System.out.print(k.getValue().getName() + ", ");
         }
         System.out.println();
     }
