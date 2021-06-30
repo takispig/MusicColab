@@ -182,27 +182,19 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
     // their IDs we will make the correct decision
     public void onClick(View view) {
         CommunicationHandling networkThread = Login.networkThread;
-
-        if (view.getId() == R.id.calibrate) {
-            selectedInstrument.reCalibrate();
-        }
-
+        if (view.getId() == R.id.calibrate)selectedInstrument.reCalibrate();
         // this is the Leave Lobby function and not a Disconnect
         if (view.getId() == R.id.disconnect) {
             networkThread.action = 6;
             networkThread.soundPlayer.stopEverything();
             //networkThread.lobbyID = Login.networkThread.lobbyID;
             try {
-                synchronized (Thread.currentThread()) {
-                    // Set as connection timeout 5 seconds
-                    Thread.currentThread().wait(5000);
-                }
+                // Set as connection timeout 5 seconds
+                synchronized (Thread.currentThread()){Thread.currentThread().wait(5000);}
             } catch (InterruptedException e) {
                 System.out.println("Error with waiting of main thread.");
             }
-            String output = networkThread.result;
-            System.out.println(output);
-
+            System.out.println( networkThread.result);
             System.out.println("LeaveLobby conf-code: " + networkThread.confirmation);
             if (networkThread.confirmation == 6) {
                 // reset the sensitive user data after logout & clear LobbyNames
@@ -218,14 +210,15 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
                 toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
             }
         }
+        if (view.getId() == R.id.more_button) getMore();
+    }
 
-        if (view.getId() == R.id.more_button) {
-            TextView admin_text = findViewById(R.id.admin_boolean);
-            admin_text.setText(Login.networkThread.admin ? "true" : "false");
-            ConstraintLayout info = findViewById(R.id.info);
-            visible = !visible;
-            info.setVisibility(visible ? View.VISIBLE : View.GONE);
-        }
+    private void getMore(){
+        TextView admin_text = findViewById(R.id.admin_boolean);
+        admin_text.setText(Login.networkThread.admin ? "true" : "false");
+        ConstraintLayout info = findViewById(R.id.info);
+        visible = !visible;
+        info.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -274,7 +267,6 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             } else if (networkThread.confirmation == 16) {
                 toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
             }
-
         }
     }
 }
