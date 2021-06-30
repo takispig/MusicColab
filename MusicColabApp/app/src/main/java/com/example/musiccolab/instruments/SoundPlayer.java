@@ -46,13 +46,13 @@ import java.util.HashMap;
 
 
     public void sendToneToServer(String toneAsString, int toneAction) {
-        playTone(toneAsString,NETWORK_THREAD.username, toneAction);
+        playTone(toneAsString,NETWORK_THREAD.userID, toneAction);
         NETWORK_THREAD.action = NETWORK_THREAD_ACTION_SEND_TONE;
         NETWORK_THREAD.toneAction = (byte) toneAction;
         NETWORK_THREAD.data = toneAsString;
     }
 
-    public void playTone(String toneAsString,String user, int toneAction) {
+    public void playTone(String toneAsString,int user, int toneAction) {
         if(toneAction==1){
             if(toneAsString.equals("therm")){
                 stopTheremin(user);
@@ -71,7 +71,7 @@ import java.util.HashMap;
             synchronized (currentlyPlaying) {
                 MediaPlayerAdapter playing = null;
                 for (MediaPlayerAdapter mp : currentlyPlaying) {
-                    if (mp.tone.equals(toneAsString) && mp.user.equals(user)) {
+                    if (mp.tone.equals(toneAsString) && mp.user == user) {
                         mp.stop();
                         playing = mp;
                         break;
@@ -81,11 +81,11 @@ import java.util.HashMap;
             }
         }
     }
-    public void stopTheremin(String user){
+    public void stopTheremin(int user){
         synchronized (currentlyPlaying){
             MediaPlayerAdapter playing=null;
             for (MediaPlayerAdapter mp:currentlyPlaying){
-                if(mp.tone.startsWith("therm")&&mp.user.equals(user)) {
+                if(mp.tone.startsWith("therm")&&mp.user== user) {
                     mp.stop();
                     playing=mp;
                     break;

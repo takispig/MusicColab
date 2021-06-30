@@ -50,6 +50,7 @@ public class CommunicationHandling implements Runnable {
     public String email = null;
     public String username = null;
     public String password = null;
+    public int userID = -1;
     public String lobbyName = null;
     public String question = null; //VH - 27.06
     public boolean admin = false;
@@ -279,7 +280,7 @@ public class CommunicationHandling implements Runnable {
     private void sendToneToSoundPlayer() {
         if (soundPlayer != null) {
             String[] results = result.split(",");
-            soundPlayer.playTone(results[0],results[1],Integer.parseInt(results[2]));
+            soundPlayer.playTone(results[0],Integer.parseInt(results[1]),Integer.parseInt(results[2]));
         }
     }
 
@@ -306,7 +307,6 @@ public class CommunicationHandling implements Runnable {
         buffer.put(convertShortToByte(action));
         buffer.put(convertShortToByte(dataLength));
         buffer.put(toneAction);
-        buffer.put((byte) 10);
         buffer.put(data.getBytes(messageCharset));
 
         buffer.flip();
@@ -372,14 +372,15 @@ public class CommunicationHandling implements Runnable {
                     clientChannel.close();
                 } else if (action == 1) {
                     response = messageCharset.decode(buffer).toString().split(",");
-                    for (int index = 0; index < response.length; index++) {
+/*                    for (int index = 0; index < response.length; index++) {
                         if (index == 0)
                             result = response[index];   // first value is not a lobbyName
                         else
-                            //IdList.add(Character.getNumericValue(response[index].charAt(0)));
-                            //IdList.add(Integer.parseInt(response[index]));
                             LobbyList.add(response[index]);
-                    }
+                    }*/
+                    result = response[0];
+                    userID = Integer.parseInt(response[2]);
+
                 } else {
                     result = messageCharset.decode(buffer).toString();
                 }

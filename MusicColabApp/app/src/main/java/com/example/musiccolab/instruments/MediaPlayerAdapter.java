@@ -7,10 +7,10 @@ public class MediaPlayerAdapter {
 
     private MediaPlayer mp;
     private final boolean testingMode;
-    public String user;
+    public int user;
     public String tone;
 
-    public MediaPlayerAdapter(Context context, int id, boolean testingMode,String user,String tone) {
+    public MediaPlayerAdapter(Context context, int id, boolean testingMode,int user,String tone) {
         this.testingMode = testingMode;
         if (!this.testingMode) {
             mp = MediaPlayer.create(context, id);
