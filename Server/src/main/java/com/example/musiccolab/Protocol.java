@@ -123,7 +123,7 @@ public class Protocol {
     }
 
 
-    private void parseBufferIfPasswordForgotten(Charset messageCharset, SocketChannel clientChannel) throws IOException {
+    private void parseBufferIfPasswordForgotten(Charset messageCharset, SocketChannel clientChannel, SelectionKey key) throws IOException {
 
         String username, email, password = "";
         boolean checkResponse = false;
@@ -158,7 +158,7 @@ public class Protocol {
         try {
             checkResponse = LoginSystem.forgotPassword(username, email, password);
             //Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action : action + 10, checkResponse));
+            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action : action + 10, checkResponse, key));
         } catch (SQLException e) {
             System.out.println("Fehler passwort Reset");
             e.printStackTrace();
@@ -207,15 +207,15 @@ public class Protocol {
             } else if (action == logout) {
                 checkResponse = key.attachment() != null && LoginSystem.logout(username, password);
             }
-            if(playerAddress != null) Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse)); return;
+            if(playerAddress != null) Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse, key));
+            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse, key)); return;
         } catch (SQLException e) {
             System.out.println("ERROR: SQL");
         } catch (ClassNotFoundException e) {
             System.out.println("ERROR: ClassNotFound");
         }
-        if(playerAddress != null) Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(action + 10, false));
-        sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(action + 10, false));
+        if(playerAddress != null) Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(action + 10, false, key));
+        sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(action + 10, false, key));
     }
 
     private void parseBufferForLobbyOrGame(Charset messageCharset, SocketChannel clientChannel, int lobbyNameIsSize, SelectionKey key) throws IOException {
@@ -225,7 +225,7 @@ public class Protocol {
             Just for testing.
             Please uncomment the fowling line if you run the tests.
         */
-        player = this.player; //For testing
+        //player = this.player; //For testing
 
         ByteBuffer lobbyBuffer;
 
@@ -415,7 +415,7 @@ public class Protocol {
                 testCorrect = true;
             }
             else if (action == passwordForgotten) {
-                parseBufferIfPasswordForgotten(messageCharset, clientChannel);
+                parseBufferIfPasswordForgotten(messageCharset, clientChannel, key);
                 testCorrect = true;
             }
             else if (action == mutePlayer){
@@ -458,15 +458,23 @@ public class Protocol {
         else return -3;
     }
 
-    private String getLoginSystemResponse(int action, boolean result){
+    private String getLoginSystemResponse(int action, boolean result, SelectionKey key){
         int index = result? 0:1;
         this.responseAction = (short) action;
-        String IDs = "";
-        if(action == 1) IDs = getAllLobbyIds(Server.lobbyMap);
+        //String IDs = "";
+        String playerName = "";
+        String playerID = "";
+        if(action == 1){
+            //IDs = getAllLobbyIds(Server.lobbyMap);
+            Player player = (Player) key.attachment();
+            playerName = "," + player.getName();
+            playerID = "," + player.getId();
+        }
+
 
         if(action == 8 || action == 18)
             return responsesArray[3][index];
-        return responsesArray[action <= 10? action-1:action-11][index] + IDs;
+        return responsesArray[action <= 10? action-1:action-11][index] + playerName + playerID;
     }
 
     private String getLobbyResponse(boolean result, Lobby lobby, String additionPart){
