@@ -360,12 +360,12 @@ public class Protocol {
         byte toneAction = messageCharset.decode(toneBuffer).toString().getBytes()[0];
         toneBuffer.clear();
 
-        clientChannel.read(toneBuffer);
+        /*clientChannel.read(toneBuffer);
         toneBuffer.flip();
         byte toneType = messageCharset.decode(toneBuffer).toString().getBytes()[0];
-        toneBuffer.clear();
+        toneBuffer.clear();*/
 
-        toneBuffer = ByteBuffer.allocate(dataSize - 2);
+        toneBuffer = ByteBuffer.allocate(dataSize - 1);
         clientChannel.read(toneBuffer);
         toneBuffer.flip();
         toneData= messageCharset.decode(toneBuffer).toString();
@@ -378,7 +378,7 @@ public class Protocol {
                 responseAction = action;
 
                 int i;
-                if ((i = MusicJoiner.handleToneData(messageCharset, clientLobby, toneAction, toneType, toneData, responseAction)) != 0) {
+                if ((i = MusicJoiner.handleToneData(messageCharset, clientLobby, toneAction, toneData, responseAction)) != 0) {
                     // for testing
                     if (i == -1)
                         System.out.println("Fehler in MusicJoiner -1");
@@ -388,7 +388,7 @@ public class Protocol {
                         System.out.println("Fehler in MusicJoiner -??");
                 }
             } else {
-                MusicJoiner.sendTonToClient(messageCharset,sender.getPlayerChannel(),toneData + "," + toneType + "," + toneAction, action);
+                MusicJoiner.sendTonToClient(messageCharset,sender.getPlayerChannel(),toneData + "," + sender.getId() + "," + toneAction, action);
             }
 
         } else {
