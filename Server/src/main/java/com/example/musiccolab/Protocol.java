@@ -426,7 +426,6 @@ public class Protocol {
     }
 
     private void parseBufferIfMutePlayer(Charset messageCharset, SocketChannel clientChannel, SelectionKey key) throws IOException {
-        //todo;
         Player player = (Player) key.attachment();
         int muteID;
 
