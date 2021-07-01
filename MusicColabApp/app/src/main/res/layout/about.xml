@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".About">
+
+    <TextView
+        android:id="@+id/about_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
+        android:text="About this App"
+        android:textSize="35sp"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ScrollView
+        android:id="@+id/ScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0sp"
+        android:layout_margin="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/about_title">
+
+        <TextView
+            android:id="@+id/about"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="\nMusicColab ist ein System, welches es Musikbegeisterten ermöglicht, gemeinsam zu musizieren. Auch ohne dabei im gleichen Raum zu sitzen.\nNicht einmal reale Instrumente sind notwendig - es reicht das eigene Android-Smartphone.\n\nMusicColab ist simpel: Einloggen, Instrument wählen und sobald alle bereit sind, kann es auch sofort losgehen! Abhängig vom gewählten Instrument wird auf unterschiedlichste Art und Weise mithilfe der im Smartphone integrierten Sensoren Musik gemacht.\n\nDie gespielten Töne der einzelnen Benutzer werden an einen Server gesendet, der alle eingehenden Tonspuren zu einem Stück zusammenfügt und dieses an allen anderen teilnehmenden Musiker zurücksendet.\n\nSomit wird ein gemeinsames Lied erschaffen, das bei allen Benutzern in Echtzeit abgespielt werden kann."
+            android:textAlignment="center"
+            android:textSize="20sp"
+            android:textStyle="italic" />
+
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

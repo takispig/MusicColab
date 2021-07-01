@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">MusicColab</string>
     <string name="about">About</string>
-    <string name="are_you_a_new_user_click_here_to_register">Are you a new user? Click here to Register.</string>
+    <string name="are_you_a_new_user_click_here_to_register">New user? Tap here to <b>Register</b>.</string>
     <string name="forgot_password">Forgot Password?</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
@@ -22,7 +22,18 @@
     <string name="disconnect">Disconnect</string>
     <string name="you_have_joined_server">You have joined Server: #</string>
     <string name="admin_access">Admin access: </string>
-    <string name="loop">Loop</string>
+    <string name="loop">Start Loop</string>
+    <string name="calibrate">Calibrate</string>
+    <string name="about_text">\nMusicColab ist ein System, welches Musikbegeisterten es ermöglicht, gemeinsam zu musizieren, auch ohne dabei im gleichen Raum zu sitzen.\nNicht einmal reale Instrumente sind notwendig - es reicht das eigene Android-Smartphone.\n\nMusicColab ist simpel: einloggen, Instrument wählen und sobald alle bereit sind, kann es auch sofort losgehen! Abhängig vom gewählten Instrument wird auf unterschiedlichste Art und Weise mithilfe der im Smartphone integrierten Sensoren Musik gemacht.\n\nDie gespielten Töne der einzelnen Benutzer werden an einen Server gesendet, der alle eingehenden Tonspuren zu einem Stück zusammenfügt und dieses an allen anderen teilnehmenden Musiker zurücksendet.\nSomit wird ein gemeinsames Lied erschaffen, das bei allen Benutzern in Echtzeit abgespielt werden kann.</string>
+    <string name="iva_center_text_default">Here is gonna be the Instrument Visualisation Area</string>
+    <string name="piano_c_keyLabel">C</string>
+    <string name="piano_d_keyLabel">D</string>
+    <string name="piano_e_keyLabel">E</string>
+    <string name="piano_f_keyLabel">F</string>
+    <string name="piano_g_keyLabel">G</string>
+    <string name="piano_a_keyLabel">A</string>
+    <string name="piano_h_keyLabel">H</string>
+    <string name="piano_c2_keyLabel">C</string>
 
     <string-array name="instruments">
         <item>Controller Pad</item>
