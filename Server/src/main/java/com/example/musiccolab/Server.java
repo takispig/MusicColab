@@ -187,7 +187,7 @@ public class Server {
         boolean somethingChanged = false;
         for (var k : entrySet) {
             int lobbyID = -1;
-            if ((p = k.getValue()).getPlayerChannel() == null) {
+            if (!(p = k.getValue()).getPlayerChannel().isConnected()) {
                 lobbyID = p.getLobbyId();
                 if (lobbyID != -1) {
                     Lobby l = lobbyMap.get(lobbyID);
@@ -204,6 +204,7 @@ public class Server {
         }
         if (somethingChanged) {
             protocol.updateLobbyNameList();
+            System.out.println("removed disconnected player");
         }
     }
 
