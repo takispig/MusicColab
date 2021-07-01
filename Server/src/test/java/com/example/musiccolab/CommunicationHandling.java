@@ -22,7 +22,7 @@ public class CommunicationHandling implements Runnable {
     public static final int PROTOCOL_LEAVE_LOBBY_ACTION = 6;
     public static final int PROTOCOL_TONE_ACTION = 7;
 
-    private static final String IP = "192.168.178.42";
+    private static final String IP = "localhost";
     private static int port = 1200;
 
     public static final String CAN_NOT_READ_FROM_BUFFER = "Can not read from buffer.";
@@ -61,6 +61,7 @@ public class CommunicationHandling implements Runnable {
     public boolean threadExist = false;
 
     private int test;
+    public static Server server = null;
 
 
     public CommunicationHandling(Thread thread, int test) {
@@ -76,7 +77,7 @@ public class CommunicationHandling implements Runnable {
     @Override
     public void run() {
         if(test == 0)
-            port = 1200;
+            port = 1199;
         else if(test == 1)
             port = 1201;
         else if (test == 2){
@@ -87,8 +88,36 @@ public class CommunicationHandling implements Runnable {
             port = 1204;
         else if(test == 5)
             port = 1205;
+        else if(test == 6)
+            port = 1206;
+        else if(test == 7)
+            port = 1207;
+        else if(test == 8)
+            port = 1208;
+        else if(test == 9)
+            port = 1209;
+        else if(test == 10)
+            port = 1210;
+        else if(test == 11)
+            port = 1211;
+        else if(test == 12)
+            port = 1212;
+        else if(test == 13)
+            port = 1213;
+        else if(test == 14)
+            port = 1214;
+        else if(test == 15)
+            port = 1215;
+        else if(test == 16)
+            port = 1216;
+        else if(test == 17)
+            port = 1217;
+        else if(test == 18)
+            port = 1218;
+        else if(test == 19)
+            port = 1219;
 
-        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_LOGIN_ACTION || test == 4) {
+        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_LOGIN_ACTION || test == 4 || test == 6 || test == 11 || test == 12 || test == 13 || test == 14 || test == 15 || test == 16 || test == 17 || test == 18 || test == 19) {
             buildConnection();
             connectToServer();
         }
@@ -110,45 +139,56 @@ public class CommunicationHandling implements Runnable {
                     try {
 
                         clientChannel.finishConnect();
+                        Thread.sleep(3000);
                         clientChannel.read(buffer);
                         buffer.flip();
                         result = null;
                         ServerTest.result = null;
                         result = messageCharset.decode(buffer).toString();
-                        ServerTest.result = result;
-                        System.out.println(result);
+
 
                         if(test == 1) {
+                            ServerTest.result = result;
+                            System.out.println(result);
                             action = 0;
                             synchronized (mainThread) {
                                 mainThread.notify();
                             }
                         }
-
-                    } catch (IOException e) {
-                        System.out.println("Problem with finishConnect");
+                    } catch (IOException | InterruptedException e) {
+                        System.out.println("Problem with Test 1");
                     }
                 } else if (key.isReadable()) {
                     short[] actionAndDataLength = analyseMainBuffer(messageCharset, clientChannel);
                     if (actionAndDataLength[1] > 0) {
                         confirmation = actionAndDataLength[0];
                         handleAction(actionAndDataLength[0], actionAndDataLength[1]);
+                        ProtocolTest.result = result;
                     } else {
                         try {
-                            ByteBuffer errorBuffer = ByteBuffer.allocate(31);
+                            ByteBuffer errorBuffer = ByteBuffer.allocate(100);
+                            Thread.sleep(2000);
                             clientChannel.read(errorBuffer);
                             errorBuffer.flip();
                             result = null;
                             ServerTest.result = null;
-                            ServerTest.result = messageCharset.decode(errorBuffer).toString().substring(1);
-                            result = ServerTest.result;
-                            if(test == 2) {
+                            result = messageCharset.decode(errorBuffer).toString();
+                            ServerTest.result = result;
+                            if(test == 2 || test == 6 || test == 7) {
                                 synchronized (mainThread) {
                                     mainThread.notify();
                                 }
                             }
+
+                            if(test == 13) {
+                                ProtocolTest.result = result;
+                                synchronized (mainThread) {
+                                    mainThread.notify();
+                                }
+                            }
+
                             clientChannel.close();
-                        } catch (IOException e) {
+                        } catch (IOException | InterruptedException e) {
                             System.err.println("Error with empty channel.");
                         }
                     }
@@ -156,16 +196,31 @@ public class CommunicationHandling implements Runnable {
                 }
                 selectedKeys.remove();
             }
-            if (codesList.contains(action)) {
+
+            if (codesList.contains(action) || (test == 6 && action != 0)) {
+                if(test == 7) {
+                    synchronized (mainThread) {
+                        mainThread.notify();
+                    }
+                    try {
+                        clientChannel.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    Thread.currentThread().stop();
+                }
+
                 sendMessageByAction(action);
                 action = 0;
 
-
-                if(test == 0 || test == 3 || test == 4 || test == 5){
+                if(test == 0 || test == 3 || test == 4 || test == 5 || test == 10 || test == 11 || test == 12 || test == 13 || test == 14 || test == 15 || test == 16 || test == 17 || test == 18 || test == 19){
                     synchronized (mainThread) {
                         mainThread.notify();
                     }
                 }
+
+                if(test == 8 || test == 9)
+                    server.setRunningForTesting(false);
             }
         }
     }
@@ -200,7 +255,7 @@ public class CommunicationHandling implements Runnable {
             } catch (IOException e) {
                 System.err.println(CAN_NOT_WRITE_IN_BUFFER);
             }
-        } else if (action == PROTOCOL_TONE_ACTION) {
+        } else if (action == PROTOCOL_TONE_ACTION || action == 50) {
             try {
                 sendTone(action);
             } catch (IOException e) {
@@ -283,6 +338,7 @@ public class CommunicationHandling implements Runnable {
         if (dataLength >= 0) {
             ByteBuffer buffer = ByteBuffer.allocate(dataLength);
             try {
+                Thread.sleep(3000);
                 clientChannel.read(buffer);
                 buffer.flip();
                 result = messageCharset.decode(buffer).toString();
@@ -295,7 +351,7 @@ public class CommunicationHandling implements Runnable {
                     }
                     System.out.println("LobbyID: " + lobbyID + " and #users: " + users);
                 }
-            } catch (IOException e) {
+            } catch (IOException | InterruptedException e) {
                 System.err.println(CAN_NOT_READ_FROM_BUFFER);
             }
         } else {

@@ -73,14 +73,15 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         disconnect.setOnClickListener(this);
         ImageButton more = findViewById(R.id.more_button);
         more.setOnClickListener(this);
-
         SoundPlayer sp = new SoundPlayer(this);
-        sp.generateToneList();
         Login.networkThread.soundPlayer = sp;
         sensorManager = (SensorManager) getSystemService(Service.SENSOR_SERVICE);
 
         callInstrument(sp);
+        getSpinner(sp);
+    }
 
+    private void getSpinner(SoundPlayer sp){
         // Drop-Down Menu (Spinner)
         Spinner mySpinner = (Spinner) findViewById(R.id.spinner);
         ArrayAdapter<String> p = new ArrayAdapter<String>(Lobby.this, android.R.layout.simple_spinner_item, instruments);
@@ -98,9 +99,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
                 mySpinner.setSelection(2);
                 break;
         }
-
         mySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (counter2 == 0) {
@@ -118,17 +117,10 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
                 // refresh text in more
                 TextView instr = findViewById(R.id.instrument);
                 instr.setText(String.format("%s", getIntent().getSerializableExtra(PreLobby.SELECTED_INSTRUMENT)));
-
                 callInstrument(sp);
             }
-
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-
+            public void onNothingSelected(AdapterView<?> parent) {}});
     }
 
     private void createInstrumentGUIBox() {
@@ -150,14 +142,17 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         switch (selectedInstrumentFromPreLobby) {
             case InstrumentType.THEREMIN:
                 selectedInstrument = new Theremin(instrumentGUI, sp);
+                findViewById(R.id.calibrate).setVisibility(View.VISIBLE);
                 break;
             case InstrumentType.DRUMS:
                 selectedInstrument = new Drums(instrumentGUI, sp);
+                findViewById(R.id.calibrate).setVisibility(View.VISIBLE);
                 break;
             case InstrumentType.PIANO:
                 // delete previous text from Theremin or Drums
                 TextView lobby_default_text = findViewById(R.id.iva_text_1);
                 lobby_default_text.setText("");
+                findViewById(R.id.calibrate).setVisibility(View.INVISIBLE);
 
                 selectedInstrument = new Piano(instrumentGUI, sp);
                 break;
@@ -187,26 +182,19 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
     // their IDs we will make the correct decision
     public void onClick(View view) {
         CommunicationHandling networkThread = Login.networkThread;
-
-        if (view.getId() == R.id.calibrate) {
-            selectedInstrument.reCalibrate();
-        }
-
+        if (view.getId() == R.id.calibrate)selectedInstrument.reCalibrate();
         // this is the Leave Lobby function and not a Disconnect
         if (view.getId() == R.id.disconnect) {
             networkThread.action = 6;
+            networkThread.soundPlayer.stopEverything();
             //networkThread.lobbyID = Login.networkThread.lobbyID;
             try {
-                synchronized (Thread.currentThread()) {
-                    // Set as connection timeout 2 seconds
-                    Thread.currentThread().wait(2000);
-                }
+                // Set as connection timeout 5 seconds
+                synchronized (Thread.currentThread()){Thread.currentThread().wait(5000);}
             } catch (InterruptedException e) {
                 System.out.println("Error with waiting of main thread.");
             }
-            String output = networkThread.result;
-            System.out.println(output);
-
+            System.out.println( networkThread.result);
             System.out.println("LeaveLobby conf-code: " + networkThread.confirmation);
             if (networkThread.confirmation == 6) {
                 // reset the sensitive user data after logout & clear LobbyNames
@@ -222,14 +210,15 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
                 toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
             }
         }
+        if (view.getId() == R.id.more_button) getMore();
+    }
 
-        if (view.getId() == R.id.more_button) {
-            TextView admin_text = findViewById(R.id.admin_boolean);
-            admin_text.setText(Login.networkThread.admin ? "true" : "false");
-            ConstraintLayout info = findViewById(R.id.info);
-            visible = !visible;
-            info.setVisibility(visible ? View.VISIBLE : View.GONE);
-        }
+    private void getMore(){
+        TextView admin_text = findViewById(R.id.admin_boolean);
+        admin_text.setText(Login.networkThread.admin ? "true" : "false");
+        ConstraintLayout info = findViewById(R.id.info);
+        visible = !visible;
+        info.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -253,10 +242,11 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         } else {
             // else remove the user from lobby
             networkThread.action = 6;
+            networkThread.soundPlayer.stopEverything();
             try {
                 synchronized (Thread.currentThread()) {
-                    // Set as connection timeout 2 seconds
-                    Thread.currentThread().wait(2000);
+                    // Set as connection timeout 5 seconds
+                    Thread.currentThread().wait(5000);
                 }
             } catch (InterruptedException e) {
                 System.out.println("Error with waiting of main thread.");
@@ -277,7 +267,6 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             } else if (networkThread.confirmation == 16) {
                 toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
             }
-
         }
     }
 }

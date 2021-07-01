@@ -50,11 +50,13 @@ public class CommunicationHandling implements Runnable {
     public String email = null;
     public String username = null;
     public String password = null;
+    public int userID = -1;
     public String lobbyName = null;
     public String question = null; //VH - 27.06
     public boolean admin = false;
     public int users = 0;
     public List<String> LobbyList = new LinkedList<String>();
+    public List<String> UsernameList = new LinkedList<String>();
 
     public byte toneAction;
     public byte toneType;
@@ -130,14 +132,15 @@ public class CommunicationHandling implements Runnable {
                     // if message length == 0 and action == 20, then just delete all Lobbies
                     else if (actionAndDataLength[1] == 0 && actionAndDataLength[0] == (short) 20) {
                         LobbyList.clear();
+                    } else if (actionAndDataLength[1] == 0 && actionAndDataLength[0] == (short) 21) {
+                        UsernameList.clear();
                     } else {
-                        try {
-                            clientChannel.read(ByteBuffer.allocate(1000));
-                        } catch (IOException e) {
-                            System.err.println("Error with empty channel.");
-                        }
+                            try {
+                                clientChannel.read(ByteBuffer.allocate(1000));
+                            } catch (IOException e) {
+                                System.err.println("Error with empty channel.");
+                            }
                     }
-
                 }
                 selectedKeys.remove();
             }
@@ -247,12 +250,23 @@ public class CommunicationHandling implements Runnable {
         }
         else if (action == PROTOCOL_UPDATE_USERS) {
             try {
+                System.out.println("Action: 21 (update num_users and usernames)");
                 ByteBuffer num_users = ByteBuffer.allocate(messageLength);
                 clientChannel.read(num_users);
                 num_users.flip();
                 result = messageCharset.decode(num_users).toString();
+                System.out.println("Result: " + result);
+                // clear previous list of users
+                UsernameList.clear();
+                // receive list of users
+                String[] u_names = result.split(",");
+                for (int index = 0; index < u_names.length; index++) {
+                    if (!u_names[index].equals(""))
+                        UsernameList.add(u_names[index]);
+                }
                 // update the number of users
-                users = Integer.parseInt(result);
+                users = UsernameList.size();
+                System.out.println("Num_Users: " + users + ", UserNames: " + UsernameList);
             }catch (IOException e){
                 System.out.println(CAN_NOT_WRITE_IN_BUFFER + " from adminBuffer.");
             }
@@ -266,7 +280,7 @@ public class CommunicationHandling implements Runnable {
     private void sendToneToSoundPlayer() {
         if (soundPlayer != null) {
             String[] results = result.split(",");
-            soundPlayer.playTone(results[0],Integer.parseInt(results[2]));
+            soundPlayer.playTone(results[0],Integer.parseInt(results[1]),Integer.parseInt(results[2]));
         }
     }
 
@@ -358,14 +372,15 @@ public class CommunicationHandling implements Runnable {
                     clientChannel.close();
                 } else if (action == 1) {
                     response = messageCharset.decode(buffer).toString().split(",");
-                    for (int index = 0; index < response.length; index++) {
+/*                    for (int index = 0; index < response.length; index++) {
                         if (index == 0)
                             result = response[index];   // first value is not a lobbyName
                         else
-                            //IdList.add(Character.getNumericValue(response[index].charAt(0)));
-                            //IdList.add(Integer.parseInt(response[index]));
                             LobbyList.add(response[index]);
-                    }
+                    }*/
+                    result = response[0];
+                    userID = Integer.parseInt(response[2]);
+
                 } else {
                     result = messageCharset.decode(buffer).toString();
                 }
@@ -379,8 +394,8 @@ public class CommunicationHandling implements Runnable {
 
         private void sendLoginSystemMessage(short action, String email, String username, String password, String question) throws IOException {
         short dataLength;
-        byte emailLength, userNameLength, passwordLength, size = 2;
-        byte questionLength = 0;
+        byte emailLength, userNameLength, passwordLength, size = 2, questionLength;
+        questionLength = 0;
         emailLength = 0;
 
         String message = "";
@@ -388,7 +403,6 @@ public class CommunicationHandling implements Runnable {
 
         if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD) {
             emailLength = (byte) email.length();
-            questionLength = (byte) question.length();
             message = email;
             size = 4;
         }
@@ -409,9 +423,6 @@ public class CommunicationHandling implements Runnable {
         }
         buffer.put(userNameLength);
         buffer.put(passwordLength);
-        if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD) {
-            buffer.put(questionLength);
-        }
         buffer.put(message.getBytes(messageCharset));
         buffer.flip();
         clientChannel.write(buffer);
@@ -525,6 +536,11 @@ public class CommunicationHandling implements Runnable {
             networkThread.email = null;
             networkThread.password = null;
             networkThread.question = null;
+            try {
+                networkThread.clientChannel.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         networkThread.admin = false;
         networkThread.confirmation = 0;
