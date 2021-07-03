@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -66,13 +67,21 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         TextView usersInLobby = findViewById(R.id.members_number);
         usersInLobby.setText(String.format("%s", Login.networkThread.users));
 
-        // Create Listeners for the IDs: about, register
+        // Create Listeners
         Button calibrate = findViewById(R.id.calibrate);
         calibrate.setOnClickListener(this);
         ImageButton disconnect = findViewById(R.id.disconnect);
         disconnect.setOnClickListener(this);
         ImageButton more = findViewById(R.id.more_button);
         more.setOnClickListener(this);
+        ImageButton num_users = findViewById(R.id.users);
+        num_users.setOnClickListener(this);
+        ImageButton muted = findViewById(R.id.muted);
+        muted.setOnClickListener(this);
+        Button mute_unmute = findViewById(R.id.mute_unmute);
+        mute_unmute.setOnClickListener(this);
+        Button cancel = findViewById(R.id.cancel_create2);
+        cancel.setOnClickListener(this);
         SoundPlayer sp = new SoundPlayer(this);
         Login.networkThread.soundPlayer = sp;
         sensorManager = (SensorManager) getSystemService(Service.SENSOR_SERVICE);
@@ -182,7 +191,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
     // their IDs we will make the correct decision
     public void onClick(View view) {
         CommunicationHandling networkThread = Login.networkThread;
-        if (view.getId() == R.id.calibrate)selectedInstrument.reCalibrate();
+        if (view.getId() == R.id.calibrate) selectedInstrument.reCalibrate();
         // this is the Leave Lobby function and not a Disconnect
         if (view.getId() == R.id.disconnect) {
             networkThread.action = 6;
@@ -211,6 +220,40 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             }
         }
         if (view.getId() == R.id.more_button) getMore();
+        if (view.getId() == R.id.users) {
+            // display usernames
+            TextView usernames = findViewById(R.id.usernames);
+            if (!networkThread.UsernameList.isEmpty()) usernames.setText(String.format("%s", networkThread.UsernameList));
+            // message visibility
+            visible = !visible;
+            ConstraintLayout userss = findViewById(R.id.users_message);
+            userss.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
+        if (view.getId() == R.id.muted) {
+            if (networkThread.admin == true) findViewById(R.id.muted_message).setVisibility(View.VISIBLE);
+            else toast("You need to be Admin to mute players");
+            // display muted players
+            TextView m_usernames = findViewById(R.id.muted_names);
+            if (!networkThread.MuteList.isEmpty()) m_usernames.setText(String.format("%s", networkThread.MuteList));
+            else m_usernames.setText("-");
+
+        }
+        if (view.getId() == R.id.mute_unmute) {
+            findViewById(R.id.muted_message).setVisibility(View.GONE);
+            EditText d = findViewById(R.id.name_to_mute);
+            String tmp_muted = d.getText().toString();
+            if (networkThread.MuteList.contains(tmp_muted)) {
+                networkThread.MuteList.remove(tmp_muted);
+                toast(tmp_muted + " has been unmuted");
+            } else {
+                networkThread.MuteList.add(tmp_muted);
+                toast(tmp_muted + " has been muted");
+            }
+
+        }
+        if (view.getId() == R.id.cancel_create2) {
+            findViewById(R.id.muted_message).setVisibility(View.GONE);
+        }
     }
 
     private void getMore(){
