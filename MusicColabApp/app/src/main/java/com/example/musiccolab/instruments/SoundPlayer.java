@@ -13,8 +13,8 @@ public class SoundPlayer {
     public static CommunicationHandling NETWORK_THREAD = Login.networkThread;
     private final Lobby lobby;
     private boolean testingMode = false;
-    private ArrayList<MediaPlayerAdapter> currentlyPlaying = new ArrayList<>();
-    private HashMap<String, Integer> sounds = new HashMap<>();
+    private final ArrayList<MediaPlayerAdapter> currentlyPlaying = new ArrayList<>();
+    private final HashMap<String, Integer> sounds = new HashMap<>();
 
     public SoundPlayer(Lobby lobby) {
         this.lobby = lobby;
@@ -46,12 +46,10 @@ public class SoundPlayer {
 
 
     public void sendToneToServer(String toneAsString, int toneAction) {
-        if (sounds.containsKey(toneAsString)) {
-            playTone(toneAsString, NETWORK_THREAD.userID, toneAction);
-            NETWORK_THREAD.action = NETWORK_THREAD_ACTION_SEND_TONE;
-            NETWORK_THREAD.toneAction = (byte) toneAction;
-            NETWORK_THREAD.data = toneAsString;
-        }
+        playTone(toneAsString, NETWORK_THREAD.userID, toneAction);
+        NETWORK_THREAD.action = NETWORK_THREAD_ACTION_SEND_TONE;
+        NETWORK_THREAD.toneAction = (byte) toneAction;
+        NETWORK_THREAD.data = toneAsString;
     }
 
     public void playTone(String toneAsString, int user, int toneAction) {
@@ -99,7 +97,7 @@ public class SoundPlayer {
 
     public void stopEverything() {
         synchronized (currentlyPlaying) {
-            currentlyPlaying.forEach(mp -> mp.stop());
+            currentlyPlaying.forEach(MediaPlayerAdapter::stop);
             currentlyPlaying.clear();
         }
     }

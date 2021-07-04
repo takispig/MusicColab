@@ -12,11 +12,11 @@ public class MediaPlayerAdapter {
 
     public MediaPlayerAdapter(Context context, int id, boolean testingMode, int user, String tone) {
         this.testingMode = testingMode;
+        this.tone = tone;
         if (!this.testingMode) {
             mp = MediaPlayer.create(context, id);
             mp.setOnErrorListener((mp, what, extra) -> true);
             this.user = user;
-            this.tone = tone;
         }
     }
 
