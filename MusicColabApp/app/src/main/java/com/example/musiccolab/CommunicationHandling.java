@@ -27,6 +27,7 @@ public class CommunicationHandling implements Runnable {
     public static final int PROTOCOL_BECAME_ADMIN = 9;
     public static final int PROTOCOL_UPDATE_LOBBY_ID_LIST = 20;
     public static final int PROTOCOL_UPDATE_USERS = 21;             // NOT YET TESTED
+    public static final int PROTOCOL_MUTE_USERS = 22;             // NOT YET TESTED
 
     // private static final String IP = "35.207.116.16";   //130.149.80.94 // Google Server IP-Address
     private static final String IP = "130.149.80.94";   // VM IP-Address
@@ -57,6 +58,7 @@ public class CommunicationHandling implements Runnable {
     public int users = 0;
     public List<String> LobbyList = new LinkedList<String>();
     public List<String> UsernameList = new LinkedList<String>();
+    public List<String> MuteList = new LinkedList<String>();
 
     public byte toneAction;
     public byte toneType;
@@ -79,6 +81,7 @@ public class CommunicationHandling implements Runnable {
         }
         codesList.add((short) 20);  // add the update lobby list action
         codesList.add((short) 21);  // add the update number of users in lobby action
+        codesList.add((short) 22);  // add the mute/unmute player action
     }
 
     @Override
