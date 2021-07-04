@@ -13,6 +13,7 @@ public class Theremin implements Instrument {
     public static final int THEREMIN_ALPHA_H = 69;
     public static final int THEREMIN_ALPHA_C2 = 38;
     public static final int THEREMIN_ALPHA_DEFAULT = 7;
+    public static final String THEREMIN_STOP = "thermSTOP";
 
     private final SoundPlayer sp;
     private float lastSensorValue = 0;
@@ -83,6 +84,7 @@ public class Theremin implements Instrument {
             instrumentGUI.setThereminAlpha(THEREMIN_ALPHA_C2);
         } else {
             stringToDisplay = "0";
+            toneToServer = THEREMIN_STOP;
             instrumentGUI.setThereminAlpha(THEREMIN_ALPHA_DEFAULT);
         }
         if (!lastTone.equals(toneToServer)) {

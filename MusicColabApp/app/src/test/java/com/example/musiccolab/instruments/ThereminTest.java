@@ -196,7 +196,7 @@ public class ThereminTest {
         theremin.action(event);
 
         // assert
-        verify(sp, times(1)).sendToneToServer("therm", 1);
+        verify(sp, times(1)).sendToneToServer(Theremin.THEREMIN_STOP, 1);
     }
 
     @Test

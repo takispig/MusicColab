@@ -1,5 +1,7 @@
 package com.example.musiccolab.instruments;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.example.musiccolab.CommunicationHandling;
 import com.example.musiccolab.Lobby;
 import com.example.musiccolab.Login;
@@ -9,11 +11,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class SoundPlayer {
+
+    @VisibleForTesting
+    protected static CommunicationHandling NETWORK_THREAD = Login.networkThread;
+
+    @VisibleForTesting
+    protected final ArrayList<MediaPlayerAdapter> currentlyPlaying = new ArrayList<>();
+
     private static final short NETWORK_THREAD_ACTION_SEND_TONE = 7;
-    public static CommunicationHandling NETWORK_THREAD = Login.networkThread;
     private final Lobby lobby;
     private boolean testingMode = false;
-    private final ArrayList<MediaPlayerAdapter> currentlyPlaying = new ArrayList<>();
     private final HashMap<String, Integer> sounds = new HashMap<>();
 
     public SoundPlayer(Lobby lobby) {
@@ -44,7 +51,6 @@ public class SoundPlayer {
         testingMode = true;
     }
 
-
     public void sendToneToServer(String toneAsString, int toneAction) {
         playTone(toneAsString, NETWORK_THREAD.userID, toneAction);
         NETWORK_THREAD.action = NETWORK_THREAD_ACTION_SEND_TONE;
@@ -54,23 +60,30 @@ public class SoundPlayer {
 
     public void playTone(String toneAsString, int user, int toneAction) {
         if (toneAction == 1) {
-            if (toneAsString.equals("therm")) {
+            if (toneAsString.equals(Theremin.THEREMIN_STOP)) {
                 stopTheremin(user);
                 return;
             }
             if (sounds.get(toneAsString) == null) {
-                System.out.println("Wrong tone data");
                 return;
             }
-            MediaPlayerAdapter tone = new MediaPlayerAdapter(lobby, sounds.get(toneAsString), testingMode, user, toneAsString);
-            if (toneAsString.startsWith("therm")) stopTheremin(user);
+            MediaPlayerAdapter tone;
+            try {
+                int soundId = sounds.get(toneAsString);
+                tone = new MediaPlayerAdapter(lobby, soundId, testingMode, user, toneAsString);
+            } catch (NullPointerException e) {
+                return;
+            }
+            if (toneAsString.startsWith("therm")) {
+                stopTheremin(user);
+            }
             currentlyPlaying.add(tone);
             tone.start();
         } else if (toneAction == 0) {
             synchronized (currentlyPlaying) {
                 MediaPlayerAdapter playing = null;
                 for (MediaPlayerAdapter mp : currentlyPlaying) {
-                    if (mp.tone.equals(toneAsString) && mp.user == user) {
+                    if (mp.getTone().equals(toneAsString) && mp.getUser() == user) {
                         mp.stop();
                         playing = mp;
                         break;
@@ -85,7 +98,7 @@ public class SoundPlayer {
         synchronized (currentlyPlaying) {
             MediaPlayerAdapter playing = null;
             for (MediaPlayerAdapter mp : currentlyPlaying) {
-                if (mp.tone.startsWith("therm") && mp.user == user) {
+                if (mp.getTone().startsWith("therm") && mp.getUser() == user) {
                     mp.stop();
                     playing = mp;
                     break;

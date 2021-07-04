@@ -20,20 +20,25 @@ public class MediaPlayerAdapter {
         }
     }
 
+    public String getTone(){
+        return tone;
+    }
+
+    public int getUser(){
+        return user;
+    }
+
     public void start() {
         if (!testingMode) {
             mp.start();
         }
     }
 
-
     public void stop() {
-        if (!testingMode) {
-            if (mp.isPlaying()) {
-                mp.pause();
-                mp.reset();
-                mp.release();
-            }
+        if (!testingMode && mp.isPlaying()) {
+            mp.pause();
+            mp.reset();
+            mp.release();
         }
     }
 }
