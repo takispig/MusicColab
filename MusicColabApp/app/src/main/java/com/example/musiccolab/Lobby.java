@@ -15,6 +15,9 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.RotateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -124,16 +127,22 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
     }
 
     private void createInstrumentGUIBox() {
-        List<Integer> pianoKeys = new ArrayList<>();
-        pianoKeys.add(R.id.btnC);
-        pianoKeys.add(R.id.btnD);
-        pianoKeys.add(R.id.btnE);
-        pianoKeys.add(R.id.btnF);
-        pianoKeys.add(R.id.btnG);
-        pianoKeys.add(R.id.btnA);
-        pianoKeys.add(R.id.btnH);
-        pianoKeys.add(R.id.btnC2);
-        instrumentGUI = new InstrumentGUIBox(this, R.id.iva_text_1, pianoKeys);
+        List<Integer> pianoKeyIDs = new ArrayList<>();
+        pianoKeyIDs.add(R.id.btnC);
+        pianoKeyIDs.add(R.id.btnD);
+        pianoKeyIDs.add(R.id.btnE);
+        pianoKeyIDs.add(R.id.btnF);
+        pianoKeyIDs.add(R.id.btnG);
+        pianoKeyIDs.add(R.id.btnA);
+        pianoKeyIDs.add(R.id.btnH);
+        pianoKeyIDs.add(R.id.btnC2);
+        instrumentGUI = new InstrumentGUIBox(this, R.id.iva_text_1, pianoKeyIDs);
+        instrumentGUI.init();
+        instrumentGUI.setScaleDownAnimation(AnimationUtils.loadAnimation(this, R.anim.scale_down));
+        RotateAnimation rotateRight = new RotateAnimation(40, 45, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        RotateAnimation rotateLeft = new RotateAnimation(-40, -45, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        RotateAnimation rotateVert = new RotateAnimation(0, 5, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        instrumentGUI.createRotateAnimations(rotateRight, rotateLeft, rotateVert);
     }
 
     private void callInstrument(SoundPlayer sp) {
