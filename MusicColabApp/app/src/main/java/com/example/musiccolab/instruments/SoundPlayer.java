@@ -46,10 +46,12 @@ import java.util.HashMap;
 
 
     public void sendToneToServer(String toneAsString, int toneAction) {
-        playTone(toneAsString,NETWORK_THREAD.userID, toneAction);
-        NETWORK_THREAD.action = NETWORK_THREAD_ACTION_SEND_TONE;
-        NETWORK_THREAD.toneAction = (byte) toneAction;
-        NETWORK_THREAD.data = toneAsString;
+        if (sounds.containsKey(toneAsString)) {
+            playTone(toneAsString, NETWORK_THREAD.userID, toneAction);
+            NETWORK_THREAD.action = NETWORK_THREAD_ACTION_SEND_TONE;
+            NETWORK_THREAD.toneAction = (byte) toneAction;
+            NETWORK_THREAD.data = toneAsString;
+        }
     }
 
     public void playTone(String toneAsString,int user, int toneAction) {

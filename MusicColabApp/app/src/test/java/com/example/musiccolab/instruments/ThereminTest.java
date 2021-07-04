@@ -5,7 +5,12 @@ import android.hardware.Sensor;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class ThereminTest {
@@ -58,12 +63,13 @@ public class ThereminTest {
         SensorEventAdapter event = new SensorEventAdapter(new float[]{THEREMIN_INIT_VALUE}, sensor);
         theremin.reCalibrate();//Useless but for 100% coverage
         theremin.reCalibrate(event);
-
         event = new SensorEventAdapter(new float[]{0}, sensor);
+
         // act
         theremin.action(event);
+
         // assert
-        assertEquals("c Theremin", theremin.stringToDisplay);
+        verify(sp, times(1)).sendToneToServer("therm0", 1);
     }
 
     @Test
@@ -74,10 +80,12 @@ public class ThereminTest {
         theremin.reCalibrate();//Useless but for 100% coverage
         theremin.reCalibrate(event);
         event = new SensorEventAdapter(new float[]{10}, sensor);
+
         // act
         theremin.action(event);
+
         // assert
-        assertEquals("d Theremin", theremin.stringToDisplay);
+        verify(sp, times(1)).sendToneToServer("therm1", 1);
     }
 
     @Test
@@ -88,10 +96,12 @@ public class ThereminTest {
         theremin.reCalibrate();//Useless but for 100% coverage
         theremin.reCalibrate(event);
         event = new SensorEventAdapter(new float[]{20}, sensor);
+
         // act
         theremin.action(event);
+
         // assert
-        assertEquals("e Theremin", theremin.stringToDisplay);
+        verify(sp, times(1)).sendToneToServer("therm2", 1);
     }
 
     @Test
@@ -102,10 +112,12 @@ public class ThereminTest {
         theremin.reCalibrate();//Useless but for 100% coverage
         theremin.reCalibrate(event);
         event = new SensorEventAdapter(new float[]{30}, sensor);
+
         // act
         theremin.action(event);
+
         // assert
-        assertEquals("f Theremin", theremin.stringToDisplay);
+        verify(sp, times(1)).sendToneToServer("therm3", 1);
     }
 
     @Test
@@ -116,10 +128,12 @@ public class ThereminTest {
         theremin.reCalibrate();//Useless but for 100% coverage
         theremin.reCalibrate(event);
         event = new SensorEventAdapter(new float[]{40}, sensor);
+
         // act
         theremin.action(event);
+
         // assert
-        assertEquals("g Theremin", theremin.stringToDisplay);
+        verify(sp, times(1)).sendToneToServer("therm4", 1);
     }
 
     @Test
@@ -130,10 +144,12 @@ public class ThereminTest {
         theremin.reCalibrate();//Useless but for 100% coverage
         theremin.reCalibrate(event);
         event = new SensorEventAdapter(new float[]{50}, sensor);
+
         // act
         theremin.action(event);
+
         // assert
-        assertEquals("a Theremin", theremin.stringToDisplay);
+        verify(sp, times(1)).sendToneToServer("therm5", 1);
     }
 
     @Test
@@ -144,10 +160,12 @@ public class ThereminTest {
         theremin.reCalibrate();//Useless but for 100% coverage
         theremin.reCalibrate(event);
         event = new SensorEventAdapter(new float[]{60}, sensor);
+
         // act
         theremin.action(event);
+
         // assert
-        assertEquals("h Theremin", theremin.stringToDisplay);
+        verify(sp, times(1)).sendToneToServer("therm6", 1);
     }
 
     @Test
@@ -158,10 +176,12 @@ public class ThereminTest {
         theremin.reCalibrate();//Useless but for 100% coverage
         theremin.reCalibrate(event);
         event = new SensorEventAdapter(new float[]{70}, sensor);
+
         // act
         theremin.action(event);
+
         // assert
-        assertEquals("c2 Theremin", theremin.stringToDisplay);
+        verify(sp, times(1)).sendToneToServer("therm7", 1);
     }
 
     @Test
@@ -172,9 +192,30 @@ public class ThereminTest {
         theremin.reCalibrate();//Useless but for 100% coverage
         theremin.reCalibrate(event);
         event = new SensorEventAdapter(new float[]{80}, sensor);
+
         // act
         theremin.action(event);
+
         // assert
-        assertEquals("0 Theremin", theremin.stringToDisplay);
+        verify(sp, times(1)).sendToneToServer("therm", 1);
+    }
+
+    @Test
+    public void test_action_wrongSensor_soundPlayerNotCalled() {
+        // arrange
+        when(sensor.getType()).thenReturn(sensor.TYPE_LIGHT);
+        SensorEventAdapter event = new SensorEventAdapter(new float[]{THEREMIN_INIT_VALUE}, sensor);
+        theremin.reCalibrate();//Useless but for 100% coverage
+        theremin.reCalibrate(event);
+
+        Sensor wrongSensor = mock(Sensor.class);
+        when(wrongSensor.getType()).thenReturn(sensor.TYPE_ACCELEROMETER);
+        event = new SensorEventAdapter(new float[]{80}, wrongSensor);
+
+        // act
+        theremin.action(event);
+
+        // assert
+        verify(sp, times(0)).sendToneToServer(anyString(), anyInt());
     }
 }
