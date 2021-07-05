@@ -67,8 +67,6 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             TextView admin_text = findViewById(R.id.admin_boolean);
             admin_text.setText(" true");
         }
-        TextView usersInLobby = findViewById(R.id.members_number);
-        usersInLobby.setText(String.format("%s", Login.networkThread.users));
 
         // Create Listeners
         Button calibrate = findViewById(R.id.calibrate);
@@ -268,6 +266,8 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
     private void getMore(){
         TextView admin_text = findViewById(R.id.admin_boolean);
         admin_text.setText(Login.networkThread.admin ? "true" : "false");
+        TextView usersInLobby = findViewById(R.id.members_number);
+        usersInLobby.setText(String.format("%s", Login.networkThread.users));
         ConstraintLayout info = findViewById(R.id.info);
         visible = !visible;
         info.setVisibility(visible ? View.VISIBLE : View.GONE);
