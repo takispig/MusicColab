@@ -224,13 +224,17 @@ public class Protocol {
         lobbyBuffer.flip();
         if(action == createLobby && player != null){
             lobbyName = messageCharset.decode(lobbyBuffer).toString();
-            int id = Server.createLobbyId();
-            Lobby lobby = new Lobby(player, lobbyName, id);
-            Server.lobbyMap.put(id,lobby);
-            //
-            Server.lobbyList.add(lobby);
-            sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(true, lobby, " created by client."));
-            Main.logr.log(Level.INFO, "LOBBY " + lobby.getLobby_id() + " CREATED BY CLIENT " + playerAddress.toString());
+            if (!Server.lobbyList.contains(lobbyName)) {
+                int id = Server.createLobbyId();
+                Lobby lobby = new Lobby(player, lobbyName, id);
+                Server.lobbyMap.put(id, lobby);
+                //
+                Server.lobbyList.add(lobby);
+                sendResponseToClient(messageCharset, clientChannel, getLobbyResponse(true, lobby, " created by client."));
+                Main.logr.log(Level.INFO, "LOBBY " + lobby.getLobby_id() + " CREATED BY CLIENT " + playerAddress.toString());
+            } else{
+                sendResponseToClient(messageCharset, clientChannel, "Lobby already exists");
+            }
         }
         else if((action == joinLobby || action == leaveLobby) && player != null){
             int lobbyID;
