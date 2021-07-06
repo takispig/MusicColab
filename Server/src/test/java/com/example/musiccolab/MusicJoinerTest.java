@@ -32,10 +32,10 @@ class MusicJoinerTest {
         String toneData = "dataExample2";
 
         // Test mit korrekten Daten
-        assertEquals(0, MusicJoiner.handleToneData(messageCharset, lobby, toneAction, toneData, action));
+        assertEquals(0, MusicJoiner.handleToneData(messageCharset, lobby, toneAction, toneData, action, admin));
 
         // Test mit lobby = null
-        assertEquals(-1, MusicJoiner.handleToneData(messageCharset, null, toneAction, toneData, action));
+        assertEquals(-1, MusicJoiner.handleToneData(messageCharset, null, toneAction, toneData, action, admin));
 
     }
 

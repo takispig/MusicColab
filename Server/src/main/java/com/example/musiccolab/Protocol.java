@@ -380,7 +380,7 @@ public class Protocol {
                 responseAction = action;
 
                 int i;
-                if ((i = MusicJoiner.handleToneData(messageCharset, clientLobby, toneAction, toneData, responseAction)) != 0) {
+                if ((i = MusicJoiner.handleToneData(messageCharset, clientLobby, toneAction, toneData, responseAction, sender)) != 0) {
                     // for testing
                     if (i == -1)
                         System.out.println("Fehler in MusicJoiner -1");
