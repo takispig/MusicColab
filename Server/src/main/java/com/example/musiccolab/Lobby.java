@@ -96,4 +96,22 @@ public class Lobby {
         }
         return ids.toString();
     }
+
+    public void toggleMutePlayerByID(int id) {
+        for (Player player : players) {
+            if (player.getId() == id) {
+                player.toggleMute();
+                break;
+            }
+        }
+    }
+
+    public void toggleMutePlayerByUsername(String username) {
+        for (Player player : players) {
+            if (player.getName().equals(username)) {
+                player.toggleMute();
+                break;
+            }
+        }
+    }
 }

@@ -14,7 +14,7 @@ public class MusicJoiner {
             playersNumber = (short) lobby.getMax_players();
             System.out.println("Get tone data: " + toneData);
             for (Player player : lobby.getPlayers()) {
-                if (player.state.getState() == ClientState.inLobby)
+                if (player.state.getState() == ClientState.inLobby && !player.isMuted())
                     if (sendTonToClient(messageCharset, player.getPlayerChannel(), toneData + "," + player.getId() + "," + toneAction, action) == -1){
                         return -2;
                     }

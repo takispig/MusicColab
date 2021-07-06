@@ -25,7 +25,7 @@ public class Protocol {
     final private int tone = 7;
     final private int passwordForgotten = 8;
     final public static int becameAdmin = 9;
-    final private int mutePlayer = 10;
+    final private int mutePlayer = 22;
 
 
     private short action;
@@ -53,8 +53,10 @@ public class Protocol {
                                           {"Client joined Lobby","Client left Lobby"}};
 
     public Protocol(){
-        for(short index = 0; index < 11; index++)
+        for(short index = 0; index < 11; index++) {
             codesList.add(index);
+        }
+        codesList.add((short) 22);
     }
 
 
@@ -419,17 +421,31 @@ public class Protocol {
                 testCorrect = true;
             }
             else if (action == mutePlayer){
-                parseBufferIfMutePlayer(messageCharset, clientChannel);
+                parseBufferIfMutePlayer(messageCharset, clientChannel, key);
                 testCorrect = true;
             }
         }
     }
 
-    private void parseBufferIfMutePlayer(Charset messageCharset, SocketChannel clientChannel) {
-        //todo;
+    private void parseBufferIfMutePlayer(Charset messageCharset, SocketChannel clientChannel, SelectionKey key) throws IOException {
+        Player player = (Player) key.attachment();
 
+        ByteBuffer sizeBuffer = ByteBuffer.allocate(1);
+        clientChannel.read(sizeBuffer);
+        sizeBuffer.flip();
+        userNameSize = messageCharset.decode(sizeBuffer).toString().getBytes(messageCharset)[0];
+        sizeBuffer.clear();
 
+        ByteBuffer userNameBuffer = ByteBuffer.allocate(userNameSize);
+        clientChannel.read(userNameBuffer);
+        userNameBuffer.flip();
+        username = messageCharset.decode(userNameBuffer).toString();
+        userNameBuffer.clear();
 
+        if (player.getLobbyId() != -1) {
+            Lobby lobby = Server.lobbyMap.get(player.getLobbyId());
+            lobby.toggleMutePlayerByUsername(username);
+        }
     }
 
     private String getAllLobbyIds(HashMap<Integer, Lobby> lobbyMap) {
