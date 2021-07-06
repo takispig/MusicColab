@@ -445,6 +445,8 @@ public class Protocol {
             lobby.toggleMutePlayerByUsername(username);
         }
 
+        sendResponseToClient(messageCharset, clientChannel, "Player " + username + " is un/muted");
+
 
         /*
         // das war für PlayerID
