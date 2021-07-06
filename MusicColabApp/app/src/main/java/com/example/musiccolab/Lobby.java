@@ -237,7 +237,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             userss.setVisibility(visible ? View.VISIBLE : View.GONE);
         }
         if (view.getId() == R.id.muted) {
-            if (networkThread.admin == true) findViewById(R.id.muted_message).setVisibility(View.VISIBLE);
+            if (networkThread.admin) findViewById(R.id.muted_message).setVisibility(View.VISIBLE);
             else toast("You need to be Admin to mute players");
             // display muted players
             TextView m_usernames = findViewById(R.id.muted_names);
@@ -249,6 +249,15 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             findViewById(R.id.muted_message).setVisibility(View.GONE);
             EditText d = findViewById(R.id.name_to_mute);
             String tmp_muted = d.getText().toString();
+            // connect to server
+            networkThread.mutedPlayer = tmp_muted;
+            networkThread.action = 22;
+            try {
+                synchronized (Thread.currentThread()) {Thread.currentThread().wait(1);}
+            } catch (InterruptedException e) {
+                System.out.println("Error with waiting of main thread.");
+            }
+            // local changes
             if (networkThread.MuteList.contains(tmp_muted)) {
                 networkThread.MuteList.remove(tmp_muted);
                 toast(tmp_muted + " has been unmuted");

@@ -29,8 +29,8 @@ public class CommunicationHandling implements Runnable {
     public static final int PROTOCOL_UPDATE_USERS = 21;             // NOT YET TESTED
     public static final int PROTOCOL_MUTE_USERS = 22;             // NOT YET TESTED
 
-    // private static final String IP = "35.207.116.16";   //130.149.80.94 // Google Server IP-Address
-    private static final String IP = "130.149.80.94";   // VM IP-Address
+    private static final String IP = "10.0.2.2";   //130.149.80.94 // Google Server IP-Address
+    // private static final String IP = "130.149.80.94";   // VM IP-Address
     private static final int port = 8080;
 
     public static final String CAN_NOT_READ_FROM_BUFFER = "Can not read from buffer.";
@@ -53,6 +53,7 @@ public class CommunicationHandling implements Runnable {
     public String password = null;
     public int userID = -1;
     public String lobbyName = null;
+    public String mutedPlayer = null;
     public String question = null; //VH - 27.06
     public boolean admin = false;
     public int users = 0;
@@ -171,10 +172,11 @@ public class CommunicationHandling implements Runnable {
             } catch (IOException e) {
                 System.err.println(CAN_NOT_WRITE_IN_BUFFER);
             }
-        } else if (action == PROTOCOL_CREATE_LOBBY_ACTION || action == PROTOCOL_JOIN_LOBBY_ACTION || action == PROTOCOL_LEAVE_LOBBY_ACTION) {
+        } else if (action == PROTOCOL_CREATE_LOBBY_ACTION || action == PROTOCOL_JOIN_LOBBY_ACTION || action == PROTOCOL_LEAVE_LOBBY_ACTION || action == PROTOCOL_MUTE_USERS) {
+            System.out.println("We are in sendMessageByAction. Action: " + action);
             try {
-                if (action == PROTOCOL_CREATE_LOBBY_ACTION)
-                    sendLobbyMessage(action, lobbyName);
+                if (action == PROTOCOL_MUTE_USERS)
+                    sendLobbyMessage(action, mutedPlayer);
                 else
                     sendLobbyMessage(action, lobbyName);
             } catch (IOException e) {
@@ -343,17 +345,18 @@ public class CommunicationHandling implements Runnable {
 
     }
 
-    private void sendLobbyMessage(short action, String lobbyNameOrID) throws IOException {
+    private void sendLobbyMessage(short action, String lobbyNameOrUsername) throws IOException {
+        System.out.println("We are in sendLobbyMessage with variables\naction = " + action + ", lobbyName/username = " + lobbyNameOrUsername);
         short dataLength;
         ByteBuffer buffer;
 
-        dataLength = (short) lobbyNameOrID.length();
+        dataLength = (short) lobbyNameOrUsername.length();
         buffer = ByteBuffer.allocate(6 + dataLength);
 
         buffer.put(convertShortToByte(protocolName));
         buffer.put(convertShortToByte(action));
         buffer.put(convertShortToByte(dataLength));
-        buffer.put(lobbyNameOrID.getBytes(messageCharset));
+        buffer.put(lobbyNameOrUsername.getBytes(messageCharset));
 
         buffer.flip();
         clientChannel.write(buffer);
