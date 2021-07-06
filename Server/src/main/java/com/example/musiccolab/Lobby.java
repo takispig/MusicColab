@@ -105,4 +105,13 @@ public class Lobby {
             }
         }
     }
+
+    public void toggleMutePlayerByUsername(String username) {
+        for (Player player : players) {
+            if (player.getName().equals(username)) {
+                player.toggleMute();
+                break;
+            }
+        }
+    }
 }

@@ -427,6 +427,27 @@ public class Protocol {
 
     private void parseBufferIfMutePlayer(Charset messageCharset, SocketChannel clientChannel, SelectionKey key) throws IOException {
         Player player = (Player) key.attachment();
+
+        ByteBuffer sizeBuffer = ByteBuffer.allocate(1);
+        clientChannel.read(sizeBuffer);
+        sizeBuffer.flip();
+        userNameSize = messageCharset.decode(sizeBuffer).toString().getBytes(messageCharset)[0];
+        sizeBuffer.clear();
+
+        ByteBuffer userNameBuffer = ByteBuffer.allocate(userNameSize);
+        clientChannel.read(userNameBuffer);
+        userNameBuffer.flip();
+        username = messageCharset.decode(userNameBuffer).toString();
+        userNameBuffer.clear();
+
+        if (player.getLobbyId() != -1) {
+            Lobby lobby = Server.lobbyMap.get(player.getLobbyId());
+            lobby.toggleMutePlayerByUsername(username);
+        }
+
+
+        /*
+        // das war für PlayerID
         int muteID;
 
         ByteBuffer muteBuffer = ByteBuffer.allocate(4);
@@ -439,7 +460,7 @@ public class Protocol {
             Lobby lobby = Server.lobbyMap.get(player.getLobbyId());
             lobby.toggleMutePlayerByID(muteID);
         }
-
+        */
     }
 
     private String getAllLobbyIds(HashMap<Integer, Lobby> lobbyMap) {
