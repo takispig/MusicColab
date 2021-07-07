@@ -56,13 +56,18 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
         // Update the Username from the CommunicationHandling Class (data are stored from login)
         TextView username = (TextView) findViewById(R.id.username);
         username.setText(networkThread.username);
+        getSpinner();
 
+    }
+
+
+    public void getSpinner(){
         // Drop-Down Menu (Spinner) -> now idea what happens here, i took the pieces from some tutorials
         Spinner mySpinner = (Spinner) findViewById(R.id.spinner);
         ArrayAdapter<String> p = new ArrayAdapter<String>(PreLobby.this, android.R.layout.simple_spinner_item, instruments);
         p.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mySpinner.setAdapter(p);
-        
+
         mySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
             @Override
@@ -81,7 +86,6 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
     // In this function we will 'hear' for onClick events and according to
     // their IDs we will make the correct decision
     public void onClick(View view) {
-
         if (view.getId() == R.id.create_server) {
             if (networkThread.lobbyName != null) {
                 System.out.println("LobbyName: " + networkThread.lobbyName);
@@ -92,57 +96,56 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
         }
 
         if (view.getId() == R.id.create) {
-            System.out.println("Created has been pressed");
             EditText name = findViewById(R.id.servername);
             System.out.println("Servername: "+name.getText().toString());
             if (name.getText().toString().equals("")){
                 toast("Please enter server name");
                 return;
             }
-            else {
-                lobbyName = name.getText().toString();
-                networkThread.lobbyName = lobbyName;
-                networkThread.action = 4;
-            }
-            findViewById(R.id.create_server_popup).setVisibility(View.GONE);
-
-            try {
-                synchronized (Thread.currentThread()) {
-                    // Set as connection timeout 2 seconds
-                    Thread.currentThread().wait(2000);
-                }
-            } catch (InterruptedException e) {
-                System.out.println("Error with waiting of main thread.");
-            }
-
-            String output = networkThread.result;
-            System.out.println("Server's response: " + output);
-
-            System.out.println("LobbyName: " + lobbyName + " with conf-code : " + networkThread.confirmation);
-            if (networkThread.confirmation==4) {
-                // this means we successfully created a lobby -> set status Connected with server #Num
-                toast("Lobby Created Successfully\n");
-                networkThread.confirmation = 0;
-                networkThread.admin = true;
-                networkThread.users = 1;
-                selectInstrAndGo();
-            } else if (networkThread.confirmation == 14) {
-                networkThread.lobbyName = null;
-                toast("Error while Creating the Lobby\nPlease try again");
-            } else {
-                networkThread.lobbyName = null;
-                toast("Connection timeout");
-                CommunicationHandling.wipeData(2, networkThread);
-                startActivity(new Intent(this, Login.class));
-            }
-            networkThread.confirmation = 0;
+            lobbyName = name.getText().toString();
+            createLobby();
         }
-
-
         if (view.getId() == R.id.cancel_create) {
             findViewById(R.id.create_server_popup).setVisibility(View.GONE);
         }
+        if (view.getId() == R.id.logout) {
+            logout();
+        }
+        join(view);
+    }
 
+    public void createLobby(){
+        networkThread.lobbyName = lobbyName;
+        networkThread.action = 4;
+        findViewById(R.id.create_server_popup).setVisibility(View.GONE);
+        try {
+            // Set as connection timeout 5 seconds
+            synchronized (Thread.currentThread()) {Thread.currentThread().wait(5000);}
+        } catch (InterruptedException e) {
+            System.out.println("Error with waiting of main thread.");
+        }
+        System.out.println("Server's response: " + networkThread.result);
+        System.out.println("LobbyName: " + lobbyName + " with conf-code : " + networkThread.confirmation);
+        if (networkThread.confirmation==4) {
+            // this means we successfully created a lobby -> set status Connected with server #Num
+            toast("Lobby Created Successfully\n");
+            networkThread.confirmation = 0;
+            networkThread.admin = true;
+            networkThread.users = 1;
+            selectInstrAndGo();
+        } else if (networkThread.confirmation == 14) {
+            networkThread.lobbyName = null;
+            toast("Name already exists\nPlease try another one");
+        } else {
+            networkThread.lobbyName = null;
+            toast("Connection timeout");
+            CommunicationHandling.wipeData(2, networkThread);
+            startActivity(new Intent(this, Login.class));
+        }
+        networkThread.confirmation = 0;
+    }
+
+    public void join(View view){
         if (view.getId() == R.id.join_server) {
             if (networkThread.lobbyName != null) {
                 System.out.println("LobbyName: " + networkThread.lobbyName);
@@ -157,7 +160,6 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             available_lobbies.setText(String.format("Available Lobbies to join:\n %s", networkThread.LobbyList));
             findViewById(R.id.join_server_popup).setVisibility(View.VISIBLE);
         }
-
         if (view.getId() == R.id.join) {
             EditText lobbyID_text = findViewById(R.id.lobbyID);
             lobbyName = lobbyID_text.getText().toString();  // new code testing
@@ -166,71 +168,68 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
                 toast("Please enter server name");
                 return;
             }
-            else {
-                networkThread.lobbyName = lobbyName;
-                networkThread.action = 5;
-            }
-            findViewById(R.id.join_server_popup).setVisibility(View.GONE);
-
-            try {
-                synchronized (Thread.currentThread()) {
-                    // Set as connection timeout 2 seconds
-                    Thread.currentThread().wait(2000);
-                }
-            } catch (InterruptedException e) {
-                System.out.println("Error with waiting of main thread.");
-            }
-
-            System.out.println("LobbyName " + networkThread.lobbyName + " with conf-code: " + networkThread.confirmation);
-            if (networkThread.confirmation==5) {
-                // this means we successfully created a lobby -> set status Connected with server #Num
-                toast("You joined Lobby:\n" + networkThread.lobbyName);
-                networkThread.confirmation = 0;
-                selectInstrAndGo();
-            } else if (networkThread.confirmation == 15) {
-                networkThread.lobbyName = null;
-                toast("Error while Joining the Lobby\nIs the ID correct?");
-            } else {
-                networkThread.lobbyName = null;
-                toast("Connection timeout");
-                CommunicationHandling.wipeData(2, networkThread);
-                startActivity(new Intent(this, Login.class));
-            }
-            networkThread.confirmation = 0;
+            joinPressed();
         }
-
         if (view.getId() == R.id.cancel_join) {
             findViewById(R.id.join_server_popup).setVisibility(View.GONE);
         }
+    }
 
-        if (view.getId() == R.id.logout) {
-            networkThread.action = 2;
-            try {
-                synchronized (Thread.currentThread()) {
-                    // Set as connection timeout 2 seconds
-                    Thread.currentThread().wait(2000);
-                }
-            } catch (InterruptedException e) {
-                System.out.println("Error with waiting of main thread.");
+    public void joinPressed(){
+        networkThread.lobbyName = lobbyName;
+        networkThread.action = 5;
+        findViewById(R.id.join_server_popup).setVisibility(View.GONE);
+        try {
+            // Set as connection timeout 5 seconds
+            synchronized (Thread.currentThread()) {Thread.currentThread().wait(5000);}
+        } catch (InterruptedException e) {
+            System.out.println("Error with waiting of main thread.");
+        }
+        System.out.println("LobbyName " + networkThread.lobbyName + " with conf-code: " + networkThread.confirmation);
+        if (networkThread.confirmation==5) {
+            // this means we successfully created a lobby -> set status Connected with server #Num
+            toast("You joined Lobby:\n" + networkThread.lobbyName);
+            networkThread.confirmation = 0;
+            selectInstrAndGo();
+        } else if (networkThread.confirmation == 15) {
+            networkThread.lobbyName = null;
+            toast("Error while Joining the Lobby\nIs the ID correct?");
+        } else {
+            networkThread.lobbyName = null;
+            toast("Connection timeout");
+            CommunicationHandling.wipeData(2, networkThread);
+            startActivity(new Intent(this, Login.class));
+        }
+        networkThread.confirmation = 0;
+    }
+
+    public void logout(){
+        networkThread.action = 2;
+        try {
+            synchronized (Thread.currentThread()) {
+                // Set as connection timeout 5 seconds
+                Thread.currentThread().wait(5000);
             }
-
-            String output = networkThread.result;
-
-            if (networkThread.confirmation==2){
-                // reset the sensitive user data after logout
-                toast("Logged Out");
-                CommunicationHandling.wipeData(2, networkThread);
-                startActivity(new Intent(this, Login.class));
-            }else if (networkThread.confirmation == 0){
-                toast("Connection timeout - no response");
-                CommunicationHandling.wipeData(2, networkThread);
-                startActivity(new Intent(this, Login.class));
-            } else if (networkThread.confirmation == 12) {
-                toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
-                networkThread.confirmation = 0;
-            }
+        } catch (InterruptedException e) {
+            System.out.println("Error with waiting of main thread.");
+        }
+        String output = networkThread.result;
+        if (networkThread.confirmation==2){
+            // reset the sensitive user data after logout
+            toast("Logged Out");
+            CommunicationHandling.wipeData(2, networkThread);
+            startActivity(new Intent(this, Login.class));
+        }else if (networkThread.confirmation == 0){
+            toast("Connection timeout - no response");
+            CommunicationHandling.wipeData(2, networkThread);
+            startActivity(new Intent(this, Login.class));
+        } else if (networkThread.confirmation == 12) {
+            toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
+            networkThread.confirmation = 0;
         }
     }
+
+
 
     public void selectInstrAndGo() {
         Intent lobbyIntent = new Intent(this, Lobby.class);
@@ -256,8 +255,8 @@ public class PreLobby extends AppCompatActivity implements View.OnClickListener 
             networkThread.action = 2;
             try {
                 synchronized (Thread.currentThread()) {
-                    // Set as connection timeout 2 seconds
-                    Thread.currentThread().wait(2000);
+                    // Set as connection timeout 5 seconds
+                    Thread.currentThread().wait(5000);
                 }
             } catch (InterruptedException e) {
                 System.out.println("Error with waiting of main thread.");

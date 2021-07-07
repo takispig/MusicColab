@@ -15,9 +15,13 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.RotateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -63,24 +67,31 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             TextView admin_text = findViewById(R.id.admin_boolean);
             admin_text.setText(" true");
         }
-        TextView usersInLobby = findViewById(R.id.members_number);
-        usersInLobby.setText(String.format("%s", Login.networkThread.users));
 
-        // Create Listeners for the IDs: about, register
+        // Create Listeners
         Button calibrate = findViewById(R.id.calibrate);
         calibrate.setOnClickListener(this);
         ImageButton disconnect = findViewById(R.id.disconnect);
         disconnect.setOnClickListener(this);
         ImageButton more = findViewById(R.id.more_button);
         more.setOnClickListener(this);
-
+        ImageButton num_users = findViewById(R.id.users);
+        num_users.setOnClickListener(this);
+        ImageButton muted = findViewById(R.id.muted);
+        muted.setOnClickListener(this);
+        Button mute_unmute = findViewById(R.id.mute_unmute);
+        mute_unmute.setOnClickListener(this);
+        Button cancel = findViewById(R.id.cancel_create2);
+        cancel.setOnClickListener(this);
         SoundPlayer sp = new SoundPlayer(this);
-        sp.generateToneList();
         Login.networkThread.soundPlayer = sp;
         sensorManager = (SensorManager) getSystemService(Service.SENSOR_SERVICE);
 
         callInstrument(sp);
+        getSpinner(sp);
+    }
 
+    private void getSpinner(SoundPlayer sp){
         // Drop-Down Menu (Spinner)
         Spinner mySpinner = (Spinner) findViewById(R.id.spinner);
         ArrayAdapter<String> p = new ArrayAdapter<String>(Lobby.this, android.R.layout.simple_spinner_item, instruments);
@@ -98,9 +109,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
                 mySpinner.setSelection(2);
                 break;
         }
-
         mySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (counter2 == 0) {
@@ -118,30 +127,29 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
                 // refresh text in more
                 TextView instr = findViewById(R.id.instrument);
                 instr.setText(String.format("%s", getIntent().getSerializableExtra(PreLobby.SELECTED_INSTRUMENT)));
-
                 callInstrument(sp);
             }
-
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-
+            public void onNothingSelected(AdapterView<?> parent) {}});
     }
 
     private void createInstrumentGUIBox() {
-        List<Integer> pianoKeys = new ArrayList<>();
-        pianoKeys.add(R.id.btnC);
-        pianoKeys.add(R.id.btnD);
-        pianoKeys.add(R.id.btnE);
-        pianoKeys.add(R.id.btnF);
-        pianoKeys.add(R.id.btnG);
-        pianoKeys.add(R.id.btnA);
-        pianoKeys.add(R.id.btnH);
-        pianoKeys.add(R.id.btnC2);
-        instrumentGUI = new InstrumentGUIBox(this, R.id.iva_text_1, pianoKeys);
+        List<Integer> pianoKeyIDs = new ArrayList<>();
+        pianoKeyIDs.add(R.id.btnC);
+        pianoKeyIDs.add(R.id.btnD);
+        pianoKeyIDs.add(R.id.btnE);
+        pianoKeyIDs.add(R.id.btnF);
+        pianoKeyIDs.add(R.id.btnG);
+        pianoKeyIDs.add(R.id.btnA);
+        pianoKeyIDs.add(R.id.btnH);
+        pianoKeyIDs.add(R.id.btnC2);
+        instrumentGUI = new InstrumentGUIBox(this, R.id.iva_text_1, pianoKeyIDs);
+        instrumentGUI.init();
+        instrumentGUI.setScaleDownAnimation(AnimationUtils.loadAnimation(this, R.anim.scale_down));
+        RotateAnimation rotateRight = new RotateAnimation(40, 45, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        RotateAnimation rotateLeft = new RotateAnimation(-40, -45, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        RotateAnimation rotateVert = new RotateAnimation(0, 5, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        instrumentGUI.createRotateAnimations(rotateRight, rotateLeft, rotateVert);
     }
 
     private void callInstrument(SoundPlayer sp) {
@@ -150,14 +158,17 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         switch (selectedInstrumentFromPreLobby) {
             case InstrumentType.THEREMIN:
                 selectedInstrument = new Theremin(instrumentGUI, sp);
+                findViewById(R.id.calibrate).setVisibility(View.VISIBLE);
                 break;
             case InstrumentType.DRUMS:
                 selectedInstrument = new Drums(instrumentGUI, sp);
+                findViewById(R.id.calibrate).setVisibility(View.VISIBLE);
                 break;
             case InstrumentType.PIANO:
                 // delete previous text from Theremin or Drums
                 TextView lobby_default_text = findViewById(R.id.iva_text_1);
                 lobby_default_text.setText("");
+                findViewById(R.id.calibrate).setVisibility(View.INVISIBLE);
 
                 selectedInstrument = new Piano(instrumentGUI, sp);
                 break;
@@ -187,26 +198,19 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
     // their IDs we will make the correct decision
     public void onClick(View view) {
         CommunicationHandling networkThread = Login.networkThread;
-
-        if (view.getId() == R.id.calibrate) {
-            selectedInstrument.reCalibrate();
-        }
-
+        if (view.getId() == R.id.calibrate) selectedInstrument.reCalibrate();
         // this is the Leave Lobby function and not a Disconnect
         if (view.getId() == R.id.disconnect) {
             networkThread.action = 6;
+            networkThread.soundPlayer.stopEverything();
             //networkThread.lobbyID = Login.networkThread.lobbyID;
             try {
-                synchronized (Thread.currentThread()) {
-                    // Set as connection timeout 2 seconds
-                    Thread.currentThread().wait(2000);
-                }
+                // Set as connection timeout 5 seconds
+                synchronized (Thread.currentThread()){Thread.currentThread().wait(5000);}
             } catch (InterruptedException e) {
                 System.out.println("Error with waiting of main thread.");
             }
-            String output = networkThread.result;
-            System.out.println(output);
-
+            System.out.println( networkThread.result);
             System.out.println("LeaveLobby conf-code: " + networkThread.confirmation);
             if (networkThread.confirmation == 6) {
                 // reset the sensitive user data after logout & clear LobbyNames
@@ -222,14 +226,60 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
                 toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
             }
         }
-
-        if (view.getId() == R.id.more_button) {
-            TextView admin_text = findViewById(R.id.admin_boolean);
-            admin_text.setText(Login.networkThread.admin ? "true" : "false");
-            ConstraintLayout info = findViewById(R.id.info);
+        if (view.getId() == R.id.more_button) getMore();
+        if (view.getId() == R.id.users) {
+            // display usernames
+            TextView usernames = findViewById(R.id.usernames);
+            if (!networkThread.UsernameList.isEmpty()) usernames.setText(String.format("%s", networkThread.UsernameList));
+            // message visibility
             visible = !visible;
-            info.setVisibility(visible ? View.VISIBLE : View.GONE);
+            ConstraintLayout userss = findViewById(R.id.users_message);
+            userss.setVisibility(visible ? View.VISIBLE : View.GONE);
         }
+        if (view.getId() == R.id.muted) {
+            if (networkThread.admin) findViewById(R.id.muted_message).setVisibility(View.VISIBLE);
+            else toast("You need to be Admin to mute players");
+            // display muted players
+            TextView m_usernames = findViewById(R.id.muted_names);
+            if (!networkThread.MuteList.isEmpty()) m_usernames.setText(String.format("%s", networkThread.MuteList));
+            else m_usernames.setText("-");
+
+        }
+        if (view.getId() == R.id.mute_unmute) {
+            findViewById(R.id.muted_message).setVisibility(View.GONE);
+            EditText d = findViewById(R.id.name_to_mute);
+            String tmp_muted = d.getText().toString();
+            // connect to server
+            networkThread.mutedPlayer = tmp_muted;
+            networkThread.action = 22;
+            try {
+                synchronized (Thread.currentThread()) {Thread.currentThread().wait(1);}
+            } catch (InterruptedException e) {
+                System.out.println("Error with waiting of main thread.");
+            }
+            // local changes
+            if (networkThread.MuteList.contains(tmp_muted)) {
+                networkThread.MuteList.remove(tmp_muted);
+                toast(tmp_muted + " has been unmuted");
+            } else {
+                networkThread.MuteList.add(tmp_muted);
+                toast(tmp_muted + " has been muted");
+            }
+
+        }
+        if (view.getId() == R.id.cancel_create2) {
+            findViewById(R.id.muted_message).setVisibility(View.GONE);
+        }
+    }
+
+    private void getMore(){
+        TextView admin_text = findViewById(R.id.admin_boolean);
+        admin_text.setText(Login.networkThread.admin ? "true" : "false");
+        TextView usersInLobby = findViewById(R.id.members_number);
+        usersInLobby.setText(String.format("%s", Login.networkThread.users));
+        ConstraintLayout info = findViewById(R.id.info);
+        visible = !visible;
+        info.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -253,10 +303,11 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
         } else {
             // else remove the user from lobby
             networkThread.action = 6;
+            networkThread.soundPlayer.stopEverything();
             try {
                 synchronized (Thread.currentThread()) {
-                    // Set as connection timeout 2 seconds
-                    Thread.currentThread().wait(2000);
+                    // Set as connection timeout 5 seconds
+                    Thread.currentThread().wait(5000);
                 }
             } catch (InterruptedException e) {
                 System.out.println("Error with waiting of main thread.");
@@ -277,7 +328,6 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             } else if (networkThread.confirmation == 16) {
                 toast("Couldn't Log you out\nWorst case scenario, exit the App manually");
             }
-
         }
     }
 }

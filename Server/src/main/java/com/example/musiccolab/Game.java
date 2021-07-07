@@ -1,4 +1,4 @@
-package com.example.musiccolab;
+/*package com.example.musiccolab;
 
 import java.util.LinkedList;
 
@@ -12,4 +12,4 @@ public class Game {
         this.players = lobby.getPlayers();
     }
 
-}
+}*/

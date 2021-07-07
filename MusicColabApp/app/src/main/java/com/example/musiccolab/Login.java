@@ -55,52 +55,44 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         } else if (view.getId() == R.id.forgot_password) {
             startActivity(new Intent(this, ForgotPassword.class));
         } else if (view.getId() == R.id.login_submit) {
-            // send the email + password in the server to check authorisation
-            userNameView = findViewById(R.id.emaill);
-            passView = findViewById(R.id.passwordl);
-            userName = userNameView.getText().toString();
-            password = passView.getText().toString();
-
-            // check data validity (no empty input)
-            if (password.isEmpty() || userName.isEmpty()) {
-                toast("All fields must be filled");
-            }
-            else {
-
-                networkThread = new CommunicationHandling(Thread.currentThread());
-                networkThread.username = userName;
-                networkThread.password = password;
-                networkThread.action = 1;
-
-                if (networkThread.threadExist) {
-                    networkThread.communicationThread.notify();
-                } else {
-                    networkThread.start();
-                }
-
-                try {
-                    synchronized (Thread.currentThread()) {
-                        // Set as connection timeout 2 seconds
-                        Thread.currentThread().wait(2000);
-                    }
-                } catch (InterruptedException e) {
-                    System.out.println("Error with waiting of main thread.");
-                }
-
-                System.out.println("Conf-code: " + networkThread.confirmation);
-                if (networkThread.confirmation == 1) {
-                    networkThread.confirmation = 0;
-                    startActivity(new Intent(this, PreLobby.class));
-                } else if (networkThread.confirmation == 0) {
-                    CommunicationHandling.wipeData(2, networkThread);
-                    toast("Connection timeout");
-                } else if (networkThread.confirmation == 11) {
-                    toast("Username/password wrong\nPlease try again");
-                    networkThread.confirmation = 0;
-                }
-            }
+            login();
         }
 
+    }
+
+    public void login(){
+        // send the email + password in the server to check authorisation
+        userNameView = findViewById(R.id.emaill);
+        passView = findViewById(R.id.passwordl);
+        userName = userNameView.getText().toString();
+        password = passView.getText().toString();
+        // check data validity (no empty input)
+        if (password.isEmpty() || userName.isEmpty()) toast("All fields must be filled");
+        else {
+            networkThread = new CommunicationHandling(Thread.currentThread());
+            networkThread.username = userName;
+            networkThread.password = password;
+            networkThread.action = 1;
+            if (networkThread.threadExist) networkThread.communicationThread.notify();
+            else networkThread.start();
+            try {
+                // Set as connection timeout 5 seconds
+                synchronized (Thread.currentThread()) {Thread.currentThread().wait(5000);}
+            } catch (InterruptedException e) {
+                System.out.println("Error with waiting of main thread.");
+            }
+            System.out.println("Conf-code: " + networkThread.confirmation);
+            if (networkThread.confirmation == 1) {
+                networkThread.confirmation = 0;
+                startActivity(new Intent(this, PreLobby.class));
+            } else if (networkThread.confirmation == 0) {
+                CommunicationHandling.wipeData(2, networkThread);
+                toast("Connection timeout");
+            } else if (networkThread.confirmation == 11) {
+                toast("Username/password wrong\nPlease try again");
+                networkThread.confirmation = 0;
+            }
+        }
     }
 
     @Override
