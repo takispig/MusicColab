@@ -61,7 +61,6 @@ class MusicJoinerTest {
                     protocol.getParseMusicJoiner(messageCharset, (SocketChannel) key.channel(), key);
                     assert protocol.getToneData().equals("dataExample2");
                     assert protocol.getToneAction() == 1;
-                    assert protocol.getToneType() == 1;
                 }
                 selectedKeys.remove();
             }
@@ -93,7 +92,7 @@ class MusicJoinerTest {
         String toneData = "dataExample2";
 
         // Test mit lobby = null
-        assertEquals(-1, MusicJoiner.handleToneData(messageCharset, null, toneAction, toneType, toneData, action));
+        assertEquals(-1, MusicJoiner.handleToneData(messageCharset, null, toneAction, toneData, action, admin));
 
     }
 
