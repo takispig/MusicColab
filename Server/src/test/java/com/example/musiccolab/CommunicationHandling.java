@@ -22,7 +22,7 @@ public class CommunicationHandling implements Runnable {
     public static final int PROTOCOL_LEAVE_LOBBY_ACTION = 6;
     public static final int PROTOCOL_TONE_ACTION = 7;
 
-    private static final String IP = "192.168.178.42";
+    private static final String IP = "localhost";
     private static int port = 1200;
 
     public static final String CAN_NOT_READ_FROM_BUFFER = "Can not read from buffer.";
@@ -43,7 +43,7 @@ public class CommunicationHandling implements Runnable {
     public String email = null;
     public String username = null;
     public String password = null;
-    
+
     public String lobbyName = null;
     public int lobbyID = -1;
     public boolean admin = false;
