@@ -127,7 +127,6 @@ public class Lobby {
         String playersAsString = "";
         for(Player player : players)
             playersAsString += player.getName() + ",";
-        playersAsString += players.size();
         return playersAsString;
     }
 }

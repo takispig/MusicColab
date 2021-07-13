@@ -60,7 +60,6 @@ class MusicJoinerTest {
                 } else if (key.isReadable()) {
                     protocol.getParseMusicJoiner(messageCharset, (SocketChannel) key.channel(), key);
                     assert protocol.getToneData().equals("dataExample2");
-                    assert protocol.getToneAction() == 1;
                 }
                 selectedKeys.remove();
             }

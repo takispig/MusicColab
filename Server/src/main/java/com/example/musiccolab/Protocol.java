@@ -332,7 +332,7 @@ public class Protocol {
     }
 
     private void sendToAllClients(SocketChannel clientChannel, String IDs) {
-
+        System.out.println("Test: " + IDs);
         short actionResponse = 20;
 
         short dataLength = (short) IDs.length();
@@ -500,12 +500,16 @@ public class Protocol {
     private String getLobbyResponse(Charset messageCharset, SocketChannel clientChannel, boolean result, Lobby lobby, String additionPart){
         String message;
         if(result){
+            responseAction = 21;
             if((action == 5 || action == 6) && !lobby.isEmpty()) {
                 for (Player player : lobby.getPlayers()) {
-                    responseAction = 21;
-                    if (!player.equals(lobby.getPlayers().getLast()))
-                        sendResponseToClient(messageCharset,clientChannel, lobby.getPlayersListAsString());
+                    System.out.println("send user names.");
+                    sendResponseToClient(messageCharset, player.getPlayerChannel(), lobby.getPlayersListAsString());
                 }
+            }
+            else{
+                System.out.println("send user names.");
+                sendResponseToClient(messageCharset, clientChannel, lobby.getPlayersListAsString());
             }
             message = "Lobby "+ lobby.getLobbyName() + additionPart;
             responseAction = action;
@@ -525,6 +529,7 @@ public class Protocol {
     }
 
     public void sendResponseToClient(Charset messageCharset, SocketChannel clientChannel, String message){
+        System.out.println("Test: " + message);
         short dataLength = (short) message.length();
         ByteBuffer messageBuffer = ByteBuffer.allocate(6 + dataLength);
 
