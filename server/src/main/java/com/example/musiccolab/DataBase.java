@@ -142,18 +142,19 @@ public final class DataBase {
      * @throws ClassNotFoundException
      */
     public static void addUser(final String name, final String email,
-                               final String passwort)
+                               final String passwort, final String securityQuestion)
             throws SQLException, ClassNotFoundException {
         if (con == null) {
             getConnection();
         }
 
         PreparedStatement prep = con.prepareStatement("INSERT INTO "
-                + TABLE_NAME + " (name,email,passwort) values(?, ?, ?);");
+                + TABLE_NAME + " (name,email,passwort,securityquestion) values(?, ?, ?, ?);");
 
         prep.setString(1, name);
         prep.setString(2, email);
         prep.setString(3, passwort);
+        prep.setString(4, securityQuestion);
 
         prep.execute();
 
@@ -237,6 +238,19 @@ public final class DataBase {
         prep.setString(3, email);
         prep.execute();
 
+    }
+
+    public static boolean checksecurityQuestion(final String username, final String email, final String securityQuestion) throws SQLException, ClassNotFoundException {
+        if(con == null){
+            getConnection();
+        }
+
+        Statement state = con.createStatement();
+        ResultSet res = state.executeQuery("SELECT * FROM "+ TABLE_NAME + " WHERE securityquestion = "+ securityQuestion +
+                " AND name = "+ username + " AND email = "+ email);
+
+
+        return res.next();
     }
 
     /*

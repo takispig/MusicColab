@@ -12,13 +12,13 @@ class DataBaseTest {
     String testName = "Manuel";
     String testEmail = "Manuel@mail.de";
     String testPassword = "1234";
-
+    String securityQuestion = "";
     @Test
     void addUser() {
 
 
         try {
-            DataBase.addUser(testName,testEmail,testPassword);
+            DataBase.addUser(testName,testEmail,testPassword,securityQuestion);
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {

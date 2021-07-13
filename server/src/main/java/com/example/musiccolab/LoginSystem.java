@@ -111,12 +111,12 @@ public final class LoginSystem {
      * @throws ClassNotFoundException
      */
     public static boolean register(final String name,
-                                   final String email, final String passwort)
+                                   final String email, final String passwort, final String securityQuestion)
             throws SQLException, ClassNotFoundException {
         //check for registration
         if (!checkForRegistration(name, email)) {
             //add data to DB
-            DataBase.addUser(name, email, passwort);
+            DataBase.addUser(name, email, passwort, securityQuestion);
             return true;
         } else {
             return false;
@@ -169,6 +169,7 @@ public final class LoginSystem {
         } else return -1;
     }
 
+<<<<<<< Updated upstream:server/src/main/java/com/example/musiccolab/LoginSystem.java
     /**
      * method to get the player from "on" the channel.
      * @param channel from searched player
@@ -188,9 +189,16 @@ public final class LoginSystem {
 
     public static boolean forgotPassword(String username, String email,String password) throws SQLException, ClassNotFoundException {
         if(checkForRegistration(username,email)){
+=======
+    public static boolean forgotPassword(String username, String email,String password, String securityQuestion) throws SQLException, ClassNotFoundException {
+        System.out.println(checkForRegistration(username,email));
+        if(checkForRegistration(username,email) && DataBase.checksecurityQuestion(username, email, securityQuestion)){
+            System.out.println("ResetPassword");
+>>>>>>> Stashed changes:Server/src/main/java/com/example/musiccolab/LoginSystem.java
             DataBase.resetPasswort(username,email,password);
             return true;
         }
+        System.out.println("Wrong Security Answer");
         return false;
     }
 }

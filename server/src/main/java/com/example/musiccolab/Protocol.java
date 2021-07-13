@@ -33,9 +33,26 @@ public class Protocol {
     private short action;
     private short responseAction;
 
+<<<<<<< Updated upstream:server/src/main/java/com/example/musiccolab/Protocol.java
     private byte userNameSize;
     private byte emailSize;
     private byte passwordSize;
+=======
+
+    byte userNameSize;
+    byte emailSize;
+    byte passwordSize;
+    byte securityQuestionSize;
+
+    String username, password, email, securityQuestion = "";
+    String lobbyName = "";
+
+    Player player = null;
+    int lobbyID;
+
+    String toneData = "";
+    boolean testCorrect = false;
+>>>>>>> Stashed changes:Server/src/main/java/com/example/musiccolab/Protocol.java
 
 
 
@@ -63,7 +80,6 @@ public class Protocol {
             mainBuffer = ByteBuffer.allocate(2);
             clientChannel.read(mainBuffer);
             mainBuffer.flip();
-
             short nameOfProtocol = getShort(messageCharset.decode(mainBuffer).toString().getBytes(messageCharset));
             if (protocolName == nameOfProtocol) {
                 mainBuffer.clear();
@@ -156,9 +172,15 @@ public class Protocol {
         loginSystemBuffer.clear();
 
         try {
+<<<<<<< Updated upstream:server/src/main/java/com/example/musiccolab/Protocol.java
             checkResponse = LoginSystem.forgotPassword(username, email, password);
             Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
             sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+=======
+            checkResponse = LoginSystem.forgotPassword(username, email, password, securityQuestion);
+            //Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action : action + 10, checkResponse, key));
+>>>>>>> Stashed changes:Server/src/main/java/com/example/musiccolab/Protocol.java
         } catch (SQLException e) {
             System.out.println("Fehler passwort Reset");
             e.printStackTrace();
@@ -201,9 +223,11 @@ public class Protocol {
         password = messageCharset.decode(loginSystemBuffer).toString();
         loginSystemBuffer.clear();
 
+
+
         try {
             if (action == register) {
-                checkResponse = LoginSystem.register(username, email, password);
+                checkResponse = LoginSystem.register(username, email, password, securityQuestion);
 
             } else if (action == login) {
                 Player player = LoginSystem.login(username, password, clientChannel);
