@@ -114,4 +114,20 @@ public class Lobby {
             }
         }
     }
+
+    public static boolean lobbyNameExist(String name){
+        for(Lobby l : Server.lobbyList){
+            if(l.lobbyName.equals(name))
+                return true;
+        }
+        return false;
+    }
+
+    public String getPlayersListAsString(){
+        String playersAsString = "";
+        for(Player player : players)
+            playersAsString += player.getName() + ",";
+        playersAsString += players.size();
+        return playersAsString;
+    }
 }

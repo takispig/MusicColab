@@ -41,21 +41,19 @@ public class Protocol {
     Player player = null;
     int lobbyID;
 
-    byte toneAction;
-    byte toneType;
     String toneData = "";
     boolean testCorrect = false;
 
 
 
     final private String[][] responsesArray = { {"Client logged in", "error with login"},
-            {"Client logged out", "error with logout"},
-            {"Client registered", "Client is already registered."},
-            {"password reset","Error with rest password"},
-            {"Client joined Lobby","Client left Lobby"}};
+                                          {"Client logged out", "error with logout"},
+                                          {"Client registered", "Client is already registered."},
+                                          {"password reset","Error with rest password"},
+                                          {"Client joined Lobby","Client left Lobby"}};
 
     public Protocol(){
-        for(short index = 0; index < 11; index++) {
+        for(short index = 0; index < 11; index++){
             codesList.add(index);
         }
         codesList.add((short) 22);
@@ -238,16 +236,16 @@ public class Protocol {
         lobbyBuffer.flip();
         if(action == createLobby && player != null){
             lobbyName = messageCharset.decode(lobbyBuffer).toString();
-            if (!Server.lobbyList.contains(lobbyName)) {
+            if (!Lobby.lobbyNameExist(lobbyName)) {
                 int id = Server.createLobbyId();
                 Lobby lobby = new Lobby(player, lobbyName, id);
                 Server.lobbyMap.put(id,lobby);
                 //
                 Server.lobbyList.add(lobby);
-                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(true, lobby, " created by client."));
+                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(messageCharset,clientChannel, true, lobby, " created by client."));
                 if(playerAddress != null) Main.logr.log(Level.INFO, "LOBBY " + lobby.getLobby_id() + " CREATED BY CLIENT " + playerAddress.toString());
             } else {
-                sendResponseToClient(messageCharset, clientChannel, "Lobby already exists");
+                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(messageCharset,clientChannel, false, null, "--> Lobby already exists"));
             }
         }
         else if((action == joinLobby || action == leaveLobby) && player != null){
@@ -266,10 +264,9 @@ public class Protocol {
                 byte lobbyUsers = 0;
                 if (checkResponse)
                     lobbyUsers = currentLobby.getUsersNumber();
-                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " --> you are in.," + lobbyUsers));
+                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(messageCharset,clientChannel, checkResponse, currentLobby, " --> you are in.," + lobbyUsers));
                 if(checkResponse) Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " JOINED LOBBY " + currentLobby.getLobby_id());
-                action = 21;
-                handleAction(messageCharset, clientChannel, lobbyNameIsSize, key);
+
             } else if(action == leaveLobby){
                 boolean checkResponse = (currentLobby != null);
                 if(checkResponse) {
@@ -278,18 +275,16 @@ public class Protocol {
                         player.disableAdmin();
                         responseAction = becameAdmin + 10 ; sendResponseToClient(messageCharset, clientChannel, "You are no more admin.");
                         if(currentLobby.getAdmin() != null){
-                            responseAction = becameAdmin; sendResponseToClient(messageCharset, currentLobby.getAdmin().getPlayerChannel(), "You are now admin.");}
+                        responseAction = becameAdmin; sendResponseToClient(messageCharset, currentLobby.getAdmin().getPlayerChannel(), "You are now admin.");}
                     }
 
                     Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " LEFT LOBBY " + currentLobby.getLobby_id());
                 }
-                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(checkResponse, currentLobby, " you are out."));
+                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(messageCharset,clientChannel, checkResponse, currentLobby, " you are out."));
                 if(checkResponse && currentLobby.isEmpty()) {
                     Server.lobbyMap.remove(currentLobby.getLobby_id());
                     Server.lobbyList.remove(currentLobby);
                 }
-                action = 21;
-                handleAction(messageCharset, clientChannel, lobbyNameIsSize, key);
             }
 
         }
@@ -408,37 +403,6 @@ public class Protocol {
         }
     }
 
-    private void SendPlayersInLobby(Charset messageCharset, SocketChannel clientChannel, int lobbyNameIsSize) throws IOException {
-
-        Lobby currentLobby;
-        int lobbyID;
-        String nameId = "";
-        ByteBuffer lobbyBuffer = ByteBuffer.allocate(lobbyNameIsSize);
-
-        try {
-            nameId = messageCharset.decode(lobbyBuffer).toString();
-            lobbyID = Integer.parseInt(nameId);
-            currentLobby = Server.lobbyMap.get(lobbyID);
-        } catch (NumberFormatException e) {
-            currentLobby = Server.getLobbyByName(nameId);
-        }
-
-        if (currentLobby != null){
-            LinkedList<Player> players = currentLobby.getPlayers();
-            String playerStr = "";
-            for (Player player : players){
-                playerStr += player.getName() + ",";
-            }
-            responseAction = (short) 21;
-            sendResponseToClient(messageCharset, clientChannel, playerStr);
-        } else{
-            responseAction = (short) 21 + 10;
-            sendResponseToClient(messageCharset, clientChannel, "ERROR Lobby is null");
-        }
-
-    }
-
-
     public void handleAction(Charset messageCharset, SocketChannel clientChannel, int bufferSize, SelectionKey key) throws IOException {
         if(bufferSize != 0){
             playerAddress = clientChannel.getRemoteAddress();
@@ -463,9 +427,6 @@ public class Protocol {
             else if (action == mutePlayer){
                 parseBufferIfMutePlayer(messageCharset, clientChannel, key);
                 testCorrect = true;
-            }
-            else if (action == sendPlayersInLobby){
-                SendPlayersInLobby(messageCharset, clientChannel, bufferSize);
             }
         }
     }
@@ -536,11 +497,19 @@ public class Protocol {
         return responsesArray[action <= 10? action-1:action-11][index] + playerName + playerID;
     }
 
-    private String getLobbyResponse(boolean result, Lobby lobby, String additionPart){
+    private String getLobbyResponse(Charset messageCharset, SocketChannel clientChannel, boolean result, Lobby lobby, String additionPart){
         String message;
         if(result){
+            if((action == 5 || action == 6) && !lobby.isEmpty()) {
+                for (Player player : lobby.getPlayers()) {
+                    responseAction = 21;
+                    if (!player.equals(lobby.getPlayers().getLast()))
+                        sendResponseToClient(messageCharset,clientChannel, lobby.getPlayersListAsString());
+                }
+            }
             message = "Lobby "+ lobby.getLobbyName() + additionPart;
             responseAction = action;
+
         }
         else{
             message = "either lobby is full or lobbyId is wrong or you are already in.";
@@ -588,7 +557,7 @@ public class Protocol {
     }
 
 
-    //-------------------------------------------------For Tests -------------------------------------------------------
+//-------------------------------------------------For Tests -------------------------------------------------------
     public void setAction(short a){action = a;}
     public void setPlayer(Player p) {player = p;}
 
@@ -605,7 +574,6 @@ public class Protocol {
     public byte getUserNameSize(){return userNameSize;}
     public byte getPasswordSize(){return passwordSize;}
     public String getToneData(){return toneData;}
-    public byte getToneAction(){return toneAction;}
     public boolean test(){return testCorrect;}
 
     public int getLobbyID(){return lobbyID;}
