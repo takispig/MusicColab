@@ -4,11 +4,8 @@ import com.example.musiccolab.instruments.SoundPlayer;
 
 import org.junit.Test;
 
-import java.util.Random;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class CommunicationHandlingTest {
 
@@ -16,7 +13,7 @@ public class CommunicationHandlingTest {
     public void test_start_full_cycle() {
         //login
         // arrange
-        CommunicationHandling ch= new CommunicationHandling(Thread.currentThread());
+        CommunicationHandling ch = new CommunicationHandling(Thread.currentThread());
         ch.username = "marc";
         ch.password = "1";
         ch.action = 1;
@@ -31,7 +28,7 @@ public class CommunicationHandlingTest {
             System.out.println("Error with waiting of main thread.");
         }
         // assert
-        assertEquals(1,ch.confirmation);
+        assertEquals(1, ch.confirmation);
 
         //create lobby
         // arrange
@@ -47,7 +44,7 @@ public class CommunicationHandlingTest {
             System.out.println("Error with waiting of main thread.");
         }
         // assert
-        assertEquals(4,ch.confirmation);
+        assertEquals(4, ch.confirmation);
 
         // send tone
         // arrange
@@ -65,7 +62,7 @@ public class CommunicationHandlingTest {
             System.out.println("Error with waiting of main thread.");
         }
         // assert
-        assertEquals(7,ch.confirmation);
+        assertEquals(7, ch.confirmation);
 
         //leave lobby
         // arrange
@@ -80,7 +77,7 @@ public class CommunicationHandlingTest {
             System.out.println("Error with waiting of main thread.");
         }
         // assert
-        assertEquals(6,ch.confirmation);
+        assertEquals(6, ch.confirmation);
 
         // logout
         // arrange
@@ -95,14 +92,14 @@ public class CommunicationHandlingTest {
             System.out.println("Error with waiting of main thread.");
         }
         // assert
-        assertEquals(2,ch.confirmation);
+        assertEquals(2, ch.confirmation);
 
         // clean
         // arrange
         // act
-        CommunicationHandling.wipeData(2,ch);
+        CommunicationHandling.wipeData(2, ch);
         // assert
-        assertEquals(null,ch.username);
+        assertEquals(null, ch.username);
     }
 
 }
