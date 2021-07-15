@@ -246,8 +246,8 @@ public final class DataBase {
         }
 
         Statement state = con.createStatement();
-        ResultSet res = state.executeQuery("SELECT * FROM "+ TABLE_NAME + " WHERE securityquestion = "+ securityQuestion +
-                " AND name = "+ username + " AND email = "+ email);
+        ResultSet res = state.executeQuery("SELECT * FROM "+ TABLE_NAME + " WHERE name = '"+ username + "' AND email = '"+ email +
+                      "' AND securityquestion = '"+ securityQuestion +"'");
 
 
         return res.next();

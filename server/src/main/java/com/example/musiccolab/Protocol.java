@@ -36,10 +36,10 @@ public class Protocol {
     private byte userNameSize;
     private byte emailSize;
     private byte passwordSize;
+    private byte questionLength;
 
+    private String email=null;
 
-    String username, password, email, securityQuestion = "";
-    String lobbyName = "";
 
     Player player = null;
     int lobbyID;
@@ -53,7 +53,8 @@ public class Protocol {
     final private String[][] responsesArray = { {"Client logged in", "error with login"},
                                           {"Client logged out", "error with logout"},
                                           {"Client registered", "Client is already registered."},
-                                          {"Client joined Lobby","Client left Lobby"}};
+                                          {"Client joined Lobby","Client left Lobby"},
+                                            {"New Password set","Securityanswer wrong"}};
 
     public Protocol(){
         for(short index = 0; index < 11; index++)
@@ -106,10 +107,15 @@ public class Protocol {
     private void readSizes(Charset messageCharset, SocketChannel clientChannel) throws IOException {
 
         ByteBuffer loginSystemBuffer = ByteBuffer.allocate(1);
-        if(action == register){
+        if(action == register || action == passwordForgotten){
             clientChannel.read(loginSystemBuffer);
             loginSystemBuffer.flip();
             emailSize = messageCharset.decode(loginSystemBuffer).toString().getBytes(messageCharset)[0];
+            loginSystemBuffer.clear();
+
+            clientChannel.read(loginSystemBuffer);
+            loginSystemBuffer.flip();
+            questionLength = messageCharset.decode(loginSystemBuffer).toString().getBytes(messageCharset)[0];
             loginSystemBuffer.clear();
         }
 
@@ -127,22 +133,10 @@ public class Protocol {
 
     private void parseBufferIfPasswordForgotten(Charset messageCharset, SocketChannel clientChannel) throws IOException {
 
-        String username, email, password = "";
+        String username, password, email,question = "";
         boolean checkResponse = false;
-        ByteBuffer loginSystemBuffer1 = ByteBuffer.allocate(1);
 
-        // read email-size
-        clientChannel.read(loginSystemBuffer1);
-        loginSystemBuffer1.flip();
-        emailSize = messageCharset.decode(loginSystemBuffer1).toString().getBytes(messageCharset)[0];
-        loginSystemBuffer1.clear();
-
-        //read username-size
-        clientChannel.read(loginSystemBuffer1);
-        loginSystemBuffer1.flip();
-        userNameSize = messageCharset.decode(loginSystemBuffer1).toString().getBytes(messageCharset)[0];
-        loginSystemBuffer1.clear();
-
+        readSizes(messageCharset, clientChannel);
         ByteBuffer loginSystemBuffer;
 
         // read email
@@ -159,23 +153,26 @@ public class Protocol {
         username = messageCharset.decode(loginSystemBuffer).toString();
         loginSystemBuffer.clear();
 
+        // readNewPassword
         loginSystemBuffer = ByteBuffer.allocate(passwordSize);
         clientChannel.read(loginSystemBuffer);
         loginSystemBuffer.flip();
         password = messageCharset.decode(loginSystemBuffer).toString();
         loginSystemBuffer.clear();
 
-        loginSystemBuffer = ByteBuffer.allocate(255);
+        //readSecurityQuestion
+        loginSystemBuffer = ByteBuffer.allocate(questionLength);
         clientChannel.read(loginSystemBuffer);
         loginSystemBuffer.flip();
-        securityQuestion = messageCharset.decode(loginSystemBuffer).toString();
-        System.out.println(securityQuestion);
+        question = messageCharset.decode(loginSystemBuffer).toString();
+        System.out.println("Sec:" +  question);
 
         try {
 
-            checkResponse = LoginSystem.forgotPassword(username, email, password,securityQuestion);
-            Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
+            checkResponse = LoginSystem.forgotPassword(username, email, password,question);
+            Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + (checkResponse? "New Password set":"Answer wrong"));
+            responseAction = (short) (checkResponse ? action : action + 10);
+            sendResponseToClient(messageCharset, clientChannel, checkResponse? "New Password set":"Answer wrong");
         } catch (SQLException e) {
             System.out.println("Fehler passwort Reset");
             e.printStackTrace();
@@ -184,15 +181,14 @@ public class Protocol {
             e.printStackTrace();
         }
 
-
-        Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(action + 10, false));
-        sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(action + 10, false));
+        sendResponseToClient(messageCharset, clientChannel, "ERROR");
     }
 
     private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel, SelectionKey key)
             throws IOException {
 
         String username, password, email = "";
+        String question ="";
         boolean checkResponse = false;
 
         readSizes(messageCharset, clientChannel);
@@ -218,11 +214,17 @@ public class Protocol {
         password = messageCharset.decode(loginSystemBuffer).toString();
         loginSystemBuffer.clear();
 
-
+        if(action == register){
+            loginSystemBuffer = ByteBuffer.allocate(questionLength);
+            clientChannel.read(loginSystemBuffer);
+            loginSystemBuffer.flip();
+            question = messageCharset.decode(loginSystemBuffer).toString();
+            System.out.println("Sec:" +  question);
+        }
 
         try {
             if (action == register) {
-                checkResponse = LoginSystem.register(username, email, password, securityQuestion);
+                checkResponse = LoginSystem.register(username, email, password, question);
 
             } else if (action == login) {
                 Player player = LoginSystem.login(username, password, clientChannel);

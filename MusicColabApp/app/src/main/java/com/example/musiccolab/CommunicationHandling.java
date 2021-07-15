@@ -417,6 +417,7 @@ public class CommunicationHandling implements Runnable {
         message += username + password;
         if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD) {
             message += question;
+            questionLength = (byte) question.length();
         }
         dataLength = (short) message.length();
         buffer = ByteBuffer.allocate(6 + size + dataLength);
@@ -426,6 +427,7 @@ public class CommunicationHandling implements Runnable {
         buffer.put(convertShortToByte(dataLength));
         if (action == PROTOCOL_REGISTER_ACTION || action == PROTOCOL_FORGOT_PASSWORD) {
             buffer.put(emailLength);
+            buffer.put(questionLength);
         }
         buffer.put(userNameLength);
         buffer.put(passwordLength);
