@@ -33,16 +33,10 @@ public class Protocol {
     private short action;
     private short responseAction;
 
-<<<<<<< Updated upstream:server/src/main/java/com/example/musiccolab/Protocol.java
     private byte userNameSize;
     private byte emailSize;
     private byte passwordSize;
-=======
 
-    byte userNameSize;
-    byte emailSize;
-    byte passwordSize;
-    byte securityQuestionSize;
 
     String username, password, email, securityQuestion = "";
     String lobbyName = "";
@@ -52,7 +46,7 @@ public class Protocol {
 
     String toneData = "";
     boolean testCorrect = false;
->>>>>>> Stashed changes:Server/src/main/java/com/example/musiccolab/Protocol.java
+
 
 
 
@@ -172,15 +166,10 @@ public class Protocol {
         loginSystemBuffer.clear();
 
         try {
-<<<<<<< Updated upstream:server/src/main/java/com/example/musiccolab/Protocol.java
-            checkResponse = LoginSystem.forgotPassword(username, email, password);
+
+            checkResponse = LoginSystem.forgotPassword(username, email, password,securityQuestion);
             Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
             sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-=======
-            checkResponse = LoginSystem.forgotPassword(username, email, password, securityQuestion);
-            //Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action : action + 10, checkResponse, key));
->>>>>>> Stashed changes:Server/src/main/java/com/example/musiccolab/Protocol.java
         } catch (SQLException e) {
             System.out.println("Fehler passwort Reset");
             e.printStackTrace();
