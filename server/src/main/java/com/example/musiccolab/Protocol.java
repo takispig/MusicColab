@@ -165,6 +165,12 @@ public class Protocol {
         password = messageCharset.decode(loginSystemBuffer).toString();
         loginSystemBuffer.clear();
 
+        loginSystemBuffer = ByteBuffer.allocate(255);
+        clientChannel.read(loginSystemBuffer);
+        loginSystemBuffer.flip();
+        securityQuestion = messageCharset.decode(loginSystemBuffer).toString();
+        System.out.println(securityQuestion);
+
         try {
 
             checkResponse = LoginSystem.forgotPassword(username, email, password,securityQuestion);
