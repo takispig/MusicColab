@@ -1,9 +1,19 @@
 package com.example.musiccolab.instruments;
 
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
 
 public class Theremin implements Instrument {
+
+    public static final int THEREMIN_ALPHA_C = 255;
+    public static final int THEREMIN_ALPHA_D = 224;
+    public static final int THEREMIN_ALPHA_E = 193;
+    public static final int THEREMIN_ALPHA_F = 162;
+    public static final int THEREMIN_ALPHA_G = 131;
+    public static final int THEREMIN_ALPHA_A = 100;
+    public static final int THEREMIN_ALPHA_H = 69;
+    public static final int THEREMIN_ALPHA_C2 = 38;
+    public static final int THEREMIN_ALPHA_DEFAULT = 7;
+    public static final String THEREMIN_STOP = "thermSTOP";
 
     private final SoundPlayer sp;
     private float lastSensorValue = 0;
@@ -12,6 +22,7 @@ public class Theremin implements Instrument {
     private static final String INSTRUMENT_TYPE = InstrumentType.THEREMIN;
     private final InstrumentGUIBox instrumentGUI;
     private static final int DEFAULT_SENSOR = Sensor.TYPE_LIGHT;
+    private String lastTone = "";
 
     public Theremin(InstrumentGUIBox instrumentGUI, SoundPlayer sp) {
         this.instrumentGUI = instrumentGUI;
@@ -20,8 +31,8 @@ public class Theremin implements Instrument {
     }
 
     @Override
-    public void reCalibrate(SensorEvent event) {
-        max = event.values[0];
+    public void reCalibrate(SensorEventAdapter event) {
+        max = event.getValues()[0];
     }
 
     @Override
@@ -30,59 +41,66 @@ public class Theremin implements Instrument {
     }
 
     @Override
-    public void action(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
-            lastSensorValue = event.values[0];
-            String toneToServer = "therm";
-            StringBuilder sb = new StringBuilder();
-            float x = (max - 5) / 8;
-            String stringToDisplay;
-            if (event.values[0] < x) {
-                stringToDisplay = "c Theremin";
-                toneToServer += "0";
-                instrumentGUI.setThereminAlpha(255);
-            } else if (event.values[0] < 2 * x) {
-                stringToDisplay = "d Theremin";
-                toneToServer += "1";
-                instrumentGUI.setThereminAlpha(224);
-            } else if (event.values[0] < 3 * x) {
-                stringToDisplay = "e Theremin";
-                toneToServer += "2";
-                instrumentGUI.setThereminAlpha(193);
-            } else if (event.values[0] < 4 * x) {
-                stringToDisplay = "f Theremin";
-                toneToServer += "3";
-				instrumentGUI.setThereminAlpha(162);
-            } else if (event.values[0] < 5 * x) {
-                stringToDisplay = "g Theremin";
-                toneToServer += "4";
-                instrumentGUI.setThereminAlpha(131);
-            } else if (event.values[0] < 6 * x) {
-                stringToDisplay = "a Theremin";
-                toneToServer += "5";
-                instrumentGUI.setThereminAlpha(100);
-            } else if (event.values[0] < 7 * x) {
-                stringToDisplay = "h Theremin";
-                toneToServer += "6";
-                instrumentGUI.setThereminAlpha(69);
-            } else if (event.values[0] < 8 * x) {
-                stringToDisplay = "c2 Theremin";
-                toneToServer += "7";
-                instrumentGUI.setThereminAlpha(38);
-            } else {
-                stringToDisplay = "0 Theremin";
-                instrumentGUI.setThereminAlpha(7);
-            }
-            sp.sendToneToServer(toneToServer);
-            sb.append("Light intensity:");
-            sb.append(event.values[0]);
-            sb.append(" (");
-            sb.append(max);
-            sb.append(")\n");
-            sb.append("Current Note: ");
-            sb.append(stringToDisplay);
-            instrumentGUI.setTextInCenter(sb.toString());
+    public void action(SensorEventAdapter event) {
+        if (event.getSensor().getType() != Sensor.TYPE_LIGHT) {
+            return;
         }
+        lastSensorValue = event.getValues()[0];
+        String toneToServer = "therm";
+        StringBuilder sb = new StringBuilder();
+        float x = (max - 1) / 8;
+        String stringToDisplay;
+        if (lastSensorValue < x) {
+            stringToDisplay = "c";
+            toneToServer += "0";
+            instrumentGUI.setThereminAlpha(THEREMIN_ALPHA_C);
+        } else if (lastSensorValue < 2 * x) {
+            stringToDisplay = "d";
+            toneToServer += "1";
+            instrumentGUI.setThereminAlpha(THEREMIN_ALPHA_D);
+        } else if (lastSensorValue < 3 * x) {
+            stringToDisplay = "e";
+            toneToServer += "2";
+            instrumentGUI.setThereminAlpha(THEREMIN_ALPHA_E);
+        } else if (lastSensorValue < 4 * x) {
+            stringToDisplay = "f";
+            toneToServer += "3";
+            instrumentGUI.setThereminAlpha(THEREMIN_ALPHA_F);
+        } else if (lastSensorValue < 5 * x) {
+            stringToDisplay = "g";
+            toneToServer += "4";
+            instrumentGUI.setThereminAlpha(THEREMIN_ALPHA_G);
+        } else if (lastSensorValue < 6 * x) {
+            stringToDisplay = "a";
+            toneToServer += "5";
+            instrumentGUI.setThereminAlpha(THEREMIN_ALPHA_A);
+        } else if (lastSensorValue < 7 * x) {
+            stringToDisplay = "h";
+            toneToServer += "6";
+            instrumentGUI.setThereminAlpha(THEREMIN_ALPHA_H);
+        } else if (lastSensorValue < 8 * x) {
+            stringToDisplay = "c2";
+            toneToServer += "7";
+            instrumentGUI.setThereminAlpha(THEREMIN_ALPHA_C2);
+        } else {
+            stringToDisplay = "0";
+            toneToServer = THEREMIN_STOP;
+            instrumentGUI.setThereminAlpha(THEREMIN_ALPHA_DEFAULT);
+        }
+        if (!lastTone.equals(toneToServer)) {
+            sp.sendToneToServer(toneToServer, 1);
+            lastTone = toneToServer;
+        }
+        sb.append("Light intensity:");
+        sb.append(event.getValues()[0]);
+        sb.append(" (");
+        sb.append(max);
+        sb.append(")\n");
+        sb.append("Current Note: ");
+        sb.append(stringToDisplay);
+        sb.append(" ");
+        sb.append(INSTRUMENT_NAME);
+        instrumentGUI.setTextInCenter(sb.toString());
     }
 
     @Override

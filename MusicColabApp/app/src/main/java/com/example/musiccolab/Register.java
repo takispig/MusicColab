@@ -9,12 +9,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import static xdroid.toaster.Toaster.toast;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class Register extends AppCompatActivity implements View.OnClickListener {
 
-    public static String email, password, username;
-    EditText emailView, passView, userView;
+    public static String email, password, username, question; //VH - 22.06
+    EditText emailView, passView, userView, questionView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,52 +40,51 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
             password = passView.getText().toString();
             userView = findViewById(R.id.username);
             username = userView.getText().toString();
-
+            questionView = findViewById(R.id.question); //VH - 22.06
+            question = questionView.getText().toString(); //VH - 22.06
             // check data validity (no empty input)
-            if (email.isEmpty() || password.isEmpty() || username.isEmpty()) {
+            if (email.isEmpty() || password.isEmpty() || username.isEmpty() || question.isEmpty()) { //VH - 22.06
                 toast("All fields must be filled");
             }
             else {
-
-                CommunicationHandling networkThread = new CommunicationHandling(Thread.currentThread());
-                networkThread.username = username;
-                networkThread.password = password;
-                networkThread.email = email;
-                networkThread.action = 3;
-
-                if (networkThread.threadExist) {
-                    networkThread.communicationThread.notify();
-                } else {
-                    networkThread.start();
-                }
-
-                try {
-                    synchronized (Thread.currentThread()) {
-                        Thread.currentThread().wait();
-                    }
-                } catch (InterruptedException e) {
-                    System.out.println("Error with waiting of main thread.");
-                }
-
-                String output = networkThread.result;
-
-                System.out.println("Confirmation-code after in Register.java is: " + networkThread.confirmation);
-                if (networkThread.confirmation == 3) {
-                    toast("Registration Successful");
-                    startActivity(new Intent(this, Login.class));
-                } else if (networkThread.confirmation == 0) {
-                    toast("Connection timeout");
-                } else if (networkThread.confirmation == 13) {
-                    toast("Registration Failed\nUsername already exists");
-                }
-                networkThread.confirmation = 0;
+                register();
             }
-
-
         } else if (view.getId() == R.id.aboutt) {
             // send the user to about us website, or pip up a new window
             startActivity(new Intent(this, About.class));
         }
     }
+
+    public void register(){
+        CommunicationHandling networkThread = new CommunicationHandling(Thread.currentThread());
+        networkThread.username = username;
+        networkThread.password = password;
+        networkThread.email = email;
+        networkThread.question = question; //VH - 27.06
+        networkThread.action = 3;
+        if (networkThread.threadExist) networkThread.communicationThread.notify();
+        else networkThread.start();
+        try {
+            // Set as connection timeout 5 seconds
+            synchronized (Thread.currentThread()) {Thread.currentThread().wait(5000);}
+        } catch (InterruptedException e) {
+            System.out.println("Error with waiting of main thread.");
+        }
+        if (networkThread.confirmation == 3) {
+            toast("Registration Successful!");
+            // send username and password to Login activity to make the login smoother
+            Intent re = new Intent(this, Login.class);
+            re.putExtra("username", username);
+            re.putExtra("password", password);
+            startActivity(re);
+        } else if (networkThread.confirmation == 0) {
+            CommunicationHandling.wipeData(2, networkThread);
+            toast("Connection timeout");
+        } else if (networkThread.confirmation == 13) {
+            toast("Registration Failed\nUsername already exists");
+        }
+        networkThread.confirmation = 0;
+    }
+
 
 }
