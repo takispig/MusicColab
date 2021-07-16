@@ -118,12 +118,12 @@ public final class LoginSystem {
      * @throws ClassNotFoundException
      */
     public static boolean register(final String name,
-                                   final String email, final String passwort)
+                                   final String email, final String passwort, final String securityQuestion)
             throws SQLException, ClassNotFoundException {
         //check for registration
-        if (!checkForRegistration(name, email)) {
+        if (!checkForRegistration(name, email) && !DataBase.checkUsername(name)) {
             //add data to DB
-            DataBase.addUser(name, email, passwort);
+            DataBase.addUser(name, email, passwort, securityQuestion);
             return true;
         } else {
             return false;
@@ -176,13 +176,14 @@ public final class LoginSystem {
         } else return -1;
     }
 
-    public static boolean forgotPassword(String username, String email,String password) throws SQLException, ClassNotFoundException {
+    public static boolean forgotPassword(String username, String email,String password, String securityQuestion) throws SQLException, ClassNotFoundException {
         System.out.println(checkForRegistration(username,email));
-        if(checkForRegistration(username,email)){
+        if(checkForRegistration(username,email) && DataBase.checksecurityQuestion(username, email, securityQuestion)){
             System.out.println("ResetPassword");
             DataBase.resetPasswort(username,email,password);
             return true;
         }
+        System.out.println("Wrong Security Answer");
         return false;
     }
 }

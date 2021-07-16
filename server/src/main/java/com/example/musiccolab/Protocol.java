@@ -34,6 +34,7 @@ public class Protocol {
     byte userNameSize;
     byte emailSize;
     byte passwordSize;
+    byte questionLength;
 
     String username, password, email = "";
     String lobbyName = "";
@@ -111,6 +112,11 @@ public class Protocol {
             loginSystemBuffer.flip();
             emailSize = messageCharset.decode(loginSystemBuffer).toString().getBytes(messageCharset)[0];
             loginSystemBuffer.clear();
+
+            clientChannel.read(loginSystemBuffer);
+            loginSystemBuffer.flip();
+            questionLength = messageCharset.decode(loginSystemBuffer).toString().getBytes(messageCharset)[0];
+            loginSystemBuffer.clear();
         }
 
         clientChannel.read(loginSystemBuffer);
@@ -127,7 +133,7 @@ public class Protocol {
 
     private void parseBufferIfPasswordForgotten(Charset messageCharset, SocketChannel clientChannel, SelectionKey key) throws IOException {
 
-        String username, email, password = "";
+        String username, email, password,question = "";
         boolean checkResponse = false;
 
         readSizes(messageCharset, clientChannel);
@@ -156,11 +162,19 @@ public class Protocol {
         System.out.println(password);
         loginSystemBuffer.clear();
 
+        //readSecurityQuestion
+        loginSystemBuffer = ByteBuffer.allocate(questionLength);
+        clientChannel.read(loginSystemBuffer);
+        loginSystemBuffer.flip();
+        question = messageCharset.decode(loginSystemBuffer).toString();
+        System.out.println("Sec:" +  question);
 
         try {
-            checkResponse = LoginSystem.forgotPassword(username, email, password);
-            //Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + getLoginSystemResponse(checkResponse ? action : action + 10, checkResponse));
-            sendResponseToClient(messageCharset, clientChannel, getLoginSystemResponse(checkResponse? action : action + 10, checkResponse, key));
+            checkResponse = LoginSystem.forgotPassword(username, email, password,question);
+            Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + (checkResponse? "New Password set":"Answer wrong"));
+            responseAction = (short) (checkResponse ? action : action + 10);
+            sendResponseToClient(messageCharset, clientChannel, checkResponse? "New Password set":"Answer wrong");
+
         } catch (SQLException e) {
             System.out.println("Fehler passwort Reset");
             e.printStackTrace();
@@ -168,12 +182,13 @@ public class Protocol {
             System.out.println("Fehler passwort Reset");
             e.printStackTrace();
         }
+        sendResponseToClient(messageCharset, clientChannel, "ERROR");
 
     }
 
     private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel, SelectionKey key) throws IOException {
         boolean checkResponse = false;
-
+        String question ="";
         readSizes(messageCharset, clientChannel);
         ByteBuffer loginSystemBuffer;
 
@@ -197,9 +212,17 @@ public class Protocol {
         password = messageCharset.decode(loginSystemBuffer).toString();
         loginSystemBuffer.clear();
 
+        if(action == register){
+            loginSystemBuffer = ByteBuffer.allocate(questionLength);
+            clientChannel.read(loginSystemBuffer);
+            loginSystemBuffer.flip();
+            question = messageCharset.decode(loginSystemBuffer).toString();
+            System.out.println("Sec:" +  question);
+        }
+
         try {
             if (action == register) {
-                checkResponse = LoginSystem.register(username, email, password);
+                checkResponse = LoginSystem.register(username, email, password, question);
 
             } else if (action == login) {
                 Player player = LoginSystem.login(username, password, clientChannel);
