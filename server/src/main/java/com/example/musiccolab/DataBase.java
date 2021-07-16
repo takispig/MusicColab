@@ -253,6 +253,16 @@ public final class DataBase {
         return res.next();
     }
 
+    public static boolean checkUsername(final String username) throws SQLException, ClassNotFoundException {
+        if(con == null){
+            getConnection();
+        }
+
+        Statement state = con.createStatement();
+        ResultSet res = state.executeQuery("SELECT * FROM "+ TABLE_NAME + " WHERE name = '"+ username +"'" );
+
+        return res.next();
+    }
     /*
     public static int getID(final String name, final String password)
             throws SQLException, ClassNotFoundException {

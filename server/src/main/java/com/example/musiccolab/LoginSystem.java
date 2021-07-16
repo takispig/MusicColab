@@ -41,7 +41,9 @@ public final class LoginSystem {
         //check for registration
         if (checkLogin(name, passwort)) {
             //create new player
+            System.out.println(checkLogin(name, passwort));
             ResultSet res = DataBase.getUserlogin(name, passwort);
+
             Player player = new Player(name, passwort,
                     res.getString(COL_INT_EMAIL),
                     res.getInt(COL_INT_ID), channel);
@@ -52,6 +54,7 @@ public final class LoginSystem {
             player.state.setState(ClientState.loggedIn);
             return player;
         } else {
+            System.out.println("didnt find user");
             return null;
         }
 
@@ -114,7 +117,7 @@ public final class LoginSystem {
                                    final String email, final String passwort, final String securityQuestion)
             throws SQLException, ClassNotFoundException {
         //check for registration
-        if (!checkForRegistration(name, email)) {
+        if (!checkForRegistration(name, email) && !DataBase.checkUsername(name)) {
             //add data to DB
             DataBase.addUser(name, email, passwort, securityQuestion);
             return true;
