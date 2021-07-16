@@ -111,6 +111,7 @@ public class Lobby {
         for (Player player : players) {
             if (player.getName().equals(username)) {
                 player.toggleMute();
+                System.out.println("Player: " + player.getName() + ", " + player.getId() + " is now muted: " + player.isMuted());
                 break;
             }
         }
