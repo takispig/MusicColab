@@ -1,4 +1,4 @@
-package main.java.com.example.musiccolab;
+package com.example.musiccolab;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -9,13 +9,13 @@ public class MusicJoiner {
     public static short playersNumber;
 
 
-    public static int handleToneData(Charset messageCharset, Lobby lobby, byte toneAction, byte toneType, String toneData, short action) {
+    public static int handleToneData(Charset messageCharset, Lobby lobby, byte toneAction, String toneData, short action, Player sender) {
         if(lobby != null) {
             playersNumber = (short) lobby.getMax_players();
             System.out.println("Get tone data: " + toneData);
             for (Player player : lobby.getPlayers()) {
-                if (player.state.getState() == ClientState.inLobby)
-                    if (sendTonToClient(messageCharset, player.getPlayerChannel(), toneData + "," + toneType + "," + toneAction, action) == -1){
+                if (player.state.getState() == ClientState.inLobby && !player.isMuted() && sender.getId() != player.getId())
+                    if (sendTonToClient(messageCharset, player.getPlayerChannel(), toneData + "," + player.getId() + "," + toneAction, action) == -1){
                         return -2;
                     }
             }
@@ -35,7 +35,8 @@ public class MusicJoiner {
         messageBuffer.flip();
 
         try {
-            clientChannel.write(messageBuffer);
+            if (clientChannel != null)
+                clientChannel.write(messageBuffer);
         } catch (IOException e) {
             return -1;
         }

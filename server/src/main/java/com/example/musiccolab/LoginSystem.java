@@ -1,4 +1,4 @@
-package main.java.com.example.musiccolab;
+package com.example.musiccolab;
 
 import javax.xml.crypto.Data;
 import java.io.IOException;
@@ -41,20 +41,20 @@ public final class LoginSystem {
         //check for registration
         if (checkLogin(name, passwort)) {
             //create new player
-            System.out.println(checkLogin(name, passwort));
             ResultSet res = DataBase.getUserlogin(name, passwort);
-
             Player player = new Player(name, passwort,
                     res.getString(COL_INT_EMAIL),
                     res.getInt(COL_INT_ID), channel);
             player.setLoggedIn();
             //add data to List
             Server.loggedInPlayers.put(res.getInt(COL_INT_ID), player);
+            //
+            Server.playersLoggedin.add(player);
+            //
 
             player.state.setState(ClientState.loggedIn);
             return player;
         } else {
-            System.out.println("didnt find user");
             return null;
         }
 
@@ -91,11 +91,15 @@ public final class LoginSystem {
                 lobbyOfPlayer.removePlayer(player);
                 if(lobbyOfPlayer.isEmpty()){
                     Server.lobbyMap.remove(lobbyOfPlayer.getLobby_id());
+                    Server.lobbyList.remove(lobbyOfPlayer);
                     lobbyOfPlayer = null;
                 }
                 player.state.setState(ClientState.loggedOut);
             }
             Server.loggedInPlayers.remove(getId(name, passwort));
+            //
+            Server.playersLoggedin.remove(player);
+            //
             player = null;
             return true;
         } else {
@@ -114,17 +118,12 @@ public final class LoginSystem {
      * @throws ClassNotFoundException
      */
     public static boolean register(final String name,
-<<<<<<< Updated upstream:server/src/main/java/com/example/musiccolab/LoginSystem.java
-                                   final String email, final String passwort, final String securityQuestion)
-=======
-                                   final String email, final String passwort,
-                                   final String securityQuestion)
->>>>>>> Stashed changes:Server/src/main/java/com/example/musiccolab/LoginSystem.java
+                                   final String email, final String passwort)
             throws SQLException, ClassNotFoundException {
         //check for registration
-        if (!checkForRegistration(name, email) && !DataBase.checkUsername(name)) {
+        if (!checkForRegistration(name, email)) {
             //add data to DB
-            DataBase.addUser(name, email, passwort, securityQuestion);
+            DataBase.addUser(name, email, passwort);
             return true;
         } else {
             return false;
@@ -177,35 +176,13 @@ public final class LoginSystem {
         } else return -1;
     }
 
-<<<<<<< Updated upstream:server/src/main/java/com/example/musiccolab/LoginSystem.java
-    /**
-     * method to get the player from "on" the channel.
-     * @param channel from searched player
-     * @return Player which is on the channel
-     */
-    public static Player getPlayerByChannel(final SocketChannel channel) {
-        Iterator<Map.Entry<Integer, Player>> i
-                = Server.loggedInPlayers.entrySet().iterator();
-        while (i.hasNext()) {
-            Map.Entry<Integer, Player> entry = i.next();
-            if (entry.getValue().getPlayerChannel() == channel) {
-                return entry.getValue();
-            }
-        }
-        return null;
-    }
-
-
-=======
->>>>>>> Stashed changes:Server/src/main/java/com/example/musiccolab/LoginSystem.java
-    public static boolean forgotPassword(String username, String email,String password, String securityQuestion) throws SQLException, ClassNotFoundException {
+    public static boolean forgotPassword(String username, String email,String password) throws SQLException, ClassNotFoundException {
         System.out.println(checkForRegistration(username,email));
-        if(checkForRegistration(username,email) && DataBase.checksecurityQuestion(username, email, securityQuestion)){
+        if(checkForRegistration(username,email)){
             System.out.println("ResetPassword");
             DataBase.resetPasswort(username,email,password);
             return true;
         }
-        System.out.println("Wrong Security Answer");
         return false;
     }
 }

@@ -1,4 +1,4 @@
-package main.java.com.example.musiccolab;
+package com.example.musiccolab;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -12,7 +12,7 @@ public class Player {
     private int id;
     private int lobbyId = -1;
     private boolean loggedIn = false;
-    private boolean admin = true;
+    private boolean admin = false;
     private SocketAddress address;
     private SocketChannel channel;
     private boolean muted;
@@ -24,7 +24,8 @@ public class Player {
         this.email = email;
         this.id = id;
         this.channel = channel;
-        this.address = channel.getRemoteAddress();
+        if (channel != null)
+            this.address = channel.getRemoteAddress();
         this.muted = false;
     }
 
@@ -49,8 +50,8 @@ public class Player {
     public SocketAddress getAddress() { return this.address; }
 
     public boolean isAdmin(){return admin;}
-
     public void setAdmin(){admin = true;}
+    public void disableAdmin(){admin = false;}
 
     public boolean isLoggedIn(){return loggedIn;}
 

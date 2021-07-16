@@ -1,7 +1,7 @@
-package main.java.com.example.musiccolab;
+package com.example.musiccolab;
 
-import main.java.com.example.musiccolab.exceptions.IPAddressException;
-import main.java.com.example.musiccolab.exceptions.SocketBindException;
+import com.example.musiccolab.exceptions.IPAddressException;
+import com.example.musiccolab.exceptions.SocketBindException;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -10,11 +10,13 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.*;
-import java.sql.SQLException;
-import java.util.*;
-
-import static java.lang.System.exit;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class Server {
     private Charset messageCharset = null;
@@ -32,6 +34,12 @@ public class Server {
 
     public static HashMap<Integer,Lobby> lobbyMap = new HashMap<>();
     public static HashMap<Integer,Player> loggedInPlayers = new HashMap<>();
+    public static ArrayList<Player> playersLoggedin = new ArrayList<>();
+    public static ArrayList<Lobby> lobbyList = new ArrayList<>();
+
+    public static Protocol getProtocol() {
+        return protocol;
+    }
 
     private static Protocol protocol = new Protocol();
 
@@ -51,6 +59,11 @@ public class Server {
     }
 
     public void OpenSelectorAndSetupSocket() throws IOException, SocketBindException {
+
+        lobbyMap.clear();
+        loggedInPlayers.clear();
+        playersLoggedin.clear();
+        lobbyList.clear();
 
         selector = Selector.open();
 
@@ -87,7 +100,6 @@ public class Server {
      * handle the received action.
      */
     private void handleConnectionWhenReadable(SelectionKey key) throws IOException {
-        //int state = (Integer) key.attachment(); //To save the state of all clients. Integer --> Class
 
         SocketChannel clientChannel = (SocketChannel) key.channel();
         //Read the first 6 indexes. (Protocol name, Action and data length. 2 Bytes each)
@@ -112,21 +124,31 @@ public class Server {
             }
         }
         else if(result[1] == -3) {
-            System.out.println("main.java.com.example.musiccolab.Client is disconnected.");
+            System.out.println("Client is disconnected.");
             int id = -1;
             if(disconnectedPlayer != null){
                 id = disconnectedPlayer.getLobbyId();
                 loggedInPlayers.remove(disconnectedPlayer.getId());
+                //
+                playersLoggedin.remove(disconnectedPlayer);
+                //
             }
             Lobby lobbyOfDisconnectedPlayer = null;
             if(id != -1) {
                 lobbyOfDisconnectedPlayer = lobbyMap.get(id);
                 lobbyOfDisconnectedPlayer.removePlayer(disconnectedPlayer);
-                if(lobbyOfDisconnectedPlayer.isEmpty()) lobbyOfDisconnectedPlayer = null;
+                if (lobbyOfDisconnectedPlayer.isEmpty()) {
+                    lobbyMap.remove(id);
+                    //
+                    lobbyList.remove(lobbyOfDisconnectedPlayer);
+                } else {
+                    protocol.responseAction = 9;
+                    protocol.sendResponseToClient(messageCharset, lobbyOfDisconnectedPlayer.getAdmin().getPlayerChannel(), "You are now admin.");
+                }
                 disconnectedPlayer.state.setState(ClientState.DISCONNECTED);
             }
-
             clientChannel.close();
+            protocol.updateLobbyNameList();
         }
         else if(result[1] != 0)
             protocol.handleAction(messageCharset, clientChannel, result[1], key);
@@ -153,9 +175,37 @@ public class Server {
                 }
                 selectedKeys.remove();
             }
+            updatePlayersAndLobbies();
         }
 
         finished = true;
+    }
+
+    private void updatePlayersAndLobbies() {
+        var entrySet = loggedInPlayers.entrySet();
+        Player p = null;
+        boolean somethingChanged = false;
+        for (var k : entrySet) {
+            int lobbyID = -1;
+            if (!(p = k.getValue()).getPlayerChannel().isConnected()) {
+                lobbyID = p.getLobbyId();
+                if (lobbyID != -1) {
+                    Lobby l = lobbyMap.get(lobbyID);
+                    l.removePlayer(p);
+                    if (l.isEmpty()) {
+                        lobbyMap.remove(lobbyID);
+                        lobbyList.remove(l);
+                    }
+                }
+                loggedInPlayers.remove(p.getId());
+                playersLoggedin.remove(p);
+                somethingChanged = true;
+            }
+        }
+        if (somethingChanged) {
+            protocol.updateLobbyNameList();
+            System.out.println("removed disconnected player");
+        }
     }
 
     public static int createLobbyId(){
@@ -191,6 +241,14 @@ public class Server {
         }
     }
 
+    public static Lobby getLobbyByName(String name) {
+        for (Lobby l : lobbyList) {
+            if (l.getLobbyName().equals(name))
+                return l;
+        }
+        return null;
+    }
+
     public void setFinishedTrue() {
         finished = true;
     }
@@ -205,6 +263,7 @@ public class Server {
     public Selector getSelectorForTesting(){
         return selector;
     }
+    public void setSelector(Selector s){selector = s;}
 
     public ServerSocketChannel getServerChannelForTesting(){
         return serverChannel;
@@ -213,6 +272,7 @@ public class Server {
     public Charset getMessageCharsetForTesting(){
         return messageCharset;
     }
+    public void setMessageCharset(Charset m){messageCharset = m;}
 
     public CharsetDecoder getDecoderForTesting(){
         return decoder;
@@ -225,8 +285,15 @@ public class Server {
     public boolean isRunningForTesting(){
         return running;
     }
+    public void setRunningForTesting(boolean b){
+        running = b;
+    }
 
     public boolean isFinishedForTesting(){
         return finished;
     }
+
+    public void acceptForTest(SelectionKey key) throws IOException { handleConnectionWhenAcceptable(key);}
+
+    public void handleReadableForTest(SelectionKey key) throws IOException { handleConnectionWhenReadable(key);}
 }

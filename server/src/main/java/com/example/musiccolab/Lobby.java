@@ -1,10 +1,17 @@
-package main.java.com.example.musiccolab;
+package com.example.musiccolab;
 
+import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.Random;
 
 public class Lobby {
     private int lobby_id;
+
+    public String getLobbyName() {
+        return lobbyName;
+    }
+
     private String lobbyName;
     private int MAX_PLAYERS = 7;
     private LinkedList<Player> players;
@@ -36,6 +43,7 @@ public class Lobby {
     public boolean setAdmin(Player player) {
         if (playerInLobby(player)) {
             this.admin = player;
+            player.setAdmin();
             return true;
         }
         return false;
@@ -61,14 +69,14 @@ public class Lobby {
     public void removePlayer(Player player) {
         if (playerInLobby(player)) {
             players.remove(player);
+            player.state.setState(ClientState.notInLobby);
             usersNumber--;
             player.setLobbyId(-1);
-            if (player.getId() == admin.getId()) {
+            if (player.isAdmin()) {
                 if (!players.isEmpty()) {
-                    admin = players.peek();
+                    setAdmin(players.getFirst());
                 }
                 else admin = null;
-                player.state.setState(ClientState.notInLobby);
             }
         }
     }
@@ -77,7 +85,48 @@ public class Lobby {
 
     public byte getUsersNumber(){return usersNumber;}
 
-    public  boolean isEmpty(){
+    public boolean isEmpty(){
         return players.isEmpty();
+    }
+
+    public String getPlayerIDs() {
+        StringBuilder ids = new StringBuilder();
+        for (Player player : players) {
+            ids.append(player.getId() + ";");
+        }
+        return ids.toString();
+    }
+
+    public void toggleMutePlayerByID(int id) {
+        for (Player player : players) {
+            if (player.getId() == id) {
+                player.toggleMute();
+                break;
+            }
+        }
+    }
+
+    public void toggleMutePlayerByUsername(String username) {
+        for (Player player : players) {
+            if (player.getName().equals(username)) {
+                player.toggleMute();
+                break;
+            }
+        }
+    }
+
+    public static boolean lobbyNameExist(String name){
+        for(Lobby l : Server.lobbyList){
+            if(l.lobbyName.equals(name))
+                return true;
+        }
+        return false;
+    }
+
+    public String getPlayersListAsString(){
+        String playersAsString = "";
+        for(Player player : players)
+            playersAsString += player.getName() + ",";
+        return playersAsString;
     }
 }

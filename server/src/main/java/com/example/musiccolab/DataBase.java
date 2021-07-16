@@ -1,4 +1,4 @@
-package main.java.com.example.musiccolab;
+package com.example.musiccolab;
 
 
 import java.sql.Connection;
@@ -142,19 +142,18 @@ public final class DataBase {
      * @throws ClassNotFoundException
      */
     public static void addUser(final String name, final String email,
-                               final String passwort, final String securityQuestion)
+                               final String passwort)
             throws SQLException, ClassNotFoundException {
         if (con == null) {
             getConnection();
         }
 
         PreparedStatement prep = con.prepareStatement("INSERT INTO "
-                + TABLE_NAME + " (name,email,passwort,securityquestion) values(?, ?, ?, ?);");
+                + TABLE_NAME + " (name,email,passwort) values(?, ?, ?);");
 
         prep.setString(1, name);
         prep.setString(2, email);
         prep.setString(3, passwort);
-        prep.setString(4, securityQuestion);
 
         prep.execute();
 
@@ -230,43 +229,18 @@ public final class DataBase {
         if (con == null) {
             getConnection();
         }
+        System.out.println("ResetPasword");
         PreparedStatement prep = con.prepareStatement("UPDATE "
                 + TABLE_NAME + " SET " + PASSWORD_COL_NAME + " = ? WHERE " + NAME_COL_NAME
                 + " = ? AND " + EMAIL_COL_NAME + " = ?");
         prep.setString(1, password);
         prep.setString(2, username);
         prep.setString(3, email);
+        System.out.println(prep.toString());
         prep.execute();
 
     }
 
-    public static boolean checksecurityQuestion(final String username, final String email, final String securityQuestion) throws SQLException, ClassNotFoundException {
-        if(con == null){
-            getConnection();
-        }
-
-        Statement state = con.createStatement();
-        ResultSet res = state.executeQuery("SELECT * FROM "+ TABLE_NAME + " WHERE name = '"+ username + "' AND email = '"+ email +
-<<<<<<< Updated upstream:server/src/main/java/com/example/musiccolab/DataBase.java
-                      "' AND securityquestion = '"+ securityQuestion +"'");
-=======
-                "' AND securityquestion = '"+ securityQuestion +"'");
->>>>>>> Stashed changes:Server/src/main/java/com/example/musiccolab/DataBase.java
-
-
-        return res.next();
-    }
-
-    public static boolean checkUsername(final String username) throws SQLException, ClassNotFoundException {
-        if(con == null){
-            getConnection();
-        }
-
-        Statement state = con.createStatement();
-        ResultSet res = state.executeQuery("SELECT * FROM "+ TABLE_NAME + " WHERE name = '"+ username +"'" );
-
-        return res.next();
-    }
     /*
     public static int getID(final String name, final String password)
             throws SQLException, ClassNotFoundException {

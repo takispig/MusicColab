@@ -1,7 +1,7 @@
-package main.java.com.example.musiccolab;
+package com.example.musiccolab;
 
-import main.java.com.example.musiccolab.exceptions.IPAddressException;
-import main.java.com.example.musiccolab.exceptions.SocketBindException;
+import com.example.musiccolab.exceptions.IPAddressException;
+import com.example.musiccolab.exceptions.SocketBindException;
 
 import java.io.IOException;
 import java.nio.charset.UnsupportedCharsetException;
@@ -12,8 +12,8 @@ import java.util.logging.Logger;
 public class Main {
 
     // DEFAULT VALUES //
-    private static final String DEFAULT_ADDRESS = "130.149.80.94";
-    private static final int DEFAULT_PORT = 8080;
+    private static final String DEFAULT_ADDRESS = "192.168.178.42"; // vm: 130.149.80.94
+    private static final int DEFAULT_PORT = 1200;
     // // // // // // //
 
     /**
@@ -45,6 +45,14 @@ public class Main {
     private static Scanner input;
     private static long time = 0;
     private static int restart = 0;
+
+
+    ////
+    // for testing
+    static int genPlayer = 1;
+    static int genLobby = 1;
+
+    ////
 
     public static Logger logr = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -230,6 +238,18 @@ public class Main {
                         closeServer();
                         exit = true;
                         break;
+                    case "lobbies":
+                        printLobbies();
+                        break;
+                    case "updateLobbies":
+                        currentServer.getProtocol().updateLobbyNameList();
+                        break;
+                    case "createLobby":
+                        createLobby();
+                        break;
+                    case "players":
+                        printPlayers();
+                        break;
                     default:
                         System.out.println("Undefined input");
                         break;
@@ -240,6 +260,40 @@ public class Main {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    // for testing
+    private static void createLobby() {
+        Lobby lobby = null;
+        try {
+            lobby = new Lobby(new Player("Player-" + genPlayer, "password", "e@mail"+ (genPlayer++)+".com", Server.createPlayerId(), null), "Lobby-"+(genLobby++), Server.createLobbyId());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Server.lobbyMap.put(lobby.getLobby_id(), lobby);
+        Server.lobbyList.add(lobby);
+        currentServer.getProtocol().updateLobbyNameList();
+    }
+
+    private static void printLobbies() {
+        System.out.print("Lobbies: ");
+        for (Lobby l : Server.lobbyList) {
+            System.out.print(l.getLobbyName() + ", ");
+        }
+        System.out.println();
+    }
+
+    private static void printPlayers() {
+        System.out.println(currentServer.playersLoggedin);
+        for (Player p : currentServer.playersLoggedin) {
+            System.out.print(p.getName() + ", ");
+        }
+        System.out.println();
+        var entrySet = currentServer.loggedInPlayers.entrySet();
+        for (var k : entrySet) {
+            System.out.print(k.getValue().getName() + ", ");
+        }
+        System.out.println();
     }
 
     /**
