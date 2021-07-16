@@ -448,13 +448,13 @@ public class Protocol {
                 testCorrect = true;
             }
             else if (action == mutePlayer){
-                parseBufferIfMutePlayer(messageCharset, clientChannel, key);
+                parseBufferIfMutePlayer(messageCharset, clientChannel, bufferSize, key);
                 testCorrect = true;
             }
         }
     }
 
-    private void parseBufferIfMutePlayer(Charset messageCharset, SocketChannel clientChannel, SelectionKey key) throws IOException {
+    private void parseBufferIfMutePlayer(Charset messageCharset, SocketChannel clientChannel, int bufferSize, SelectionKey key) throws IOException {
         Player player = (Player) key.attachment();
 
         ByteBuffer bufferForName = ByteBuffer.allocate(bufferSize);
