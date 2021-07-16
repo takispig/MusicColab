@@ -114,7 +114,12 @@ public final class LoginSystem {
      * @throws ClassNotFoundException
      */
     public static boolean register(final String name,
+<<<<<<< Updated upstream:server/src/main/java/com/example/musiccolab/LoginSystem.java
                                    final String email, final String passwort, final String securityQuestion)
+=======
+                                   final String email, final String passwort,
+                                   final String securityQuestion)
+>>>>>>> Stashed changes:Server/src/main/java/com/example/musiccolab/LoginSystem.java
             throws SQLException, ClassNotFoundException {
         //check for registration
         if (!checkForRegistration(name, email) && !DataBase.checkUsername(name)) {
@@ -172,6 +177,7 @@ public final class LoginSystem {
         } else return -1;
     }
 
+<<<<<<< Updated upstream:server/src/main/java/com/example/musiccolab/LoginSystem.java
     /**
      * method to get the player from "on" the channel.
      * @param channel from searched player
@@ -190,6 +196,8 @@ public final class LoginSystem {
     }
 
 
+=======
+>>>>>>> Stashed changes:Server/src/main/java/com/example/musiccolab/LoginSystem.java
     public static boolean forgotPassword(String username, String email,String password, String securityQuestion) throws SQLException, ClassNotFoundException {
         System.out.println(checkForRegistration(username,email));
         if(checkForRegistration(username,email) && DataBase.checksecurityQuestion(username, email, securityQuestion)){

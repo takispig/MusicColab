@@ -16,7 +16,11 @@ class LoginSystemTest {
     String testName = "Karl";
     String testEmail = "karl@mail.de";
     String testPassword = "1234";
+<<<<<<< Updated upstream:server/src/test/LoginSystemTest.java
     String securityQuestion = ""; //todo
+=======
+    String securityQuestion = "Sicherheit";
+>>>>>>> Stashed changes:Server/src/test/java/com/example/musiccolab/LoginSystemTest.java
 
     @AfterEach
     void cleanUp(){

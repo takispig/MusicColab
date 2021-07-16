@@ -12,7 +12,12 @@ class DataBaseTest {
     String testName = "Manuel";
     String testEmail = "Manuel@mail.de";
     String testPassword = "1234";
+<<<<<<< Updated upstream:server/src/test/DataBaseTest.java
     String securityQuestion = "";
+=======
+    String securityQuestion = "Sicherheit";
+
+>>>>>>> Stashed changes:Server/src/test/java/com/example/musiccolab/DataBaseTest.java
     @Test
     void addUser() {
 

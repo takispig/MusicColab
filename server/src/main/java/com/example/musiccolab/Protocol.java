@@ -38,7 +38,17 @@ public class Protocol {
     private byte passwordSize;
     private byte questionLength;
 
+<<<<<<< Updated upstream:server/src/main/java/com/example/musiccolab/Protocol.java
     private String email=null;
+=======
+    byte userNameSize;
+    byte emailSize;
+    byte passwordSize;
+    private byte questionLength;
+
+    private String email=null;
+    String username, password,question,lobbyName = "";
+>>>>>>> Stashed changes:Server/src/main/java/com/example/musiccolab/Protocol.java
 
 
     Player player = null;
@@ -133,7 +143,11 @@ public class Protocol {
 
     private void parseBufferIfPasswordForgotten(Charset messageCharset, SocketChannel clientChannel) throws IOException {
 
+<<<<<<< Updated upstream:server/src/main/java/com/example/musiccolab/Protocol.java
         String username, password, email,question = "";
+=======
+        String username, email, password,question = "";
+>>>>>>> Stashed changes:Server/src/main/java/com/example/musiccolab/Protocol.java
         boolean checkResponse = false;
 
         readSizes(messageCharset, clientChannel);
@@ -168,7 +182,10 @@ public class Protocol {
         System.out.println("Sec:" +  question);
 
         try {
+<<<<<<< Updated upstream:server/src/main/java/com/example/musiccolab/Protocol.java
 
+=======
+>>>>>>> Stashed changes:Server/src/main/java/com/example/musiccolab/Protocol.java
             checkResponse = LoginSystem.forgotPassword(username, email, password,question);
             Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " " + (checkResponse? "New Password set":"Answer wrong"));
             responseAction = (short) (checkResponse ? action : action + 10);
@@ -181,16 +198,23 @@ public class Protocol {
             e.printStackTrace();
         }
 
+<<<<<<< Updated upstream:server/src/main/java/com/example/musiccolab/Protocol.java
         sendResponseToClient(messageCharset, clientChannel, "ERROR");
     }
 
     private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel, SelectionKey key)
             throws IOException {
 
+=======
+
+        sendResponseToClient(messageCharset, clientChannel, "ERROR");
+    }
+
+    private void parseBufferForLoginSystem(Charset messageCharset, SocketChannel clientChannel, SelectionKey key) throws IOException {
+>>>>>>> Stashed changes:Server/src/main/java/com/example/musiccolab/Protocol.java
         String username, password, email = "";
         String question ="";
         boolean checkResponse = false;
-
         readSizes(messageCharset, clientChannel);
         ByteBuffer loginSystemBuffer;
 
@@ -259,11 +283,25 @@ public class Protocol {
         lobbyBuffer.flip();
         if(action == createLobby && player != null){
             String lobbyName = messageCharset.decode(lobbyBuffer).toString();
+<<<<<<< Updated upstream:server/src/main/java/com/example/musiccolab/Protocol.java
             int id = Server.createLobbyId();
             Lobby lobby = new Lobby(player, lobbyName, id);
             Server.lobbyMap.put(id,lobby);
             sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(true, lobby, " created by client."));
             Main.logr.log(Level.INFO, "LOBBY " + lobby.getLobby_id() + " CREATED BY CLIENT " + playerAddress.toString());
+=======
+            if (!Lobby.lobbyNameExist(lobbyName)) {
+                int id = Server.createLobbyId();
+                Lobby lobby = new Lobby(player, lobbyName, id);
+                Server.lobbyMap.put(id,lobby);
+                //
+                Server.lobbyList.add(lobby);
+                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(messageCharset,clientChannel, true, lobby, " created by client."));
+                if(playerAddress != null) Main.logr.log(Level.INFO, "LOBBY " + lobby.getLobby_id() + " CREATED BY CLIENT " + playerAddress.toString());
+            } else {
+                sendResponseToClient(messageCharset,clientChannel,getLobbyResponse(messageCharset,clientChannel, false, null, "--> Lobby already exists"));
+            }
+>>>>>>> Stashed changes:Server/src/main/java/com/example/musiccolab/Protocol.java
         }
         else if((action == joinLobby || action == leaveLobby) && player != null){
             int lobbyID = Integer.parseInt(messageCharset.decode(lobbyBuffer).toString());
@@ -368,6 +406,25 @@ public class Protocol {
 
 
 
+<<<<<<< Updated upstream:server/src/main/java/com/example/musiccolab/Protocol.java
+=======
+        ByteBuffer sizeBuffer = ByteBuffer.allocate(1);
+        clientChannel.read(sizeBuffer);
+        sizeBuffer.flip();
+        userNameSize = messageCharset.decode(sizeBuffer).toString().getBytes(messageCharset)[0];
+        sizeBuffer.clear();
+
+        ByteBuffer userNameBuffer = ByteBuffer.allocate(userNameSize);
+        clientChannel.read(userNameBuffer);
+        userNameBuffer.flip();
+        String username = messageCharset.decode(userNameBuffer).toString();
+        userNameBuffer.clear();
+
+        if (player.getLobbyId() != -1) {
+            Lobby lobby = Server.lobbyMap.get(player.getLobbyId());
+            lobby.toggleMutePlayerByUsername(username);
+        }
+>>>>>>> Stashed changes:Server/src/main/java/com/example/musiccolab/Protocol.java
     }
 
     private String getAllLobbyIds(HashMap<Integer, Lobby> lobbyMap) {

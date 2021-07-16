@@ -247,7 +247,11 @@ public final class DataBase {
 
         Statement state = con.createStatement();
         ResultSet res = state.executeQuery("SELECT * FROM "+ TABLE_NAME + " WHERE name = '"+ username + "' AND email = '"+ email +
+<<<<<<< Updated upstream:server/src/main/java/com/example/musiccolab/DataBase.java
                       "' AND securityquestion = '"+ securityQuestion +"'");
+=======
+                "' AND securityquestion = '"+ securityQuestion +"'");
+>>>>>>> Stashed changes:Server/src/main/java/com/example/musiccolab/DataBase.java
 
 
         return res.next();
