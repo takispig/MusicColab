@@ -2,8 +2,6 @@ package com.example.musiccolab.instruments;
 
 import android.hardware.Sensor;
 
-import java.util.Optional;
-
 public class Drums implements Instrument {
 
     public static final double GRAVITY = 9.81;
@@ -16,26 +14,32 @@ public class Drums implements Instrument {
     private static final String INSTRUMENT_TYPE = InstrumentType.DRUMS;
     private final InstrumentGUIBox instrumentGUI;
     private static final int DEFAULT_SENSOR = Sensor.TYPE_ACCELEROMETER;
-    private final float[] lastKnownSensorValues = new float[3];
+    private final float[] lastKnownSensorValues;
     private static final String TAG = "Drums";
     private final SoundPlayer sp;
-    private Optional<Axis> axisPointingToGround = Optional.empty();
-
+    private Axis axisPointingToGround;
+    private SensorEventAdapter lastEvent;
+    private boolean onRecalibratePressed;
 
     public Drums(InstrumentGUIBox instrumentGUI, SoundPlayer sp) {
         this.instrumentGUI = instrumentGUI;
         this.sp = sp;
+        onRecalibratePressed = false;
+        axisPointingToGround = null;
+        lastKnownSensorValues = new float[3];
+        lastEvent = null;
         instrumentGUI.setDrumsVisible();
     }
 
     @Override
     public void reCalibrate(SensorEventAdapter event) {
-        axisPointingToGround = Optional.of(getAxisWithGravity(event.getValues()));
+        axisPointingToGround = getAxisWithGravity(event.getValues());
     }
 
     @Override
     public void reCalibrate() {
-        axisPointingToGround = Optional.of(getAxisWithGravity(lastKnownSensorValues));
+        axisPointingToGround = getAxisWithGravity(lastEvent.getValues());
+        onRecalibratePressed = true;
     }
 
     @Override
@@ -80,15 +84,16 @@ public class Drums implements Instrument {
     }
 
     private void checkAndHandleAllValues(SensorEventAdapter event) {
-        if (!axisPointingToGround.isPresent()) {
-            reCalibrate(event);
+        lastEvent = event;
+         if (!onRecalibratePressed) {
+            return;
         }
         lastKnownSensorValues[0] = event.getValues()[0];
         lastKnownSensorValues[1] = event.getValues()[1];
         lastKnownSensorValues[2] = event.getValues()[2];
-        if (axisPointingToGround.get().equals(Axis.X)) {
+        if (axisPointingToGround.equals(Axis.X)) {
             checkAndHandleTwoValues(lastKnownSensorValues[1], lastKnownSensorValues[2]);
-        } else if (axisPointingToGround.get().equals(Axis.Y)) {
+        } else if (axisPointingToGround.equals(Axis.Y)) {
             checkAndHandleTwoValues(lastKnownSensorValues[0], lastKnownSensorValues[2]);
         } else {
             checkAndHandleTwoValues(lastKnownSensorValues[0], lastKnownSensorValues[1]);

@@ -1,5 +1,7 @@
 package com.example.musiccolab.instruments;
 
+import android.util.Log;
+
 import androidx.annotation.VisibleForTesting;
 
 import com.example.musiccolab.CommunicationHandling;
@@ -52,6 +54,9 @@ public class SoundPlayer {
     }
 
     public void sendToneToServer(String toneAsString, int toneAction) {
+        if (!testingMode) {
+            Log.i(getClass().getName(), "Playing tone locally: " + toneAsString + ", toneAction=" + toneAction);
+        }
         playTone(toneAsString, NETWORK_THREAD.userID, toneAction);
         NETWORK_THREAD.action = NETWORK_THREAD_ACTION_SEND_TONE;
         NETWORK_THREAD.toneAction = (byte) toneAction;
@@ -59,6 +64,9 @@ public class SoundPlayer {
     }
 
     public void playTone(String toneAsString, int user, int toneAction) {
+        if (!testingMode) {
+            Log.i(getClass().getName(), "Playing tone: " + toneAsString + ", user=" + user + ", toneAction=" + toneAction);
+        }
         if (toneAction == 1) {
             if (toneAsString.equals(Theremin.THEREMIN_STOP)) {
                 stopTheremin(user);

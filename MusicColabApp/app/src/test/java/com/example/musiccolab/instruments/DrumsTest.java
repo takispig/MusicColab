@@ -108,6 +108,8 @@ public class DrumsTest {
 
         // act
         drums.action(event);
+        drums.reCalibrate();
+        drums.action(event);
 
         // assert
         verify(sp, times(1)).sendToneToServer(DRUMS_2,1);
@@ -121,6 +123,8 @@ public class DrumsTest {
 
         // act
         drums.action(event);
+        drums.reCalibrate();
+        drums.action(event);
 
         // assert
         verify(sp, times(1)).sendToneToServer(DRUMS_1,1);
@@ -133,6 +137,8 @@ public class DrumsTest {
         SensorEventAdapter event = new SensorEventAdapter(forceValues, sensor);
 
         // act
+        drums.action(event);
+        drums.reCalibrate();
         drums.action(event);
 
         // assert
@@ -148,6 +154,7 @@ public class DrumsTest {
         // act
         drums.action(event);
         drums.reCalibrate();
+        drums.action(event);
 
         // assert
         verify(sp, times(1)).sendToneToServer(DRUMS_2,1);
@@ -160,6 +167,8 @@ public class DrumsTest {
         SensorEventAdapter event = new SensorEventAdapter(forceValues, sensor);
 
         // act
+        drums.action(event);
+        drums.reCalibrate();
         drums.action(event);
 
         // assert
@@ -174,6 +183,8 @@ public class DrumsTest {
 
         // act
         drums.action(event);
+        drums.reCalibrate();
+        drums.action(event);
 
         // assert
         verify(sp, times(1)).sendToneToServer(DRUMS_0,1);
@@ -186,6 +197,8 @@ public class DrumsTest {
         SensorEventAdapter event = new SensorEventAdapter(forceValues, sensor);
 
         // act
+        drums.action(event);
+        drums.reCalibrate();
         drums.action(event);
 
         // assert
@@ -200,6 +213,8 @@ public class DrumsTest {
 
         // act
         drums.action(event);
+        drums.reCalibrate();
+        drums.action(event);
 
         // assert
         verify(sp, times(1)).sendToneToServer(DRUMS_1,1);
@@ -212,6 +227,8 @@ public class DrumsTest {
         SensorEventAdapter event = new SensorEventAdapter(forceValues, sensor);
 
         // act
+        drums.action(event);
+        drums.reCalibrate();
         drums.action(event);
 
         // assert

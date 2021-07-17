@@ -176,7 +176,6 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
                 break;
         }
 
-        selectedInstrument.reCalibrate();
         sensor = sensorManager.getDefaultSensor(selectedInstrument.getSensorType());
         sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
 
