@@ -53,6 +53,7 @@ public class CommunicationHandling implements Runnable {
     public String password = null;
     public int userID = -1;
     public String lobbyName = null;
+    public String lobbyId = null;
     public String mutedPlayer = null;
     public String question = null; //VH - 27.06
     public boolean admin = false;
@@ -177,8 +178,12 @@ public class CommunicationHandling implements Runnable {
             try {
                 if (action == PROTOCOL_MUTE_USERS)
                     sendLobbyMessage(action, mutedPlayer);
-                else
-                    sendLobbyMessage(action, lobbyName);
+                else{
+                    if(action == PROTOCOL_LEAVE_LOBBY_ACTION)
+                        sendLobbyMessage(action, lobbyId);
+                    else
+                        sendLobbyMessage(action, lobbyName);
+                }
             } catch (IOException e) {
                 System.err.println(CAN_NOT_WRITE_IN_BUFFER);
             }
@@ -305,8 +310,8 @@ public class CommunicationHandling implements Runnable {
 
     private void sendTone(short action) throws IOException {
         short dataLength = (short) (data.length());
-        dataLength += 2;
-        ByteBuffer buffer = ByteBuffer.allocate(6 + 2 + dataLength);
+        dataLength += 1;
+        ByteBuffer buffer = ByteBuffer.allocate(6 + 1 + dataLength);
 
         buffer.put(convertShortToByte(protocolName));
         buffer.put(convertShortToByte(action));
@@ -329,7 +334,10 @@ public class CommunicationHandling implements Runnable {
                 System.out.println("Result in lobby: " + result);
                 if (action == PROTOCOL_CREATE_LOBBY_ACTION || action == PROTOCOL_JOIN_LOBBY_ACTION) {
                     String[] a = result.split(" ");
-                    lobbyName = a[1];
+                    String[] lobbyNameAndID = a[1].split("-");
+                    lobbyName = lobbyNameAndID[0];
+                    lobbyId = lobbyNameAndID[1];
+                    
                     if (action == PROTOCOL_JOIN_LOBBY_ACTION) {
                         users = Integer.parseInt(a[5].split(",")[1]);
                     }
@@ -345,18 +353,18 @@ public class CommunicationHandling implements Runnable {
 
     }
 
-    private void sendLobbyMessage(short action, String lobbyNameOrUsername) throws IOException {
+    private void sendLobbyMessage(short action, String lobbyIDOrUsername) throws IOException {
         System.out.println("We are in sendLobbyMessage with variables\naction = " + action + ", lobbyName/username = " + lobbyNameOrUsername);
         short dataLength;
         ByteBuffer buffer;
 
-        dataLength = (short) lobbyNameOrUsername.length();
+        dataLength = (short) lobbyIDOrUsername.length();
         buffer = ByteBuffer.allocate(6 + dataLength);
 
         buffer.put(convertShortToByte(protocolName));
         buffer.put(convertShortToByte(action));
         buffer.put(convertShortToByte(dataLength));
-        buffer.put(lobbyNameOrUsername.getBytes(messageCharset));
+        buffer.put(lobbyIDOrUsername.getBytes(messageCharset));
 
         buffer.flip();
         clientChannel.write(buffer);
