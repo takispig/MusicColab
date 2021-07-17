@@ -354,7 +354,7 @@ public class CommunicationHandling implements Runnable {
     }
 
     private void sendLobbyMessage(short action, String lobbyIDOrUsername) throws IOException {
-        System.out.println("We are in sendLobbyMessage with variables\naction = " + action + ", lobbyName/username = " + lobbyNameOrUsername);
+        System.out.println("We are in sendLobbyMessage with variables\naction = " + action + ", lobbyName/username = " + lobbyIDOrUsername);
         short dataLength;
         ByteBuffer buffer;
 
