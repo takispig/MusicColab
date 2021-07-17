@@ -29,8 +29,8 @@ public class CommunicationHandling implements Runnable {
     public static final int PROTOCOL_UPDATE_USERS = 21;             // NOT YET TESTED
     public static final int PROTOCOL_MUTE_USERS = 22;             // NOT YET TESTED
 
-    private static final String IP = "10.0.2.2";   //130.149.80.94 // Google Server IP-Address
-    //private static final String IP = "130.149.80.94";   // VM IP-Address
+    //private static final String IP = "10.0.2.2";   //130.149.80.94 // Google Server IP-Address
+    private static final String IP = "130.149.80.94";   // VM IP-Address
     private static final int port = 8080;
 
     public static final String CAN_NOT_READ_FROM_BUFFER = "Can not read from buffer.";

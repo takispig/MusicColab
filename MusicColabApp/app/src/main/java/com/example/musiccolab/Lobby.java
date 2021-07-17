@@ -47,6 +47,8 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
     private SensorManager sensorManager;
     private Sensor sensor;
     private Boolean visible = false;
+    private Boolean visible2 = false;
+    private Boolean visible3 = false;
     private InstrumentGUIBox instrumentGUI;
     private int counter = 0;
     private int counter2 = 0;
@@ -232,12 +234,13 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
             TextView usernames = findViewById(R.id.usernames);
             if (!networkThread.UsernameList.isEmpty()) usernames.setText(String.format("%s", networkThread.UsernameList));
             // message visibility
-            visible = !visible;
+            visible2 = !visible2;
             ConstraintLayout userss = findViewById(R.id.users_message);
-            userss.setVisibility(visible ? View.VISIBLE : View.GONE);
+            userss.setVisibility(visible2 ? View.VISIBLE : View.GONE);
         }
         if (view.getId() == R.id.muted) {
-            if (networkThread.admin) findViewById(R.id.muted_message).setVisibility(View.VISIBLE);
+            visible3 = !visible3;
+            if (networkThread.admin) findViewById(R.id.muted_message).setVisibility(visible3 ? View.VISIBLE : View.GONE);
             else toast("You need to be Admin to mute players");
             // display muted players
             TextView m_usernames = findViewById(R.id.muted_names);
@@ -246,6 +249,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
 
         }
         if (view.getId() == R.id.mute_unmute) {
+            visible3 = !visible3;
             findViewById(R.id.muted_message).setVisibility(View.GONE);
             EditText d = findViewById(R.id.name_to_mute);
             String tmp_muted = d.getText().toString();
@@ -268,6 +272,7 @@ public class Lobby extends AppCompatActivity implements View.OnClickListener, Se
 
         }
         if (view.getId() == R.id.cancel_create2) {
+            visible3 = !visible3;
             findViewById(R.id.muted_message).setVisibility(View.GONE);
         }
     }
