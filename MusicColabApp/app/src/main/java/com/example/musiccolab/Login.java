@@ -16,7 +16,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
     static String userName = "";
     static String password = "";
     EditText userNameView, passView;
-    public static CommunicationHandling networkThread = null;
+    public static CommunicationHandling networkThread = new CommunicationHandling(Thread.currentThread());
     private int counter = 0;
 
     @Override
@@ -69,7 +69,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         // check data validity (no empty input)
         if (password.isEmpty() || userName.isEmpty()) toast("All fields must be filled");
         else {
-            networkThread = new CommunicationHandling(Thread.currentThread());
+            //networkThread = new CommunicationHandling(Thread.currentThread());
             networkThread.username = userName;
             networkThread.password = password;
             networkThread.action = 1;
