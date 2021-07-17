@@ -272,16 +272,11 @@ public class Protocol {
             }
         }
         else if((action == joinLobby || action == leaveLobby) && player != null){
-            String nameId = "";
             Lobby currentLobby = null;
-            try {
-                nameId = messageCharset.decode(lobbyBuffer).toString();
-                lobbyID = Integer.parseInt(nameId);
-                currentLobby = Server.lobbyMap.get(lobbyID);
-            } catch (NumberFormatException e) {
-                currentLobby = Server.getLobbyByName(nameId);
-            }
+
             if(action == joinLobby){
+                lobbyName = messageCharset.decode(lobbyBuffer).toString();
+                currentLobby = Server.getLobbyByName(lobbyName);
                 boolean checkResponse = (currentLobby != null);
                 if(checkResponse) checkResponse = currentLobby.addPlayer(player);
                 byte lobbyUsers = 0;
@@ -291,6 +286,8 @@ public class Protocol {
                 if(checkResponse) Main.logr.log(Level.INFO, "CLIENT " + playerAddress.toString() + " JOINED LOBBY " + currentLobby.getLobby_id());
 
             } else if(action == leaveLobby){
+                lobbyID = Integer.parseInt(messageCharset.decode(lobbyBuffer).toString());
+                currentLobby = Server.lobbyMap.get(lobbyID);
                 boolean checkResponse = (currentLobby != null);
                 if(checkResponse) {
                     currentLobby.removePlayer(player);
@@ -373,7 +370,6 @@ public class Protocol {
             e.printStackTrace();
         }
         messageBuffer.clear();
-        return;
     }
 
 
@@ -528,7 +524,7 @@ public class Protocol {
                 System.out.println("send user names.");
                 sendResponseToClient(messageCharset, clientChannel, lobby.getPlayersListAsString());
             }
-            message = "Lobby "+ lobby.getLobbyName() + additionPart;
+            message = "Lobby "+ lobby.getLobbyName() + "-" + lobby.getLobby_id() + additionPart;
             responseAction = action;
 
         }
