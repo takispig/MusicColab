@@ -2,13 +2,15 @@ package com.example.musiccolab;
 
 import com.example.musiccolab.instruments.SoundPlayer;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -58,9 +60,9 @@ public class CommunicationHandling implements Runnable {
     public String question = null; //VH - 27.06
     public boolean admin = false;
     public int users = 0;
-    public List<String> LobbyList = new LinkedList<String>();
-    public List<String> UsernameList = new LinkedList<String>();
-    public List<String> MuteList = new LinkedList<String>();
+    public List<String> LobbyList = new LinkedList<>();
+    public List<String> UsernameList = new LinkedList<>();
+    public List<String> MuteList = new LinkedList<>();
 
     public byte toneAction;
     public byte toneType;
@@ -102,12 +104,12 @@ public class CommunicationHandling implements Runnable {
             Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
 
             while (selectedKeys.hasNext()) {
-                SelectionKey key = (SelectionKey) selectedKeys.next();
+                SelectionKey key = selectedKeys.next();
                 clientChannel = (SocketChannel) key.channel();
                 ByteBuffer buffer;
                 if (key.isConnectable()) {
-                    if(connected){
-                        try{
+                    if (connected) {
+                        try {
                             System.out.println("test");
                             clientChannel.close();
                             confirmation = action + 10;
@@ -115,8 +117,9 @@ public class CommunicationHandling implements Runnable {
                                 mainThread.notify();
                             }
                             System.out.println("Server is disconnected.");
+                        } catch (IOException e) {
+                            System.out.println("Error with channel.close.");
                         }
-                        catch (IOException e) {System.out.println("Error with channel.close.");}
                     }
                     buffer = ByteBuffer.allocate(100);
                     try {
@@ -140,11 +143,11 @@ public class CommunicationHandling implements Runnable {
                     } else if (actionAndDataLength[1] == 0 && actionAndDataLength[0] == (short) 21) {
                         UsernameList.clear();
                     } else {
-                            try {
-                                clientChannel.read(ByteBuffer.allocate(1000));
-                            } catch (IOException e) {
-                                System.err.println("Error with empty channel.");
-                            }
+                        try {
+                            clientChannel.read(ByteBuffer.allocate(1000));
+                        } catch (IOException e) {
+                            System.err.println("Error with empty channel.");
+                        }
                     }
                 }
                 selectedKeys.remove();
@@ -178,8 +181,8 @@ public class CommunicationHandling implements Runnable {
             try {
                 if (action == PROTOCOL_MUTE_USERS)
                     sendLobbyMessage(action, mutedPlayer);
-                else{
-                    if(action == PROTOCOL_LEAVE_LOBBY_ACTION)
+                else {
+                    if (action == PROTOCOL_LEAVE_LOBBY_ACTION)
                         sendLobbyMessage(action, lobbyId);
                     else
                         sendLobbyMessage(action, lobbyName);
@@ -214,17 +217,14 @@ public class CommunicationHandling implements Runnable {
                 }
             }
 
-        }
-        else if (action == PROTOCOL_CREATE_LOBBY_ACTION || action == PROTOCOL_JOIN_LOBBY_ACTION || action == PROTOCOL_LEAVE_LOBBY_ACTION || action == 14 || action == 15 || action == 16) {
+        } else if (action == PROTOCOL_CREATE_LOBBY_ACTION || action == PROTOCOL_JOIN_LOBBY_ACTION || action == PROTOCOL_LEAVE_LOBBY_ACTION || action == 14 || action == 15 || action == 16) {
             lobby(action, messageLength);
             synchronized (mainThread) {
                 mainThread.notify();
             }
-        }
-        else if (action == PROTOCOL_TONE_ACTION || action == 17) {
+        } else if (action == PROTOCOL_TONE_ACTION || action == 17) {
             getData(messageLength);
-        }
-        else if (action == PROTOCOL_BECAME_ADMIN || action == PROTOCOL_BECAME_ADMIN + 10) {
+        } else if (action == PROTOCOL_BECAME_ADMIN || action == PROTOCOL_BECAME_ADMIN + 10) {
             admin = action == PROTOCOL_BECAME_ADMIN;
             System.out.println(admin);
             try {
@@ -232,12 +232,11 @@ public class CommunicationHandling implements Runnable {
                 clientChannel.read(adminBuffer);
                 adminBuffer.flip();
                 result = messageCharset.decode(adminBuffer).toString();
-            }catch (IOException e){
+            } catch (IOException e) {
                 System.out.println(CAN_NOT_WRITE_IN_BUFFER + " from adminBuffer.");
             }
             System.out.println(result);
-        }
-        else if (action == PROTOCOL_UPDATE_LOBBY_ID_LIST) {
+        } else if (action == PROTOCOL_UPDATE_LOBBY_ID_LIST) {
             // delete the lobby IDs from the current list
             LobbyList.clear();
             // no update the list with the IDs we got from server
@@ -249,16 +248,15 @@ public class CommunicationHandling implements Runnable {
                 result = messageCharset.decode(lobbyIdBuffer).toString();
                 // split the lobbyIDs and extract them into IdList
                 String[] response = result.split(",");
-                for (int index = 0; index < response.length; index++) {
-                    if (!response[index].equals(""))
-                        LobbyList.add(response[index]);
+                for (String s : response) {
+                    if (!s.equals(""))
+                        LobbyList.add(s);
                 }
-            } catch (IOException e){
+            } catch (IOException e) {
                 System.out.println(CAN_NOT_WRITE_IN_BUFFER + " from lobbyIdBuffer (action 20).");
             }
             System.out.println(result);
-        }
-        else if (action == PROTOCOL_UPDATE_USERS) {
+        } else if (action == PROTOCOL_UPDATE_USERS) {
             try {
                 System.out.println("Action: 21 (update num_users and usernames)");
                 ByteBuffer num_users = ByteBuffer.allocate(messageLength);
@@ -270,14 +268,14 @@ public class CommunicationHandling implements Runnable {
                 UsernameList.clear();
                 // receive list of users
                 String[] u_names = result.split(",");
-                for (int index = 0; index < u_names.length; index++) {
-                    if (!u_names[index].equals(""))
-                        UsernameList.add(u_names[index]);
+                for (String u_name : u_names) {
+                    if (!u_name.equals(""))
+                        UsernameList.add(u_name);
                 }
                 // update the number of users
                 users = UsernameList.size();
                 System.out.println("Num_Users: " + users + ", UserNames: " + UsernameList);
-            }catch (IOException e){
+            } catch (IOException e) {
                 System.out.println(CAN_NOT_WRITE_IN_BUFFER + " from adminBuffer.");
             }
             System.out.println(result);
@@ -290,7 +288,7 @@ public class CommunicationHandling implements Runnable {
     private void sendToneToSoundPlayer() {
         if (soundPlayer != null) {
             String[] results = result.split(",");
-            soundPlayer.playTone(results[0],Integer.parseInt(results[1]),Integer.parseInt(results[2]));
+            soundPlayer.playTone(results[0], Integer.parseInt(results[1]), Integer.parseInt(results[2]));
         }
     }
 
@@ -309,19 +307,21 @@ public class CommunicationHandling implements Runnable {
     }
 
     private void sendTone(short action) throws IOException {
-        short dataLength = (short) (data.length());
-        dataLength += 1;
-        ByteBuffer buffer = ByteBuffer.allocate(6 + 1 + dataLength);
+        if (data != null) {
+            short dataLength = (short) (data.length());
+            dataLength += 1;
+            ByteBuffer buffer = ByteBuffer.allocate(6 + 1 + dataLength);
 
-        buffer.put(convertShortToByte(protocolName));
-        buffer.put(convertShortToByte(action));
-        buffer.put(convertShortToByte(dataLength));
-        buffer.put(toneAction);
-        buffer.put(data.getBytes(messageCharset));
+            buffer.put(convertShortToByte(protocolName));
+            buffer.put(convertShortToByte(action));
+            buffer.put(convertShortToByte(dataLength));
+            buffer.put(toneAction);
+            buffer.put(data.getBytes(messageCharset));
 
-        buffer.flip();
-        clientChannel.write(buffer);
-        buffer.clear();
+            buffer.flip();
+            clientChannel.write(buffer);
+            buffer.clear();
+        }
     }
 
     private void lobby(short action, short dataLength) {
@@ -337,7 +337,7 @@ public class CommunicationHandling implements Runnable {
                     String[] lobbyNameAndID = a[1].split("-");
                     lobbyName = lobbyNameAndID[0];
                     lobbyId = lobbyNameAndID[1];
-                    
+
                     if (action == PROTOCOL_JOIN_LOBBY_ACTION) {
                         users = Integer.parseInt(a[5].split(",")[1]);
                     }
@@ -406,7 +406,7 @@ public class CommunicationHandling implements Runnable {
         }
     }
 
-        private void sendLoginSystemMessage(short action, String email, String username, String password, String question) throws IOException {
+    private void sendLoginSystemMessage(short action, String email, String username, String password, String question) throws IOException {
         short dataLength;
         byte emailLength, userNameLength, passwordLength, size = 2, questionLength;
         questionLength = 0;
