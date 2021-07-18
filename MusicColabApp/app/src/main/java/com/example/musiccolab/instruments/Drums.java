@@ -10,6 +10,7 @@ public class Drums implements Instrument {
     public static final int DRUMS_IMAGE_ROTATION_LEFT = 0;
     public static final int DRUMS_IMAGE_ROTATION_VERT = 1;
     public static final int DRUMS_IMAGE_ROTATION_RIGHT = 2;
+    public static final String DRUMS_SOUND_ID_PREFIX = "drum";
     private static final String INSTRUMENT_NAME = "Drums";
     private static final String INSTRUMENT_TYPE = InstrumentType.DRUMS;
     private final InstrumentGUIBox instrumentGUI;
@@ -44,9 +45,7 @@ public class Drums implements Instrument {
 
     @Override
     public void action(SensorEventAdapter event) {
-        if (event.getSensor().getType() != Sensor.TYPE_ACCELEROMETER) {
-            throw new IllegalArgumentException("Instrument " + TAG + " need Sensor of type " + Sensor.TYPE_ACCELEROMETER + " but received sensor of type " + event.getSensor().getType() + "!");
-        } else {
+        if (event.getSensor().getType() == Sensor.TYPE_ACCELEROMETER) {
             checkAndHandleAllValues(event);
         }
     }
@@ -85,7 +84,7 @@ public class Drums implements Instrument {
 
     private void checkAndHandleAllValues(SensorEventAdapter event) {
         lastEvent = event;
-         if (!onRecalibratePressed) {
+        if (!onRecalibratePressed) {
             return;
         }
         lastKnownSensorValues[0] = event.getValues()[0];
