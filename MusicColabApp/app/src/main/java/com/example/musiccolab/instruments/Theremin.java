@@ -13,7 +13,8 @@ public class Theremin implements Instrument {
     public static final int THEREMIN_ALPHA_H = 69;
     public static final int THEREMIN_ALPHA_C2 = 38;
     public static final int THEREMIN_ALPHA_DEFAULT = 7;
-    public static final String THEREMIN_STOP = "thermSTOP";
+    public static final String THEREMIN_SOUND_ID_PREFIX = "therm";
+    public static final String THEREMIN_STOP = THEREMIN_SOUND_ID_PREFIX + "STOP";
 
     private final SoundPlayer sp;
     private float lastSensorValue = 0;
@@ -22,7 +23,8 @@ public class Theremin implements Instrument {
     private static final String INSTRUMENT_TYPE = InstrumentType.THEREMIN;
     private final InstrumentGUIBox instrumentGUI;
     private static final int DEFAULT_SENSOR = Sensor.TYPE_LIGHT;
-    private String lastTone = "";
+    private String lastTone = THEREMIN_STOP;
+    private int lastToneAction = -1;
 
     public Theremin(InstrumentGUIBox instrumentGUI, SoundPlayer sp) {
         this.instrumentGUI = instrumentGUI;
@@ -46,10 +48,11 @@ public class Theremin implements Instrument {
             return;
         }
         lastSensorValue = event.getValues()[0];
-        String toneToServer = "therm";
+        String toneToServer = THEREMIN_SOUND_ID_PREFIX;
         StringBuilder sb = new StringBuilder();
         float x = (max - 1) / 8;
         String stringToDisplay;
+        int toneAction = 1;
         if (lastSensorValue < x) {
             stringToDisplay = "c";
             toneToServer += "0";
@@ -84,13 +87,16 @@ public class Theremin implements Instrument {
             instrumentGUI.setThereminAlpha(THEREMIN_ALPHA_C2);
         } else {
             stringToDisplay = "0";
-            toneToServer = THEREMIN_STOP;
+            toneToServer = lastTone;
             instrumentGUI.setThereminAlpha(THEREMIN_ALPHA_DEFAULT);
+            toneAction = 0;
         }
-        if (!lastTone.equals(toneToServer)) {
-            sp.sendToneToServer(toneToServer, 1);
+        if (!lastTone.equals(toneToServer) || (toneAction == 0 && lastToneAction != 0)) {
+            lastToneAction = toneAction;
+            sp.sendToneToServer(toneToServer, toneAction);
             lastTone = toneToServer;
         }
+
         sb.append("Light intensity:");
         sb.append(event.getValues()[0]);
         sb.append(" (");

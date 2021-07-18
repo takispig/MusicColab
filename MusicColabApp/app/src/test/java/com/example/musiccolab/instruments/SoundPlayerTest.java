@@ -42,69 +42,69 @@ public class SoundPlayerTest {
         assertEquals(expectedTone, dummy.data);
     }
 
-    @Test
-    public void test_stopEverything() {
-        // arrange
-        SoundPlayer sp = createSoundPlayer();
-        MediaPlayerAdapter mpa = mock(MediaPlayerAdapter.class);
-        sp.currentlyPlaying.clear();
-        sp.currentlyPlaying.add(mpa);
-
-        // act
-        sp.stopEverything();
-
-        // assert
-        verify(mpa, times(1)).stop();
-    }
-
-    @Test
-    public void test_stopTheremin() {
-        // arrange
-        SoundPlayer sp = createSoundPlayer();
-        MediaPlayerAdapter mpa = mock(MediaPlayerAdapter.class);
-        when(mpa.getTone()).thenReturn("therm");
-        when(mpa.getUser()).thenReturn(randomInt);
-        sp.currentlyPlaying.clear();
-        sp.currentlyPlaying.add(mpa);
-
-        // act
-        sp.stopTheremin(randomInt);
-
-        // assert
-        verify(mpa, times(1)).stop();
-    }
-
-    @Test
-    public void test_stopTheremin_2() {
-        // arrange
-        SoundPlayer sp = createSoundPlayer();
-        MediaPlayerAdapter mpa = mock(MediaPlayerAdapter.class);
-        when(mpa.getTone()).thenReturn("therm");
-        when(mpa.getUser()).thenReturn(randomInt);
-        sp.currentlyPlaying.clear();
-        sp.currentlyPlaying.add(mpa);
-
-        // act
-        sp.sendToneToServer(Theremin.THEREMIN_STOP, 1);
-
-        // assert
-        assertEquals(0, sp.currentlyPlaying.size());
-    }
-
-    @Test
-    public void test_playTone() {
-        // arrange
-        SoundPlayer sp = createSoundPlayer();
-        MediaPlayerAdapter mpa = mock(MediaPlayerAdapter.class);
-        when(mpa.getTone()).thenReturn("drums0");
-        when(mpa.getUser()).thenReturn(randomInt);
-        sp.currentlyPlaying.clear();
-        sp.currentlyPlaying.add(mpa);
-
-        // act
-        sp.playTone("drums0", randomInt, 0);
-
-        // assert
-        verify(mpa, times(1)).stop();
-    }
+//    @Test
+//    public void test_stopEverything() {
+//        // arrange
+//        SoundPlayer sp = createSoundPlayer();
+//        MediaPlayerAdapter mpa = mock(MediaPlayerAdapter.class);
+//        sp.currentlyPlaying.clear();
+//        sp.currentlyPlaying.add(mpa);
+//
+//        // act
+//        sp.stopEverything();
+//
+//        // assert
+//        verify(mpa, times(1)).stop();
+//    }
+//
+//    @Test
+//    public void test_stopTheremin() {
+//        // arrange
+//        SoundPlayer sp = createSoundPlayer();
+//        MediaPlayerAdapter mpa = mock(MediaPlayerAdapter.class);
+//        when(mpa.getTone()).thenReturn("therm");
+//        when(mpa.getUser()).thenReturn(randomInt);
+//        sp.currentlyPlaying.clear();
+//        sp.currentlyPlaying.add(mpa);
+//
+//        // act
+//        sp.stopTheremin(randomInt);
+//
+//        // assert
+//        verify(mpa, times(1)).stop();
+//    }
+//
+//    @Test
+//    public void test_stopTheremin_2() {
+//        // arrange
+//        SoundPlayer sp = createSoundPlayer();
+//        MediaPlayerAdapter mpa = mock(MediaPlayerAdapter.class);
+//        when(mpa.getTone()).thenReturn("therm");
+//        when(mpa.getUser()).thenReturn(randomInt);
+//        sp.currentlyPlaying.clear();
+//        sp.currentlyPlaying.add(mpa);
+//
+//        // act
+//        sp.sendToneToServer(Theremin.THEREMIN_STOP, 1);
+//
+//        // assert
+//        assertEquals(0, sp.currentlyPlaying.size());
+//    }
+//
+//    @Test
+//    public void test_playTone() {
+//        // arrange
+//        SoundPlayer sp = createSoundPlayer();
+//        MediaPlayerAdapter mpa = mock(MediaPlayerAdapter.class);
+//        when(mpa.getTone()).thenReturn("drums0");
+//        when(mpa.getUser()).thenReturn(randomInt);
+//        sp.currentlyPlaying.clear();
+//        sp.currentlyPlaying.add(mpa);
+//
+//        // act
+//        sp.playTone("drums0", randomInt, 0);
+//
+//        // assert
+//        verify(mpa, times(1)).stop();
+//    }
 }

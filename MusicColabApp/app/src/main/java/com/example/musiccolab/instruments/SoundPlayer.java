@@ -11,19 +11,24 @@ import com.example.musiccolab.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
 
 public class SoundPlayer {
 
-    @VisibleForTesting
-    protected static CommunicationHandling NETWORK_THREAD = Login.networkThread;
+    public static final int TONE_ACTION_START = 1;
+    public static final int TONE_ACTION_STOP = 0;
 
     @VisibleForTesting
-    protected final ArrayList<MediaPlayerAdapter> currentlyPlaying = new ArrayList<>();
+    protected static CommunicationHandling NETWORK_THREAD = Login.networkThread;
 
     private static final short NETWORK_THREAD_ACTION_SEND_TONE = 7;
     private final Lobby lobby;
     private boolean testingMode = false;
     private final HashMap<String, Integer> sounds = new HashMap<>();
+    private final HashMap<Integer, LinkedList<String>> usersAndTheirTones = new HashMap<>();
+    private final HashMap<String, MediaPlayerAdapter> listOfCurrentPlayingMPAs = new HashMap<>();
 
     public SoundPlayer(Lobby lobby) {
         this.lobby = lobby;
@@ -54,72 +59,106 @@ public class SoundPlayer {
     }
 
     public void sendToneToServer(String toneAsString, int toneAction) {
-        if (!testingMode) {
-            Log.i(getClass().getName(), "Playing tone locally: " + toneAsString + ", toneAction=" + toneAction);
-        }
+        //    if (!testingMode) {
+            //      Log.i(getClass().getSimpleName(), ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> sendToneToServer: " + toneAsString + ", toneAction=" + toneAction);
+            //    }
         playTone(toneAsString, NETWORK_THREAD.userID, toneAction);
         NETWORK_THREAD.action = NETWORK_THREAD_ACTION_SEND_TONE;
         NETWORK_THREAD.toneAction = (byte) toneAction;
         NETWORK_THREAD.data = toneAsString;
     }
 
-    public void playTone(String toneAsString, int user, int toneAction) {
-        if (!testingMode) {
-            Log.i(getClass().getName(), "Playing tone: " + toneAsString + ", user=" + user + ", toneAction=" + toneAction);
+    public void playTone(String toneAsString, int user_ID, int toneAction) {
+        if (!usersAndTheirTones.containsKey(user_ID)) {
+            usersAndTheirTones.put(user_ID, new LinkedList<>());
         }
-        if (toneAction == 1) {
-            if (toneAsString.equals(Theremin.THEREMIN_STOP)) {
-                stopTheremin(user);
-                return;
-            }
-            if (sounds.get(toneAsString) == null) {
-                return;
-            }
-            MediaPlayerAdapter tone;
-            try {
-                int soundId = sounds.get(toneAsString);
-                tone = new MediaPlayerAdapter(lobby, soundId, testingMode, user, toneAsString);
-            } catch (NullPointerException e) {
-                return;
-            }
-            if (toneAsString.startsWith("therm")) {
-                stopTheremin(user);
-            }
-            currentlyPlaying.add(tone);
-            tone.start();
-        } else if (toneAction == 0) {
-            synchronized (currentlyPlaying) {
-                MediaPlayerAdapter playing = null;
-                for (MediaPlayerAdapter mp : currentlyPlaying) {
-                    if (mp.getTone().equals(toneAsString) && mp.getUser() == user) {
-                        mp.stop();
-                        playing = mp;
-                        break;
-                    }
-                }
-                currentlyPlaying.remove(playing);
-            }
+        if (toneAction == TONE_ACTION_START) {
+            startTone(toneAsString, user_ID);
+        } else if (toneAction == TONE_ACTION_STOP) {
+            stopTone(toneAsString, user_ID);
         }
     }
 
-    public void stopTheremin(int user) {
-        synchronized (currentlyPlaying) {
-            MediaPlayerAdapter playing = null;
-            for (MediaPlayerAdapter mp : currentlyPlaying) {
-                if (mp.getTone().startsWith("therm") && mp.getUser() == user) {
-                    mp.stop();
-                    playing = mp;
-                    break;
+    private void startTone(String toneAsString, int user_ID) {
+        if (!sounds.containsKey(toneAsString)) {
+            if (!testingMode) {
+                Log.e(getClass().getSimpleName(), "No such tone found: " + toneAsString + ", user=" + user_ID + ", toneAction=" + TONE_ACTION_START);
+            }
+            return;
+        }
+
+        // drum tones are single tones only and therefore cannot be held and stopped
+        if (!toneAsString.startsWith(Drums.DRUMS_SOUND_ID_PREFIX)) {
+            // to avoid double theremin tones
+            if (toneAsString.startsWith(Theremin.THEREMIN_SOUND_ID_PREFIX)) {
+                stopTheremin(user_ID);
+            }
+            String mpa_ID = "" + user_ID + "-" + toneAsString;
+            if (!Objects.requireNonNull(usersAndTheirTones.get(user_ID)).contains(mpa_ID)) {
+                MediaPlayerAdapter mpa = new MediaPlayerAdapter(lobby, sounds.get(toneAsString), testingMode);
+                //    Log.i(getClass().getSimpleName(), ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Started tone " + mpa_ID);
+                mpa.start();
+                Objects.requireNonNull(usersAndTheirTones.get(user_ID)).add(mpa_ID);
+                listOfCurrentPlayingMPAs.put(mpa_ID, mpa);
+                for (String id : listOfCurrentPlayingMPAs.keySet()) {
+                    //          Log.i(getClass().getSimpleName(), ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> CURRENTLY CURRENTLY CURRENTLY PLAYING: " + id);
                 }
             }
-            currentlyPlaying.remove(playing);
+        } else {
+            MediaPlayerAdapter mpa = new MediaPlayerAdapter(lobby, sounds.get(toneAsString), testingMode);
+            mpa.start();
+            //    Log.i(getClass().getSimpleName(), ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Started tone " + toneAsString);
         }
+    }
+
+    private void stopTone(String toneAsString, int user_ID) {
+        LinkedList<String> tempToneListOfOneUser = usersAndTheirTones.get(user_ID);
+        assert tempToneListOfOneUser != null;
+        if (tempToneListOfOneUser.contains(user_ID + "-" + toneAsString)) {
+            Objects.requireNonNull(listOfCurrentPlayingMPAs.get(user_ID + "-" + toneAsString)).stop();
+            //     Log.i(getClass().getSimpleName(), ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> stopTone / Stopped tone " + user_ID + "-" + toneAsString);
+            listOfCurrentPlayingMPAs.remove(user_ID + "-" + toneAsString);
+//            for (String id : listOfCurrentPlayingMPAs.keySet()) {
+//                Log.i(getClass().getSimpleName(), ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> CURRENTLY CURRENTLY CURRENTLY PLAYING: " + id);
+//            }
+            Objects.requireNonNull(usersAndTheirTones.get(user_ID)).remove(user_ID + "-" + toneAsString);
+        }
+    }
+
+    /**
+     * Stopping all Theremin tones played by the same user to avoid overlapping sounds. This method
+     * should only be called, if new Theremin tones are played. Otherwise use
+     * playTone(therm..., ..., SoundPlayer.TONE_ACTION_STOP) instead.
+     *
+     * @param user_ID the id of the current user playing a new Theremin tone
+     */
+    public void stopTheremin(int user_ID) {
+//        Log.i(getClass().getSimpleName(), "user=" + user_ID + ", stopping Theremin...");
+        List<String> tonesToBeDeleted = new ArrayList<>();
+        //    Log.i(getClass().getSimpleName(), ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> stopTheremin / userAndTheirTones=" + usersAndTheirTones.get(user_ID).toString());
+        LinkedList<String> mpa_ID_list = Objects.requireNonNull(usersAndTheirTones.get(user_ID));
+        for (String mpa_ID : mpa_ID_list) {
+            if (mpa_ID.contains(Theremin.THEREMIN_SOUND_ID_PREFIX)) {
+                Objects.requireNonNull(listOfCurrentPlayingMPAs.get(mpa_ID)).stop();
+                //         Log.i(getClass().getSimpleName(), ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> stopTheremin / Stopped tone " + mpa_ID);
+                listOfCurrentPlayingMPAs.remove(mpa_ID);
+                //        for (String id : listOfCurrentPlayingMPAs.keySet()) {
+                //             Log.i(getClass().getSimpleName(), ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> CURRENTLY CURRENTLY CURRENTLY PLAYING: " + id);
+                //        }
+                tonesToBeDeleted.add(mpa_ID);
+            }
+        }
+        mpa_ID_list.removeAll(tonesToBeDeleted);
     }
 
     public void stopEverything() {
-        synchronized (currentlyPlaying) {
-            currentlyPlaying.forEach(MediaPlayerAdapter::stop);
-            currentlyPlaying.clear();
+        Log.i(getClass().getSimpleName(), "Stopping everything...");
+        for (String id : listOfCurrentPlayingMPAs.keySet()) {
+            Objects.requireNonNull(listOfCurrentPlayingMPAs.get(id)).stop();
+        }
+        listOfCurrentPlayingMPAs.clear();
+        for (Integer user_ID : usersAndTheirTones.keySet()) {
+            Objects.requireNonNull(usersAndTheirTones.get(user_ID)).clear();
         }
     }
 }

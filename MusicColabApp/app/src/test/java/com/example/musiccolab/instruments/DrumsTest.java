@@ -81,25 +81,6 @@ public class DrumsTest {
         assertEquals(expected, result);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void test_action_wrongSensorType_exceptionThrown() {
-        // arrange
-        InstrumentGUIBox guiBox = mock(InstrumentGUIBox.class);
-        SoundPlayer sp = mock(SoundPlayer.class);
-        Sensor sensor = mock(Sensor.class);
-        Integer wrongSensorType = -1;
-        when(sensor.getType()).thenReturn(wrongSensorType);
-        SensorEventAdapter event = new SensorEventAdapter(null, sensor);
-        Drums drums = new Drums(guiBox, sp);
-
-        // act
-        drums.action(event);
-
-        // assert
-        // when no exception is thrown, this test must fail
-        fail();
-    }
-
     @Test
     public void test_action_gravityIsXNegative_forceIsYPositive_playDrums2() {
         // arrange
