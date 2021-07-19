@@ -43,8 +43,4 @@ public class MediaPlayerAdapter {
             }
         }
     }
-
-    public Integer getID() {
-        return id;
-    }
 }

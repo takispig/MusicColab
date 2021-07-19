@@ -16,7 +16,6 @@ public class Drums implements Instrument {
     private final InstrumentGUIBox instrumentGUI;
     private static final int DEFAULT_SENSOR = Sensor.TYPE_ACCELEROMETER;
     private final float[] lastKnownSensorValues;
-    private static final String TAG = "Drums";
     private final SoundPlayer sp;
     private Axis axisPointingToGround;
     private SensorEventAdapter lastEvent;

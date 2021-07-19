@@ -59,9 +59,6 @@ public class SoundPlayer {
     }
 
     public void sendToneToServer(String toneAsString, int toneAction) {
-        //    if (!testingMode) {
-            //      Log.i(getClass().getSimpleName(), ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> sendToneToServer: " + toneAsString + ", toneAction=" + toneAction);
-            //    }
         playTone(toneAsString, NETWORK_THREAD.userID, toneAction);
         NETWORK_THREAD.action = NETWORK_THREAD_ACTION_SEND_TONE;
         NETWORK_THREAD.toneAction = (byte) toneAction;
@@ -96,18 +93,13 @@ public class SoundPlayer {
             String mpa_ID = "" + user_ID + "-" + toneAsString;
             if (!Objects.requireNonNull(usersAndTheirTones.get(user_ID)).contains(mpa_ID)) {
                 MediaPlayerAdapter mpa = new MediaPlayerAdapter(lobby, sounds.get(toneAsString), testingMode);
-                //    Log.i(getClass().getSimpleName(), ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Started tone " + mpa_ID);
                 mpa.start();
                 Objects.requireNonNull(usersAndTheirTones.get(user_ID)).add(mpa_ID);
                 listOfCurrentPlayingMPAs.put(mpa_ID, mpa);
-                for (String id : listOfCurrentPlayingMPAs.keySet()) {
-                    //          Log.i(getClass().getSimpleName(), ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> CURRENTLY CURRENTLY CURRENTLY PLAYING: " + id);
-                }
             }
         } else {
             MediaPlayerAdapter mpa = new MediaPlayerAdapter(lobby, sounds.get(toneAsString), testingMode);
             mpa.start();
-            //    Log.i(getClass().getSimpleName(), ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Started tone " + toneAsString);
         }
     }
 
@@ -116,11 +108,7 @@ public class SoundPlayer {
         assert tempToneListOfOneUser != null;
         if (tempToneListOfOneUser.contains(user_ID + "-" + toneAsString)) {
             Objects.requireNonNull(listOfCurrentPlayingMPAs.get(user_ID + "-" + toneAsString)).stop();
-            //     Log.i(getClass().getSimpleName(), ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> stopTone / Stopped tone " + user_ID + "-" + toneAsString);
             listOfCurrentPlayingMPAs.remove(user_ID + "-" + toneAsString);
-//            for (String id : listOfCurrentPlayingMPAs.keySet()) {
-//                Log.i(getClass().getSimpleName(), ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> CURRENTLY CURRENTLY CURRENTLY PLAYING: " + id);
-//            }
             Objects.requireNonNull(usersAndTheirTones.get(user_ID)).remove(user_ID + "-" + toneAsString);
         }
     }
@@ -133,18 +121,12 @@ public class SoundPlayer {
      * @param user_ID the id of the current user playing a new Theremin tone
      */
     public void stopTheremin(int user_ID) {
-//        Log.i(getClass().getSimpleName(), "user=" + user_ID + ", stopping Theremin...");
         List<String> tonesToBeDeleted = new ArrayList<>();
-        //    Log.i(getClass().getSimpleName(), ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> stopTheremin / userAndTheirTones=" + usersAndTheirTones.get(user_ID).toString());
         LinkedList<String> mpa_ID_list = Objects.requireNonNull(usersAndTheirTones.get(user_ID));
         for (String mpa_ID : mpa_ID_list) {
-            if (mpa_ID.contains(Theremin.THEREMIN_SOUND_ID_PREFIX)) {
+            if (mpa_ID.startsWith(user_ID + "-" + Theremin.THEREMIN_SOUND_ID_PREFIX)) {
                 Objects.requireNonNull(listOfCurrentPlayingMPAs.get(mpa_ID)).stop();
-                //         Log.i(getClass().getSimpleName(), ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> stopTheremin / Stopped tone " + mpa_ID);
                 listOfCurrentPlayingMPAs.remove(mpa_ID);
-                //        for (String id : listOfCurrentPlayingMPAs.keySet()) {
-                //             Log.i(getClass().getSimpleName(), ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> CURRENTLY CURRENTLY CURRENTLY PLAYING: " + id);
-                //        }
                 tonesToBeDeleted.add(mpa_ID);
             }
         }

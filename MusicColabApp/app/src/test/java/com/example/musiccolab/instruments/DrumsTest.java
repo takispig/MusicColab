@@ -6,7 +6,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -93,7 +92,7 @@ public class DrumsTest {
         drums.action(event);
 
         // assert
-        verify(sp, times(1)).sendToneToServer(DRUMS_2,1);
+        verify(sp, times(1)).sendToneToServer(DRUMS_2, 1);
     }
 
     @Test
@@ -108,7 +107,7 @@ public class DrumsTest {
         drums.action(event);
 
         // assert
-        verify(sp, times(1)).sendToneToServer(DRUMS_1,1);
+        verify(sp, times(1)).sendToneToServer(DRUMS_1, 1);
     }
 
     @Test
@@ -123,7 +122,7 @@ public class DrumsTest {
         drums.action(event);
 
         // assert
-        verify(sp, times(1)).sendToneToServer(DRUMS_0,1);
+        verify(sp, times(1)).sendToneToServer(DRUMS_0, 1);
     }
 
     @Test
@@ -138,7 +137,7 @@ public class DrumsTest {
         drums.action(event);
 
         // assert
-        verify(sp, times(1)).sendToneToServer(DRUMS_2,1);
+        verify(sp, times(1)).sendToneToServer(DRUMS_2, 1);
     }
 
     @Test
@@ -153,7 +152,7 @@ public class DrumsTest {
         drums.action(event);
 
         // assert
-        verify(sp, times(1)).sendToneToServer(DRUMS_1,1);
+        verify(sp, times(1)).sendToneToServer(DRUMS_1, 1);
     }
 
     @Test
@@ -168,7 +167,7 @@ public class DrumsTest {
         drums.action(event);
 
         // assert
-        verify(sp, times(1)).sendToneToServer(DRUMS_0,1);
+        verify(sp, times(1)).sendToneToServer(DRUMS_0, 1);
     }
 
     @Test
@@ -183,7 +182,7 @@ public class DrumsTest {
         drums.action(event);
 
         // assert
-        verify(sp, times(1)).sendToneToServer(DRUMS_2,1);
+        verify(sp, times(1)).sendToneToServer(DRUMS_2, 1);
     }
 
     @Test
@@ -198,7 +197,7 @@ public class DrumsTest {
         drums.action(event);
 
         // assert
-        verify(sp, times(1)).sendToneToServer(DRUMS_1,1);
+        verify(sp, times(1)).sendToneToServer(DRUMS_1, 1);
     }
 
     @Test
@@ -213,6 +212,6 @@ public class DrumsTest {
         drums.action(event);
 
         // assert
-        verify(sp, times(1)).sendToneToServer(DRUMS_0,1);
+        verify(sp, times(1)).sendToneToServer(DRUMS_0, 1);
     }
 }
