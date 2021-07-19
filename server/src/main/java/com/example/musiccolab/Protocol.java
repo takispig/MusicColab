@@ -594,5 +594,5 @@ public class Protocol {
     public String getToneData(){return toneData;}
     public boolean test(){return testCorrect;}
 
-    public int getLobbyID(){return lobbyID;}
+    public String getLobbyID(){return lobbyName;}
 }
