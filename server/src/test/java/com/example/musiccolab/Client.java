@@ -24,6 +24,7 @@ public class Client implements Runnable{
         client.username = "zead";
         client.password = "123";
         client.email = "zead@gmail.com";
+        client.question = "du";
         client.toneAction = 1;
         client.toneType = 1;
         client.data = "dataExample2";

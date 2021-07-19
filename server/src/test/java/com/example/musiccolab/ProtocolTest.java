@@ -316,7 +316,7 @@ class ProtocolTest {
                     protocol.analyseMainBuffer(messageCharset, (SocketChannel) key.channel());
                     protocol.setPlayer(new Player("test", "test", "test", -2, (SocketChannel) key.channel()));
                     protocol.getParseLobby(messageCharset, (SocketChannel) key.channel(), key);
-                    assert protocol.getLobbyID() == 1;
+                    assert protocol.getLobbyID().equals("1");
                     counter =2;
                 }
                 selectedKeys.remove();

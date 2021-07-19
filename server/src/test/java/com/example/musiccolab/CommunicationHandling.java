@@ -41,6 +41,7 @@ public class CommunicationHandling implements Runnable {
 
     public short action = 0;
     public String email = null;
+    public String question = null;
     public String username = null;
     public String password = null;
     
@@ -319,14 +320,13 @@ public class CommunicationHandling implements Runnable {
 
     private void sendTone(short action) throws IOException {
         short dataLength = (short) (data.length());
-        dataLength += 2;
-        ByteBuffer buffer = ByteBuffer.allocate(6 + 2 + dataLength);
+        dataLength += 1;
+        ByteBuffer buffer = ByteBuffer.allocate(6 + 1 + dataLength);
 
         buffer.put(convertShortToByte(protocolName));
         buffer.put(convertShortToByte(action));
         buffer.put(convertShortToByte(dataLength));
         buffer.put(toneAction);
-        buffer.put(toneType);
         buffer.put(data.getBytes(messageCharset));
 
         buffer.flip();
@@ -414,8 +414,8 @@ public class CommunicationHandling implements Runnable {
 
     private void sendLoginSystemMessage(short action, String email, String username, String password) throws IOException {
         short dataLength;
-        byte emailLength, userNameLength, passwordLength, size = 2;
-        emailLength = 0;
+        byte emailLength, userNameLength, passwordLength, questionLength, size = 2;
+        emailLength = questionLength = 0;
 
         String message = "";
         ByteBuffer buffer;
@@ -423,18 +423,24 @@ public class CommunicationHandling implements Runnable {
         if (action == PROTOCOL_REGISTER_ACTION) {
             emailLength = (byte) email.length();
             message = email;
-            size = 3;
+            size = 4;
+
+            questionLength = (byte) email.length();
         }
         userNameLength = (byte) username.length();
         passwordLength = (byte) password.length();
         message += username + password;
+        if(action == PROTOCOL_REGISTER_ACTION) message += question;;
         dataLength = (short) message.length();
         buffer = ByteBuffer.allocate(6 + size + dataLength);
 
         buffer.put(convertShortToByte(protocolName));
         buffer.put(convertShortToByte(action));
         buffer.put(convertShortToByte(dataLength));
-        if (action == PROTOCOL_REGISTER_ACTION) buffer.put(emailLength);
+        if (action == PROTOCOL_REGISTER_ACTION) {
+            buffer.put(emailLength);
+            buffer.put(questionLength);
+        }
         buffer.put(userNameLength);
         buffer.put(passwordLength);
         buffer.put(message.getBytes(messageCharset));
