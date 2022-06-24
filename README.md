@@ -1,5 +1,9 @@
 # MusicColab
 
+<img src="photos/android_gui_1.0.png"   alt="App GUI"   width="700" />
+
+https://user-images.githubusercontent.com/19655517/175515731-2601dec5-ce8f-4b93-b257-400f7513e70c.mp4
+
 ## 1. Introduction
 
 MusicColab is a system that enables music enthusiasts to make music together without sitting in the same room.
@@ -127,11 +131,3 @@ MusicColab is simple: log in, choose an instrument, and as soon as everyone is r
 	2. 07.06.21 MVP: Client kann "gespielte" Töne eines anderen Clients wiedergeben, Login-System fertig
 	3. 21.06.21 alle Pflicht-Features fertiggestellt
 	4. Final: 05.07.21 (geplant, mit Vorbehalt) Feinschliff, fertige Implementierung optionaler Features
-
-
-## 6. Mögliche App-Visualisierung:
-
-<img src="https://git.tu-berlin.de/nilsn/PCPS-2021/-/raw/main/photos/android_gui_1.0.png"
-     alt="App GUI"
-	 width="1000"
-/>
