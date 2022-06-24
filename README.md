@@ -1,12 +1,12 @@
-# Pflichtenheft
-# Projekt-Name: MusicColab
+# MusicColab
 
-## 1. Einleitung
+## 1. Introduction
 
-MusicColab ist ein System, welches Musikbegeisterten es ermöglicht, gemeinsam zu musizieren, auch ohne dabei im gleichen Raum zu sitzen.
-Nicht einmal reale Instrumente sind notwendig - es reicht das eigene Android-Smartphone.
+MusicColab is a system that enables music enthusiasts to make music together without sitting in the same room.
+Not even real instruments are necessary - your own Android smartphone is enough.
 
-Und MusicColab ist simpel: einloggen, Instrument wählen und sobald alle bereit sind, kann es auch sofort losgehen! Abhängig vom gewählten Instrument wird auf unterschiedlichste Art und Weise mithilfe der im Smartphone integrierten Sensoren Musik gemacht. Die gespielten Töne der einzelnen Benutzer werden an einen Server gesendet, der alle eingehenden Tonspuren zu einem Stück zusammenfügt und dieses an allen anderen teilnehmenden Musiker zurücksendet. Somit wird ein gemeinsames Lied erschaffen, das bei allen Benutzern in Echtzeit abgespielt werden kann.
+MusicColab is simple: log in, choose an instrument, and as soon as everyone is ready, you can start right away! Depending on the instrument selected, music is made in a wide variety of ways using the sensors integrated in the smartphone. The sounds played by each user are sent to a server, which combines all incoming soundtracks into one piece, and sends it back to all other participating musicians. This creates a common song that can be played by all users in real time.
+
 - - -
 ## 2. Features:
 ### 2.1. Erfoderliche Features:
