@@ -100,24 +100,8 @@ MusicColab is simple: log in, choose an instrument, and as soon as everyone is r
 	- für Smartphones mit Android OS
 
 
-- - -
-## 4. Entwicklungsmethode
-### 4.1 Organisation in Teams
-- **Team Client**: Vincent Happersberger, Marc-Fabio Pascal Niemella, Dimitrios Pigkas, Christoph Jacob Hermann
-	- Kümmert sich um die Entwicklung des Client und erstellt Funktionalität auf Seiten des Client zum Verbindungsaufbau mit Server
-	- Entwickelt Tests um den Client zu testen
-- **Team Server**: Zead Alshukairi, Nils Neurath, Benedikt Simon Kunz, Leon Hecht, Alexandros Laskos
-	- Kümmert sich um die Entwicklung des Servers und erstellt Funktionalität auf Seiten des Servers zum Verbindungsaufbau mit Client
-	- Entwickelt Tests um den Server zu testen
 
-- **Projektleiter**: Marc-Fabio Pascal Niemella
-- **Dokumentationsbeauftragter**: Nils Neurath
-- **Qualitätsbeauftragter**: Christoph Jacob Hermann
-
-- - -
-
-
-## 5. Qualitätssicherung
+## 4. Qualitätssicherung
 1. Angemessene Dokumentation in Englisch 
 2. Es wird auf sauberen Code geachtet (Clean-Code)
 3. UnitTests min. 80% Testabdeckung sowohl auf dem Server als auch auf den Clients
